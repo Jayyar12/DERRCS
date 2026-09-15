@@ -26,6 +26,9 @@ Digital_Emergency_Reporting_and_Response_Coordination_System/
 │   ├── frontend/            # React Progressive Web App (Vite + Leaflet)
 │   └── ingestion/           # Node.js Express & WebSocket service
 │       ├── src/
+│       │   ├── config/      # Database pool configuration (db.js)
+│       │   ├── middleware/  # JWT auth and Multer upload handlers
+│       │   ├── routes/      # Auth, reports, candidates, incidents, units, assignments
 │       │   └── index.js     # API entry point and Socket.IO server
 │       └── package.json     # Node dependencies
 ├── uploads/                 # Local media storage directory
@@ -52,6 +55,9 @@ The system uses a root `.env` file for all services:
    ```bash
    GEMINI_API_KEY=your_actual_gemini_api_key
    ```
+3. Configure hosts based on your deployment mode:
+   * **Docker Compose (Option A, Default):** Keep `POSTGRES_HOST=postgres` and `RABBITMQ_HOST=rabbitmq`.
+   * **Native Setup (Option B):** Change `POSTGRES_HOST=localhost` and `RABBITMQ_HOST=localhost`.
 
 ---
 
@@ -81,21 +87,45 @@ sudo usermod -aG docker $USER
 
 ### Option B: Using Native PostgreSQL & RabbitMQ
 
-If you run PostgreSQL directly on your local system:
-1. Ensure the PostGIS extension is installed:
+If you run PostgreSQL and RabbitMQ directly on your local system:
+
+#### 1. PostgreSQL with PostGIS Setup
+1. Ensure PostgreSQL and PostGIS are installed:
    ```bash
-   sudo apt install -y postgresql-postgis
+   sudo apt update
+   sudo apt install -y postgresql postgresql-postgis
    ```
 2. Create the database and user matching your `.env`:
    ```bash
    sudo -u postgres psql -c "CREATE USER derrcs_user WITH PASSWORD 'derrcs_password_2026';"
    sudo -u postgres psql -c "CREATE DATABASE derrcs_db OWNER derrcs_user;"
    ```
-3. Apply the schema and seeds:
+3. Enable PostGIS on `derrcs_db` as superuser (required before schema creation):
    ```bash
-   psql -U derrcs_user -d derrcs_db -h localhost -f database-schema.sql
-   psql -U derrcs_user -d derrcs_db -h localhost -f seeds/02-initial-seeds.sql
+   sudo -u postgres psql -d derrcs_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
    ```
+4. Apply the database schema and seed data:
+   ```bash
+   PGPASSWORD=derrcs_password_2026 psql -U derrcs_user -d derrcs_db -h localhost -f database-schema.sql
+   PGPASSWORD=derrcs_password_2026 psql -U derrcs_user -d derrcs_db -h localhost -f seeds/02-initial-seeds.sql
+   ```
+
+#### 2. Native RabbitMQ Setup
+1. Install RabbitMQ Server:
+   ```bash
+   sudo apt install -y rabbitmq-server
+   ```
+2. Enable the RabbitMQ Management Dashboard:
+   ```bash
+   sudo rabbitmq-plugins enable rabbitmq_management
+   ```
+3. Create the RabbitMQ broker user matching your `.env`:
+   ```bash
+   sudo rabbitmqctl add_user derrcs_rabbit rabbit_password_2026
+   sudo rabbitmqctl set_user_tags derrcs_rabbit administrator
+   sudo rabbitmqctl set_permissions -p / derrcs_rabbit ".*" ".*" ".*"
+   ```
+4. Access the web management dashboard at `http://localhost:15672` (Login: `derrcs_rabbit` / `rabbit_password_2026`).
 
 ---
 
@@ -116,6 +146,24 @@ The Ingestion Service accepts incoming citizen reports, validates data, and emit
   npm start
   ```
 * **Verify Health:** Visit `http://localhost:5000/health` in your browser.
+
+### Default Test Accounts
+
+All accounts use the default password: `password123`
+
+| Role | Username | Full Name / Description |
+|---|---|---|
+| **Admin** | `admin` | Jay-ar Guiroy (System Administrator) |
+| **Dispatcher** | `dispatcher_tagoloan` | MDRRMO Dispatcher 1 (Operations Center) |
+| **ResponseUnit** | `rescue_alpha` | Rescue Unit Alpha Team (Ambulance `RESCUE-01`) |
+| **ResponseUnit** | `fire_bravo` | BFP Tagoloan Engine 1 (Fire Truck `FIRE-ENGINE-01`) |
+
+Test login via `curl`:
+```bash
+curl -s -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"dispatcher_tagoloan","password":"password123"}' | jq
+```
 
 ---
 
