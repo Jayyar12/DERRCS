@@ -86,7 +86,8 @@ $$\text{Reported} \longrightarrow \text{Validated} \longrightarrow \text{Dispatc
 * **Parameters:**
   * $\epsilon$ (Epsilon): Maximum distance radius between reports (default: 100 meters).
   * $minPts$: Minimum reports required to mark an incident cluster (default: 2 reports).
-* **Behavior:** Points that do not meet $minPts$ remain as single-report candidates. Points meeting criteria attach to existing candidate clusters.
+  * **Time Window:** Maximum time delta between reports to be considered the same event (default: 12 hours).
+* **Behavior:** Points that do not meet $minPts$ remain as single-report candidates. Points meeting criteria attach to existing candidate clusters. Only reports within the 12-hour time window are evaluated.
 
 ### 5.2 Modified Hungarian Algorithm (Resource Dispatch)
 * **Goal:** Assign available response units to validated incidents while minimizing overall response travel time.

@@ -52,7 +52,7 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
 
 * **`POST /api/v1/candidates/:candidateId/confirm`**
   * **Auth:** Bearer JWT (Role: `Dispatcher`).
-  * **Action:** Promotes an `incident_candidate` to an `incident`. Transitions state to `Validated`.
+  * **Action:** Confirms the `incident_candidate` and transitions the linked `incident` record from `Reported` to `Validated`.
   * **Response (200 OK):**
 ```json
 {

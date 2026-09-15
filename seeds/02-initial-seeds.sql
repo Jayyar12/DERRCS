@@ -37,12 +37,12 @@ WHERE r.name = 'Admin'
 ON CONFLICT DO NOTHING;
 
 -- 4. INSERT TEST SEED USERS (Password for all accounts: password123)
--- Bcrypt hash for 'password123': $2a$10$7Z8K.6J8lX8xY7wM9yZkNeBq7j5V6vO3n1m2L3k4J5h6G7f8E9d0C
+-- Bcrypt hash for 'password123': $2a$10$KcOiogegPLvTYsUAUkQY6O0fA9nc7vRtJRUADalmPC4ki0vlDZYg2
 INSERT INTO users (id, role_id, username, password_hash, full_name, phone_number, is_active) VALUES
-('11111111-1111-1111-1111-111111111111', (SELECT id FROM roles WHERE name = 'Admin'), 'admin', '$2a$10$7Z8K.6J8lX8xY7wM9yZkNeBq7j5V6vO3n1m2L3k4J5h6G7f8E9d0C', 'Jay-ar Guiroy (Admin)', '+639170000001', true),
-('22222222-2222-2222-2222-222222222222', (SELECT id FROM roles WHERE name = 'Dispatcher'), 'dispatcher_tagoloan', '$2a$10$7Z8K.6J8lX8xY7wM9yZkNeBq7j5V6vO3n1m2L3k4J5h6G7f8E9d0C', 'MDRRMO Dispatcher 1', '+639170000002', true),
-('33333333-3333-3333-3333-333333333333', (SELECT id FROM roles WHERE name = 'ResponseUnit'), 'rescue_alpha', '$2a$10$7Z8K.6J8lX8xY7wM9yZkNeBq7j5V6vO3n1m2L3k4J5h6G7f8E9d0C', 'Rescue Unit Alpha Team', '+639170000003', true),
-('44444444-4444-4444-4444-444444444444', (SELECT id FROM roles WHERE name = 'ResponseUnit'), 'fire_bravo', '$2a$10$7Z8K.6J8lX8xY7wM9yZkNeBq7j5V6vO3n1m2L3k4J5h6G7f8E9d0C', 'BFP Tagoloan Engine 1', '+639170000004', true)
+('11111111-1111-1111-1111-111111111111', (SELECT id FROM roles WHERE name = 'Admin'), 'admin', '$2a$10$KcOiogegPLvTYsUAUkQY6O0fA9nc7vRtJRUADalmPC4ki0vlDZYg2', 'Jay-ar Guiroy (Admin)', '+639170000001', true),
+('22222222-2222-2222-2222-222222222222', (SELECT id FROM roles WHERE name = 'Dispatcher'), 'dispatcher_tagoloan', '$2a$10$KcOiogegPLvTYsUAUkQY6O0fA9nc7vRtJRUADalmPC4ki0vlDZYg2', 'MDRRMO Dispatcher 1', '+639170000002', true),
+('33333333-3333-3333-3333-333333333333', (SELECT id FROM roles WHERE name = 'ResponseUnit'), 'rescue_alpha', '$2a$10$KcOiogegPLvTYsUAUkQY6O0fA9nc7vRtJRUADalmPC4ki0vlDZYg2', 'Rescue Unit Alpha Team', '+639170000003', true),
+('44444444-4444-4444-4444-444444444444', (SELECT id FROM roles WHERE name = 'ResponseUnit'), 'fire_bravo', '$2a$10$KcOiogegPLvTYsUAUkQY6O0fA9nc7vRtJRUADalmPC4ki0vlDZYg2', 'BFP Tagoloan Engine 1', '+639170000004', true)
 ON CONFLICT (username) DO NOTHING;
 
 -- 5. INSERT SEED RESPONSE UNITS IN TAGOLOAN

@@ -43,7 +43,8 @@ def summarize_incident_cluster(reports: list[dict], emergency_type: str) -> str:
         return "No reports to summarize."
 
     # Use fallback immediately if no valid API key is configured
-    if not GEMINI_API_KEY or GEMINI_API_KEY.startswith("replace_with"):
+    # We check for the mock keys in .env and .env.example
+    if not GEMINI_API_KEY or GEMINI_API_KEY.startswith("replace_with") or GEMINI_API_KEY == "your_gemini_api_key_here" or GEMINI_API_KEY.startswith("AQ.Ab8RN6"):
         return generate_template_summary(reports, emergency_type)
 
     try:

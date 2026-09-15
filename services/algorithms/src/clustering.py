@@ -20,31 +20,70 @@ def haversine_distance_meters(lat1: float, lon1: float, lat2: float, lon2: float
     return r * c
 
 
-def cluster_reports(reports: list[dict], epsilon_meters: float = 100.0, min_points: int = 2) -> list[dict]:
+def cluster_reports(reports: list[dict], existing_candidates: list[dict] = None, epsilon_meters: float = 100.0, min_points: int = 2) -> list[dict]:
     """
-    Clusters a list of reports by emergency location using DBSCAN.
-    Coordinates must be in degrees [latitude, longitude].
+    Clusters reports by location. Matches against existing candidates first, 
+    then runs DBSCAN on remaining reports grouped by emergencyType.
     """
     if not reports:
         return []
-
-    # Earth radius in meters used to convert epsilon to radians for haversine metric
-    kms_per_radian = 6371000.0
-    epsilon_radians = epsilon_meters / kms_per_radian
-
-    # Extract coordinates in radians for scikit-learn haversine metric: [lat_rad, lon_rad]
-    coords_rad = np.array([[math.radians(r["latitude"]), math.radians(r["longitude"])] for r in reports])
-
-    db = DBSCAN(eps=epsilon_radians, min_samples=min_points, metric="haversine")
-    labels = db.fit_predict(coords_rad)
-
+        
+    existing_candidates = existing_candidates or []
     clustered_results = []
-    for idx, report in enumerate(reports):
-        clustered_results.append({
-            "reportId": report["id"],
-            "clusterId": int(labels[idx]),  # -1 represents noise / single unclustered report
-            "isDuplicate": bool(labels[idx] != -1)
-        })
+    unclustered = []
+
+    for report in reports:
+        attached = False
+        for candidate in existing_candidates:
+            if candidate.get("emergencyType") == report.get("emergencyType"):
+                dist = haversine_distance_meters(
+                    report["latitude"], report["longitude"],
+                    candidate["latitude"], candidate["longitude"]
+                )
+                if dist <= epsilon_meters:
+                    clustered_results.append({
+                        "reportId": report["id"],
+                        "clusterId": candidate.get("id"),
+                        "isDuplicate": True
+                    })
+                    attached = True
+                    break
+        if not attached:
+            unclustered.append(report)
+
+    if unclustered:
+        from collections import defaultdict
+        grouped = defaultdict(list)
+        for r in unclustered:
+            grouped[r.get("emergencyType")].append(r)
+            
+        kms_per_radian = 6371000.0
+        epsilon_radians = epsilon_meters / kms_per_radian
+        new_cluster_offset = 0
+        
+        for e_type, group_reps in grouped.items():
+            if len(group_reps) < min_points:
+                for r in group_reps:
+                    clustered_results.append({
+                        "reportId": r["id"],
+                        "clusterId": -1,
+                        "isDuplicate": False
+                    })
+                continue
+
+            coords_rad = np.array([[math.radians(r["latitude"]), math.radians(r["longitude"])] for r in group_reps])
+            db = DBSCAN(eps=epsilon_radians, min_samples=min_points, metric="haversine")
+            labels = db.fit_predict(coords_rad)
+            
+            for idx, r in enumerate(group_reps):
+                lbl = int(labels[idx])
+                clustered_results.append({
+                    "reportId": r["id"],
+                    "clusterId": (new_cluster_offset + lbl) if lbl != -1 else -1,
+                    "isDuplicate": bool(lbl != -1)
+                })
+            if max(labels) >= 0:
+                new_cluster_offset += max(labels) + 1
 
     return clustered_results
 
@@ -52,9 +91,9 @@ def cluster_reports(reports: list[dict], epsilon_meters: float = 100.0, min_poin
 if __name__ == "__main__":
     # Smoke test with sample Tagoloan coordinates
     sample_reports = [
-        {"id": "rep-1", "latitude": 8.5385, "longitude": 124.7533},
-        {"id": "rep-2", "latitude": 8.5386, "longitude": 124.7534},  # ~15 meters away
-        {"id": "rep-3", "latitude": 8.5450, "longitude": 124.7480},  # ~800 meters away in Baluarte
+        {"id": "rep-1", "emergencyType": "Fire", "latitude": 8.5385, "longitude": 124.7533},
+        {"id": "rep-2", "emergencyType": "Fire", "latitude": 8.5386, "longitude": 124.7534},  # ~15 meters away
+        {"id": "rep-3", "emergencyType": "Flood", "latitude": 8.5385, "longitude": 124.7533}, # Same place, different type
     ]
     results = cluster_reports(sample_reports, epsilon_meters=100.0, min_points=2)
     print("DBSCAN Test Results:")

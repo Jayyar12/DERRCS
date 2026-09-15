@@ -57,9 +57,9 @@ Connect the Node.js ingestion backend with the Python algorithmic worker through
 
 3. **Streaming DBSCAN Worker Pipeline**
    * Wire `services/algorithms/src/clustering.py` into the `report.ingested` queue handler.
-   * Query recent unclustered reports from PostgreSQL.
-   * Run DBSCAN with an epsilon of 100 meters and minimum points threshold of 2.
-   * Insert new clusters into `incident_candidates` or update existing candidate report counts.
+   * Query existing active `incident_candidates` and recent unclustered reports (e.g., `created_at > NOW() - INTERVAL '12 hours'`) from PostgreSQL.
+   * Attach reports to existing candidates if within 100 meters, otherwise run DBSCAN to find new clusters.
+   * Insert new clusters into `incident_candidates` AND immediately create a linked record in `incidents` with status `Reported` (to preserve the 6-stage lifecycle).
    * Publish `candidate.created` or `candidate.updated` back to RabbitMQ.
 
 4. **Resource Allocation Engine Integration**
@@ -70,6 +70,7 @@ Connect the Node.js ingestion backend with the Python algorithmic worker through
 
 5. **AI Summarizer & Fallback Worker**
    * Wire `services/algorithms/src/summarizer.py` into `candidate.created` and `field.assessment.submitted`.
+   * Query PostgreSQL for the full report details (including `description` and `standardizedAnswers`) before summarizing.
    * Request structured summaries from the Google Gemini API using the key from [.env](file:///home/jay/Documents/Projects/Digital_Emergency_Reporting_and_Response_Coordination_System/.env#L29).
    * Switch to deterministic template summaries if the Gemini API call exceeds 2 seconds or returns an error.
    * Save output text into the `summaries` table.
