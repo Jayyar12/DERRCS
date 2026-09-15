@@ -1,0 +1,56 @@
+services:
+  # 1. POSTGRESQL WITH POSTGIS EXTENSION
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: derrcs_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-derrcs_db}
+      POSTGRES_USER: ${POSTGRES_USER:-derrcs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-derrcs_password_2026}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seeds/02-initial-seeds.sql:/docker-entrypoint-initdb.d/02-seeds.sql:ro
+    networks:
+      - derrcs_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-derrcs_user} -d ${POSTGRES_DB:-derrcs_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. RABBITMQ MESSAGE BROKER WITH MANAGEMENT UI
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: derrcs_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-derrcs_rabbit}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-rabbit_password_2026}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - derrcs_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  derrcs_net:
+    driver: bridge
