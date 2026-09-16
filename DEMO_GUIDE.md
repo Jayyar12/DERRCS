@@ -11,10 +11,16 @@ The scenario follows a **Major Warehouse Fire** from the moment citizens report 
 Open **three separate terminals** to show how the system components communicate asynchronously via RabbitMQ.
 
 **Terminal 1: Infrastructure & Database**
+
+*Option A (Docker):*
 ```bash
 docker compose up -d postgres rabbitmq
 ```
-*Talking point: We use Docker for PostgreSQL (with PostGIS for spatial data) and RabbitMQ.*
+
+*Option B (Native):*
+Ensure your local PostgreSQL and RabbitMQ services are running natively.
+
+*Talking point: We use PostgreSQL (with PostGIS for spatial data) and RabbitMQ as our core infrastructure.*
 
 **Terminal 2: Node.js Ingestion API**
 ```bash
@@ -27,7 +33,7 @@ npm run dev
 ```bash
 cd services/algorithms
 source venv/bin/activate
-python src/worker.py
+python3 src/worker.py
 ```
 *Talking point: This is our background worker. It listens to RabbitMQ events and runs our heavy algorithms (DBSCAN, Hungarian) and AI (Gemini) without slowing down the Node.js API.*
 
@@ -124,9 +130,17 @@ curl -s -X POST http://localhost:5000/api/v1/incidents/$INCIDENT_ID/field-assess
 ## Cleanup (Resetting for the next demo)
 If you want to run the demo again later, you can easily wipe the database and re-seed it:
 
+*Option A (Docker):*
 ```bash
 # In Terminal 1 (or any terminal)
 docker compose down -v
 docker compose up -d postgres rabbitmq
 ```
 This drops the volumes and re-runs `01-schema.sql` and `02-initial-seeds.sql` so you have a fresh slate.
+
+*Option B (Native):*
+To reset natively, re-run the schema and seed files directly against your local database:
+```bash
+PGPASSWORD=derrcs_password_2026 psql -U derrcs_user -d derrcs_db -h localhost -f database-schema.sql
+PGPASSWORD=derrcs_password_2026 psql -U derrcs_user -d derrcs_db -h localhost -f seeds/02-initial-seeds.sql
+```

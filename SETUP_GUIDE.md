@@ -175,6 +175,21 @@ The Python service runs spatial clustering, Hungarian optimization, and AI summa
 * **Virtual Environment:** `services/algorithms/venv/`
 * **Installed Packages:** `numpy`, `scipy`, `scikit-learn`, `google-generativeai`, `pika`, `psycopg2-binary`, `python-dotenv`.
 
+### Local Development Setup
+
+To run the algorithmic worker natively, you need to create a Python virtual environment and install the dependencies:
+
+```bash
+cd services/algorithms
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+To start the background worker:
+```bash
+python3 src/worker.py
+```
 ### Running Verification Tests:
 
 1. **Test Streaming DBSCAN Clustering:**
