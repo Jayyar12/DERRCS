@@ -7,6 +7,7 @@
 const express = require('express');
 const { query, pool } = require('../config/db');
 const { authenticate, authorize } = require('../middleware/auth');
+const stateMachine = require('../services/stateMachine');
 
 const router = express.Router();
 
@@ -115,11 +116,8 @@ router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), asyn
 
     const incident = incidentResult.rows[0];
 
-    // 4. Immediately transition to Validated (dispatcher confirmed it)
-    await client.query(
-      `UPDATE incidents SET status = 'Validated', validated_at = NOW() WHERE id = $1`,
-      [incident.id]
-    );
+    // 4. Transition Reported -> Validated via state machine (writes activity_log atomically)
+    await stateMachine.transition(incident.id, 'Validated', req.user.userId, { client });
 
     // 5. Mark the candidate as Confirmed
     await client.query(

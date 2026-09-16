@@ -8,6 +8,7 @@
 const express = require('express');
 const { query, pool } = require('../config/db');
 const { authenticate, authorize } = require('../middleware/auth');
+const stateMachine = require('../services/stateMachine');
 
 const router = express.Router();
 
@@ -90,11 +91,9 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
       [incidentId, responseUnitId, req.user.userId]
     );
 
-    // Transition incident to Dispatched
-    await client.query(
-      `UPDATE incidents SET status = 'Dispatched', dispatched_at = NOW() WHERE id = $1`,
-      [incidentId]
-    );
+
+    // Transition Validated -> Dispatched via state machine (writes activity_log atomically)
+    await stateMachine.transition(incidentId, 'Dispatched', req.user.userId, { client });
 
     // Mark unit as Assigned
     await client.query(
@@ -117,6 +116,17 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[Incidents] Assign error:', err.message);
     return res.status(500).json({
       success: false,
@@ -126,6 +136,7 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
     client.release();
   }
 });
+
 
 /**
  * @route  PATCH /api/v1/assignments/:assignmentId/status
@@ -180,11 +191,8 @@ router.patch('/assignments/:assignmentId/status', authenticate, authorize('Respo
       [assignmentId]
     );
 
-    // Transition incident to Active
-    await client.query(
-      `UPDATE incidents SET status = 'Active' WHERE id = $1`,
-      [assignment.incident_id]
-    );
+    // Transition Dispatched -> Active via state machine (writes activity_log atomically)
+    await stateMachine.transition(assignment.incident_id, 'Active', req.user.userId, { client });
 
     // Update unit status to OnScene
     await client.query(
@@ -205,6 +213,17 @@ router.patch('/assignments/:assignmentId/status', authenticate, authorize('Respo
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[Assignments] Status update error:', err.message);
     return res.status(500).json({
       success: false,
@@ -214,6 +233,7 @@ router.patch('/assignments/:assignmentId/status', authenticate, authorize('Respo
     client.release();
   }
 });
+
 
 /**
  * @route  POST /api/v1/incidents/:incidentId/field-assessment
@@ -297,11 +317,10 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
       ]
     );
 
-    // Transition incident to Resolved (requires valid field_assessment — enforced above)
-    await client.query(
-      `UPDATE incidents SET status = 'Resolved', resolved_at = NOW() WHERE id = $1`,
-      [incidentId]
-    );
+
+    // Transition Active -> Resolved via state machine.
+    // field_assessment row is already inserted above — satisfies CONTEXT.md §4 requirement.
+    await stateMachine.transition(incidentId, 'Resolved', req.user.userId, { client });
 
     // Mark assignment as Completed and unit back to Available
     await client.query(
@@ -339,6 +358,17 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[FieldAssessment] Submit error:', err.message);
     return res.status(500).json({
       success: false,
