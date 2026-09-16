@@ -6,7 +6,7 @@ The scenario follows a **Major Warehouse Fire** from the moment citizens report 
 
 ---
 
-## 🛠️ Phase 0: Start the System (Show the Microservices)
+## Phase 0: Start the System (Show the Microservices)
 
 Open **three separate terminals** to show how the system components communicate asynchronously via RabbitMQ.
 
@@ -33,7 +33,7 @@ python src/worker.py
 
 ---
 
-## 🔥 Phase 1: The Incident (Show AI Clustering)
+## Phase 1: The Incident (Show AI Clustering)
 
 Open a **4th Terminal** to act as the client/API consumer. We will simulate two citizens reporting a fire from slightly different locations.
 
@@ -65,7 +65,7 @@ curl -s -X POST http://localhost:5000/api/v1/reports \
 
 ---
 
-## 🎧 Phase 2: Dispatcher Triage (Show Hungarian Allocation)
+## Phase 2: Dispatcher Triage (Show Hungarian Allocation)
 
 Now, act as the MDRRMO Dispatcher. We will use environment variables so you don't have to manually copy/paste IDs during the demo.
 
@@ -90,7 +90,7 @@ export ASSIGNMENT_ID=$(curl -s -X POST http://localhost:5000/api/v1/incidents/$I
 
 ---
 
-## 🚑 Phase 3: Response & Resolution (Show AI Handoff)
+## Phase 3: Response & Resolution (Show AI Handoff)
 
 Now, act as the Responder on the ground.
 
@@ -121,7 +121,7 @@ curl -s -X POST http://localhost:5000/api/v1/incidents/$INCIDENT_ID/field-assess
 
 ---
 
-## 🧹 Cleanup (Resetting for the next demo)
+## Cleanup (Resetting for the next demo)
 If you want to run the demo again later, you can easily wipe the database and re-seed it:
 
 ```bash
