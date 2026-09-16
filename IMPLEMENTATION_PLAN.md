@@ -4,7 +4,7 @@ This plan organizes the development of the Digital Emergency Reporting and Respo
 
 ---
 
-## Phase 1: Core Backend & Database Persistence
+## Phase 1: Core Backend & Database Persistence (COMPLETED)
 
 ### Goal
 Replace mock handlers with real PostgreSQL queries, secure authentication, and file upload storage.
@@ -37,7 +37,7 @@ Replace mock handlers with real PostgreSQL queries, secure authentication, and f
 
 ---
 
-## Phase 2: Message Broker & Algorithmic Microservices ✅ COMPLETED
+## Phase 2: Message Broker & Algorithmic Microservices (COMPLETED)
 
 ### Goal
 Connect the Node.js ingestion backend with the Python algorithmic worker through RabbitMQ.
