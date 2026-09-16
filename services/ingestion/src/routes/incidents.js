@@ -317,7 +317,16 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
 
     await client.query('COMMIT');
 
-    // Phase 2: Publish field.assessment.submitted to RabbitMQ here.
+    // Publish field.assessment.submitted event for the summarizer worker
+    const { publishEvent } = require('../config/rabbitmq');
+    publishEvent('field.assessment.submitted', {
+      assessmentId: assessmentResult.rows[0].id,
+      incidentId,
+      assignmentId,
+      responderId: req.user.userId,
+      disposition,
+      submittedAt: assessmentResult.rows[0].created_at,
+    });
 
     return res.status(201).json({
       success: true,

@@ -9,6 +9,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const { testConnection } = require('./config/db');
+const { connectRabbitMQ } = require('./config/rabbitmq');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,5 +60,10 @@ testConnection().then(() => {
     console.log(`Server listening on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`====================================================`);
+  });
+
+  // Connect to RabbitMQ (non-blocking; retries internally)
+  connectRabbitMQ().catch((err) => {
+    console.error('[RabbitMQ] Initial connection failed:', err.message);
   });
 });

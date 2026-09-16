@@ -61,6 +61,86 @@ def optimize_allocations(units: list[dict], incidents: list[dict], average_speed
     return recommended_assignments
 
 
+def handle_incident_validated(payload, publish):
+    """
+    RabbitMQ handler for incident.validated events.
+    1. Fetch the validated incident location from PostgreSQL.
+    2. Fetch all Available response units with their GPS coordinates.
+    3. Run the Modified Hungarian Algorithm to find optimal pairings.
+    4. Publish assignment.recommended for each recommended unit-incident pair.
+    """
+    from db import query
+
+    incident_id = payload.get('incidentId')
+    incident_code = payload.get('incidentCode')
+    emergency_type = payload.get('emergencyType')
+
+    print(f"[Allocation] Processing validated incident {incident_code} ({incident_id})")
+
+    # 1. Fetch the incident location
+    incident_row = query(
+        """SELECT id, incident_code, emergency_type,
+                  ST_Y(location) AS latitude,
+                  ST_X(location) AS longitude
+           FROM incidents
+           WHERE id = %s AND status = 'Validated'""",
+        (incident_id,)
+    )
+
+    if not incident_row:
+        print(f"[Allocation] Incident {incident_id} not found or not in Validated state. Skipping.")
+        return
+
+    incident = incident_row[0]
+
+    # 2. Fetch all available response units with locations
+    units_rows = query(
+        """SELECT id, unit_code, unit_type,
+                  ST_Y(current_location) AS latitude,
+                  ST_X(current_location) AS longitude
+           FROM response_units
+           WHERE current_status = 'Available'
+             AND current_location IS NOT NULL"""
+    )
+
+    if not units_rows:
+        print(f"[Allocation] No available units with GPS coordinates. Cannot recommend assignments.")
+        return
+
+    # 3. Build input for the Hungarian algorithm
+    units = [
+        {'id': str(u['id']), 'latitude': float(u['latitude']), 'longitude': float(u['longitude'])}
+        for u in units_rows
+    ]
+    incidents = [
+        {'id': str(incident['id']), 'latitude': float(incident['latitude']), 'longitude': float(incident['longitude'])}
+    ]
+
+    # 4. Run the Modified Hungarian Algorithm
+    recommendations = optimize_allocations(units, incidents)
+
+    if not recommendations:
+        print(f"[Allocation] Hungarian algorithm returned no assignments for {incident_code}.")
+        return
+
+    # 5. Publish assignment.recommended for each pairing
+    for rec in recommendations:
+        # Find the unit row for metadata
+        unit_meta = next((u for u in units_rows if str(u['id']) == rec['unitId']), {})
+
+        publish('assignment.recommended', {
+            'incidentId': str(incident['id']),
+            'incidentCode': incident_code or str(incident.get('incident_code', '')),
+            'emergencyType': emergency_type or str(incident.get('emergency_type', '')),
+            'recommendedUnitId': rec['unitId'],
+            'unitCode': str(unit_meta.get('unit_code', '')),
+            'unitType': str(unit_meta.get('unit_type', '')),
+            'estimatedTravelTimeMinutes': rec['estimatedTravelTimeMinutes'],
+        })
+
+        print(f"[Allocation] Recommended: {unit_meta.get('unit_code', rec['unitId'])} -> {incident_code} (ETA: {rec['estimatedTravelTimeMinutes']} min)")
+
+
 if __name__ == "__main__":
     # Smoke test: 2 units and 3 incidents (unbalanced condition)
     sample_units = [

@@ -92,7 +92,18 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
     const { id: reportId, created_at: receivedAt } = result.rows[0];
 
-    // Phase 2: Publish report.ingested to RabbitMQ here.
+    // Publish report.ingested domain event to RabbitMQ for the clustering worker
+    const { publishEvent } = require('../config/rabbitmq');
+    publishEvent('report.ingested', {
+      reportId,
+      emergencyType,
+      latitude: eLat,
+      longitude: eLng,
+      description: description || null,
+      standardizedAnswers: parsedAnswers || null,
+      sessionId: sessionId || null,
+      receivedAt,
+    });
 
     return res.status(201).json({
       success: true,

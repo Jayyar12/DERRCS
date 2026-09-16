@@ -129,6 +129,16 @@ router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), asyn
 
     await client.query('COMMIT');
 
+    // Publish incident.validated domain event for the allocation worker
+    const { publishEvent } = require('../config/rabbitmq');
+    publishEvent('incident.validated', {
+      incidentId: incident.id,
+      incidentCode: incident.incident_code,
+      candidateId,
+      emergencyType: candidate.emergency_type,
+      validatedAt: new Date().toISOString(),
+    });
+
     return res.status(200).json({
       success: true,
       data: {

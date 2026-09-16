@@ -37,43 +37,43 @@ Replace mock handlers with real PostgreSQL queries, secure authentication, and f
 
 ---
 
-## Phase 2: Message Broker & Algorithmic Microservices
+## Phase 2: Message Broker & Algorithmic Microservices ✅ COMPLETED
 
 ### Goal
 Connect the Node.js ingestion backend with the Python algorithmic worker through RabbitMQ.
 
 ### Deliverables
 1. **RabbitMQ Messaging Configuration in Node.js**
-   * Create `services/ingestion/src/config/rabbitmq.js` using `amqplib`.
-   * Assert the topic exchange `derrcs.events`.
-   * Publish `report.ingested` whenever a citizen submits a valid emergency report.
-   * Publish `incident.validated` when a dispatcher confirms an incident candidate.
-   * Publish `field.assessment.submitted` when a responder submits a casualty assessment.
+   * [x] Create `services/ingestion/src/config/rabbitmq.js` using `amqplib`.
+   * [x] Assert the topic exchange `derrcs.events`.
+   * [x] Publish `report.ingested` whenever a citizen submits a valid emergency report.
+   * [x] Publish `incident.validated` when a dispatcher confirms an incident candidate.
+   * [x] Publish `field.assessment.submitted` when a responder submits a casualty assessment.
 
 2. **Python RabbitMQ Worker Service**
-   * Create `services/algorithms/src/worker.py` using `pika`.
-   * Connect to RabbitMQ using credentials from [.env](file:///home/jay/Documents/Projects/Digital_Emergency_Reporting_and_Response_Coordination_System/.env#L20-L25).
-   * Subscribe to `report.ingested`, `incident.validated`, and `field.assessment.submitted`.
+   * [x] Create `services/algorithms/src/worker.py` using `pika`.
+   * [x] Connect to RabbitMQ using credentials from `.env`.
+   * [x] Subscribe to `report.ingested`, `incident.validated`, and `field.assessment.submitted`.
 
 3. **Streaming DBSCAN Worker Pipeline**
-   * Wire `services/algorithms/src/clustering.py` into the `report.ingested` queue handler.
-   * Query existing active `incident_candidates` and recent unclustered reports (e.g., `created_at > NOW() - INTERVAL '12 hours'`) from PostgreSQL.
-   * Attach reports to existing candidates if within 100 meters, otherwise run DBSCAN to find new clusters.
-   * Insert new clusters into `incident_candidates` AND immediately create a linked record in `incidents` with status `Reported` (to preserve the 6-stage lifecycle).
-   * Publish `candidate.created` or `candidate.updated` back to RabbitMQ.
+   * [x] Wire `services/algorithms/src/clustering.py` into the `report.ingested` queue handler.
+   * [x] Query existing active `incident_candidates` and recent unclustered reports from PostgreSQL.
+   * [x] Attach reports to existing candidates if within 100 meters, otherwise run DBSCAN.
+   * [x] Insert new clusters into `incident_candidates` AND create linked `incidents` at `Reported`.
+   * [x] Publish `candidate.created` or `candidate.updated` back to RabbitMQ.
 
 4. **Resource Allocation Engine Integration**
-   * Wire `services/algorithms/src/allocation.py` into the `incident.validated` consumer.
-   * Retrieve active available units from `response_units` and compute travel distances via PostGIS.
-   * Execute the Modified Hungarian Algorithm to find optimal unit pairings.
-   * Publish `assignment.recommended` containing the recommended unit ID and travel time.
+   * [x] Wire `services/algorithms/src/allocation.py` into the `incident.validated` consumer.
+   * [x] Retrieve active available units from `response_units` and compute travel distances.
+   * [x] Execute the Modified Hungarian Algorithm to find optimal unit pairings.
+   * [x] Publish `assignment.recommended` containing the recommended unit ID and travel time.
 
 5. **AI Summarizer & Fallback Worker**
-   * Wire `services/algorithms/src/summarizer.py` into `candidate.created` and `field.assessment.submitted`.
-   * Query PostgreSQL for the full report details (including `description` and `standardizedAnswers`) before summarizing.
-   * Request structured summaries from the Google Gemini API using the key from [.env](file:///home/jay/Documents/Projects/Digital_Emergency_Reporting_and_Response_Coordination_System/.env#L29).
-   * Switch to deterministic template summaries if the Gemini API call exceeds 2 seconds or returns an error.
-   * Save output text into the `summaries` table.
+   * [x] Wire `services/algorithms/src/summarizer.py` into `candidate.created` and `field.assessment.submitted`.
+   * [x] Query PostgreSQL for the full report details before summarizing.
+   * [x] Request structured summaries from the Google Gemini API.
+   * [x] Switch to deterministic template summaries if Gemini exceeds 2 seconds or errors.
+   * [x] Save output text into the `summaries` table.
 
 ---
 
