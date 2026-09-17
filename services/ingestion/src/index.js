@@ -174,10 +174,10 @@ async function bindConsumers(channel) {
   // prevents overwhelming Socket.IO on burst traffic.
   await channel.prefetch(1);
 
-  // ─── Consumer 1: cluster.completed → dispatchers ──────────────────────────
-  const clusterQueue = 'ingestion.cluster.completed';
+  // ─── Consumer 1: candidate.created → dispatchers ──────────────────────────
+  const clusterQueue = 'ingestion.candidate.created';
   await channel.assertQueue(clusterQueue, { durable: true });
-  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'cluster.completed');
+  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'candidate.created');
 
   channel.consume(clusterQueue, (msg) => {
     if (!msg) return; // Broker sent null (queue cancelled)
@@ -187,15 +187,35 @@ async function bindConsumers(channel) {
       emitToRoom('dispatchers', 'dispatcher:candidate:new', payload);
       channel.ack(msg);
     } catch (err) {
-      console.error('[Consumer] cluster.completed parse error:', err.message);
+      console.error('[Consumer] candidate.created parse error:', err.message);
       // Nack without requeue to avoid poison-pill loops
       channel.nack(msg, false, false);
     }
   });
 
-  console.log(`[RabbitMQ] Consumer bound: cluster.completed → dispatcher:candidate:new`);
+  console.log(`[RabbitMQ] Consumer bound: candidate.created → dispatcher:candidate:new`);
 
-  // ─── Consumer 2: unit.assigned → unit:<unit_id> ───────────────────────────
+  // ─── Consumer 2a: assignment.recommended → dispatchers ───────────────────────────
+  const recommendQueue = 'ingestion.assignment.recommended';
+  await channel.assertQueue(recommendQueue, { durable: true });
+  await channel.bindQueue(recommendQueue, EXCHANGE_NAME, 'assignment.recommended');
+
+  channel.consume(recommendQueue, (msg) => {
+    if (!msg) return;
+
+    try {
+      const payload  = JSON.parse(msg.content.toString());
+      emitToRoom('dispatchers', 'dispatcher:assignment:recommended', payload);
+      channel.ack(msg);
+    } catch (err) {
+      console.error('[Consumer] assignment.recommended parse error:', err.message);
+      channel.nack(msg, false, false);
+    }
+  });
+
+  console.log(`[RabbitMQ] Consumer bound: assignment.recommended → dispatcher:assignment:recommended`);
+
+  // ─── Consumer 2b: unit.assigned → unit:<unit_id> ───────────────────────────
   const unitQueue = 'ingestion.unit.assigned';
   await channel.assertQueue(unitQueue, { durable: true });
   await channel.bindQueue(unitQueue, EXCHANGE_NAME, 'unit.assigned');
@@ -223,10 +243,10 @@ async function bindConsumers(channel) {
 
   console.log(`[RabbitMQ] Consumer bound: unit.assigned → unit:dispatch:alert`);
 
-  // ─── Consumer 3: field.assessment.completed → dispatchers ─────────────────
-  const fieldQueue = 'ingestion.field.assessment.completed';
+  // ─── Consumer 3: field.assessment.submitted → dispatchers ─────────────────
+  const fieldQueue = 'ingestion.field.assessment.submitted';
   await channel.assertQueue(fieldQueue, { durable: true });
-  await channel.bindQueue(fieldQueue, EXCHANGE_NAME, 'field.assessment.completed');
+  await channel.bindQueue(fieldQueue, EXCHANGE_NAME, 'field.assessment.submitted');
 
   channel.consume(fieldQueue, (msg) => {
     if (!msg) return;
@@ -236,12 +256,12 @@ async function bindConsumers(channel) {
       emitToRoom('dispatchers', 'dispatcher:field:resolved', payload);
       channel.ack(msg);
     } catch (err) {
-      console.error('[Consumer] field.assessment.completed parse error:', err.message);
+      console.error('[Consumer] field.assessment.submitted parse error:', err.message);
       channel.nack(msg, false, false);
     }
   });
 
-  console.log(`[RabbitMQ] Consumer bound: field.assessment.completed → dispatcher:field:resolved`);
+  console.log(`[RabbitMQ] Consumer bound: field.assessment.submitted → dispatcher:field:resolved`);
 }
 
 // ---------------------------------------------------------------------------

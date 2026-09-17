@@ -6,6 +6,7 @@
 const express = require('express');
 const { pool } = require('../config/db');
 const { authenticate, authorize } = require('../middleware/auth');
+const stateMachine = require('../services/stateMachine');
 
 const router = express.Router();
 
@@ -62,11 +63,8 @@ router.patch('/:assignmentId/status', authenticate, authorize('ResponseUnit'), a
       [assignmentId]
     );
 
-    // Transition incident to Active
-    await client.query(
-      `UPDATE incidents SET status = 'Active' WHERE id = $1`,
-      [assignment.incident_id]
-    );
+    // Transition incident to Active via state machine (writes activity_log atomically)
+    await stateMachine.transition(assignment.incident_id, 'Active', req.user.userId, { client });
 
     // Update unit status to OnScene
     await client.query(
@@ -87,6 +85,17 @@ router.patch('/:assignmentId/status', authenticate, authorize('ResponseUnit'), a
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[Assignments] Status update error:', err.message);
     return res.status(500).json({
       success: false,

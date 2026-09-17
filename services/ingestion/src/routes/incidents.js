@@ -103,6 +103,17 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
 
     await client.query('COMMIT');
 
+    // Publish unit.assigned event for the socket server
+    const { publishEvent } = require('../config/rabbitmq');
+    publishEvent('unit.assigned', {
+      unitId: responseUnitId,
+      incidentId,
+      assignmentId: assignmentResult.rows[0].id,
+      status: 'Dispatched',
+      assignedAt: assignmentResult.rows[0].assigned_at,
+      notes: notes || null
+    });
+
     return res.status(200).json({
       success: true,
       data: {
@@ -131,103 +142,6 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
     return res.status(500).json({
       success: false,
       error: { code: 'SERVER_ERROR', message: 'Failed to assign unit.' }
-    });
-  } finally {
-    client.release();
-  }
-});
-
-
-/**
- * @route  PATCH /api/v1/assignments/:assignmentId/status
- * @desc   Responder toggles assignment to OnScene. Transitions incident to Active.
- * @access ResponseUnit
- */
-router.patch('/assignments/:assignmentId/status', authenticate, authorize('ResponseUnit'), async (req, res) => {
-  const { assignmentId } = req.params;
-  const { status } = req.body;
-
-  if (status !== 'OnScene') {
-    return res.status(400).json({
-      success: false,
-      error: { code: 'VALIDATION_ERROR', message: 'Only "OnScene" status is accepted here.' }
-    });
-  }
-
-  const client = await pool.connect();
-
-  try {
-    await client.query('BEGIN');
-
-    const assignResult = await client.query(
-      `SELECT a.id, a.incident_id, a.status FROM assignments a WHERE a.id = $1 FOR UPDATE`,
-      [assignmentId]
-    );
-
-    if (assignResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({
-        success: false,
-        error: { code: 'NOT_FOUND', message: 'Assignment not found.' }
-      });
-    }
-
-    const assignment = assignResult.rows[0];
-
-    if (assignment.status !== 'Dispatched' && assignment.status !== 'Acknowledged') {
-      await client.query('ROLLBACK');
-      return res.status(409).json({
-        success: false,
-        error: {
-          code: 'INVALID_STATE',
-          message: `Cannot set OnScene from current status: ${assignment.status}.`
-        }
-      });
-    }
-
-    // Update assignment status and arrival time
-    await client.query(
-      `UPDATE assignments SET status = 'OnScene', arrived_at = NOW() WHERE id = $1`,
-      [assignmentId]
-    );
-
-    // Transition Dispatched -> Active via state machine (writes activity_log atomically)
-    await stateMachine.transition(assignment.incident_id, 'Active', req.user.userId, { client });
-
-    // Update unit status to OnScene
-    await client.query(
-      `UPDATE response_units SET current_status = 'OnScene', updated_at = NOW()
-       WHERE id = (SELECT unit_id FROM assignments WHERE id = $1)`,
-      [assignmentId]
-    );
-
-    await client.query('COMMIT');
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        assignmentId,
-        status: 'OnScene',
-        arrivedAt: new Date().toISOString()
-      }
-    });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    if (err.name === 'InvalidStateTransitionError') {
-      return res.status(422).json({
-        success: false,
-        error: {
-          code:         'INVALID_STATE_TRANSITION',
-          message:      err.message,
-          currentState: err.currentState,
-          targetState:  err.targetState,
-        }
-      });
-    }
-    console.error('[Assignments] Status update error:', err.message);
-    return res.status(500).json({
-      success: false,
-      error: { code: 'SERVER_ERROR', message: 'Failed to update assignment status.' }
     });
   } finally {
     client.release();

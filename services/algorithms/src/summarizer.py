@@ -256,6 +256,15 @@ def handle_field_assessment_submitted(payload, publish):
     # Generate handover debrief
     summary_text, is_fallback = generate_handover_debrief(report_dicts, assessment_dicts, incident_code)
 
+    # Determine version number (increment if summary already exists)
+    existing = db_query(
+        """SELECT COALESCE(MAX(version), 0) AS max_version
+           FROM summaries
+           WHERE incident_id = %s AND summary_type = 'HandoverDebrief'""",
+        (incident_id,)
+    )
+    version = (existing[0]['max_version'] if existing else 0) + 1
+
     # Save to summaries table
     conn = get_connection()
     try:
@@ -263,16 +272,16 @@ def handle_field_assessment_submitted(payload, publish):
             cur.execute(
                 """INSERT INTO summaries
                      (candidate_id, incident_id, summary_type, content, is_fallback, version)
-                   VALUES (%s, %s, 'HandoverDebrief', %s, %s, 1)
+                   VALUES (%s, %s, 'HandoverDebrief', %s, %s, %s)
                    RETURNING id""",
-                (candidate_id, incident_id, summary_text, is_fallback)
+                (candidate_id, incident_id, summary_text, is_fallback, version)
             )
             summary_id = cur.fetchone()[0]
             conn.commit()
     finally:
         put_connection(conn)
 
-    print(f"[Summarizer] Saved HandoverDebrief {summary_id} (fallback={is_fallback}) for incident {incident_code}")
+    print(f"[Summarizer] Saved HandoverDebrief {summary_id} (v{version}, fallback={is_fallback}) for incident {incident_code}")
 
 
 if __name__ == "__main__":
