@@ -1,0 +1,488 @@
+{
+  "communities": {
+    "0": [
+      "ref_amqplib",
+      "ref_bcryptjs",
+      "ref_express",
+      "ref_jsonwebtoken",
+      "ref_pg",
+      "services_ingestion_src_config_db",
+      "services_ingestion_src_config_db_pool",
+      "services_ingestion_src_config_db_query",
+      "services_ingestion_src_config_db_testconnection",
+      "services_ingestion_src_config_rabbitmq",
+      "services_ingestion_src_config_rabbitmq_amqp",
+      "services_ingestion_src_config_rabbitmq_connectrabbitmq",
+      "services_ingestion_src_config_rabbitmq_publishevent",
+      "services_ingestion_src_middleware_auth",
+      "services_ingestion_src_middleware_auth_authenticate",
+      "services_ingestion_src_middleware_auth_authorize",
+      "services_ingestion_src_middleware_auth_jwt",
+      "services_ingestion_src_routes_assignments",
+      "services_ingestion_src_routes_assignments_authenticate_authorize",
+      "services_ingestion_src_routes_assignments_express",
+      "services_ingestion_src_routes_assignments_pool",
+      "services_ingestion_src_routes_assignments_router",
+      "services_ingestion_src_routes_auth",
+      "services_ingestion_src_routes_auth_bcrypt",
+      "services_ingestion_src_routes_auth_express",
+      "services_ingestion_src_routes_auth_jwt",
+      "services_ingestion_src_routes_auth_query",
+      "services_ingestion_src_routes_auth_router",
+      "services_ingestion_src_routes_candidates",
+      "services_ingestion_src_routes_candidates_authenticate_authorize",
+      "services_ingestion_src_routes_candidates_express",
+      "services_ingestion_src_routes_candidates_query_pool",
+      "services_ingestion_src_routes_candidates_router",
+      "services_ingestion_src_routes_candidates_statemachine",
+      "services_ingestion_src_routes_incidents",
+      "services_ingestion_src_routes_incidents_authenticate_authorize",
+      "services_ingestion_src_routes_incidents_express",
+      "services_ingestion_src_routes_incidents_query_pool",
+      "services_ingestion_src_routes_incidents_router",
+      "services_ingestion_src_routes_incidents_statemachine",
+      "services_ingestion_src_routes_reports",
+      "services_ingestion_src_routes_reports_express",
+      "services_ingestion_src_routes_reports_query",
+      "services_ingestion_src_routes_reports_router",
+      "services_ingestion_src_routes_reports_upload",
+      "services_ingestion_src_routes_units",
+      "services_ingestion_src_routes_units_authenticate_authorize",
+      "services_ingestion_src_routes_units_express",
+      "services_ingestion_src_routes_units_query",
+      "services_ingestion_src_routes_units_router",
+      "services_ingestion_src_services_statemachine",
+      "services_ingestion_src_services_statemachine_invalidstatetransitionerror",
+      "services_ingestion_src_services_statemachine_invalidstatetransitionerror_constructor",
+      "services_ingestion_src_services_statemachine_isvalidtransition",
+      "services_ingestion_src_services_statemachine_pool",
+      "services_ingestion_src_services_statemachine_transition",
+      "services_ingestion_src_services_statemachine_transitions",
+      "services_ingestion_src_workers_escalationworker",
+      "services_ingestion_src_workers_escalationworker_escalateincident",
+      "services_ingestion_src_workers_escalationworker_pool",
+      "services_ingestion_src_workers_escalationworker_runpollcycle",
+      "services_ingestion_src_workers_escalationworker_start"
+    ],
+    "1": [
+      "services_algorithms_src_clustering",
+      "services_algorithms_src_clustering_handle_report_ingested",
+      "services_algorithms_src_clustering_haversine_distance_meters",
+      "services_algorithms_src_clustering_rationale_1",
+      "services_algorithms_src_clustering_rationale_17",
+      "services_algorithms_src_clustering_rationale_97",
+      "services_algorithms_src_db",
+      "services_algorithms_src_db_close_pool",
+      "services_algorithms_src_db_get_connection",
+      "services_algorithms_src_db_get_connection_params",
+      "services_algorithms_src_db_get_pool",
+      "services_algorithms_src_db_put_connection",
+      "services_algorithms_src_db_query",
+      "services_algorithms_src_db_query_one",
+      "services_algorithms_src_db_rationale_1",
+      "services_algorithms_src_db_rationale_18",
+      "services_algorithms_src_db_rationale_33",
+      "services_algorithms_src_db_rationale_47",
+      "services_algorithms_src_db_rationale_52",
+      "services_algorithms_src_db_rationale_57",
+      "services_algorithms_src_db_rationale_77",
+      "services_algorithms_src_db_rationale_83",
+      "services_algorithms_src_summarizer",
+      "services_algorithms_src_summarizer_generate_handover_debrief",
+      "services_algorithms_src_summarizer_handle_candidate_created",
+      "services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "services_algorithms_src_summarizer_rationale_1",
+      "services_algorithms_src_summarizer_rationale_121",
+      "services_algorithms_src_summarizer_rationale_144",
+      "services_algorithms_src_summarizer_rationale_206",
+      "services_algorithms_src_summarizer_rationale_77",
+      "services_algorithms_src_summarizer_template_handover_debrief",
+      "services_algorithms_src_worker",
+      "services_algorithms_src_worker_get_rabbitmq_connection",
+      "services_algorithms_src_worker_main",
+      "services_algorithms_src_worker_on_message",
+      "services_algorithms_src_worker_publish_event",
+      "services_algorithms_src_worker_rationale_1",
+      "services_algorithms_src_worker_rationale_117",
+      "services_algorithms_src_worker_rationale_42",
+      "services_algorithms_src_worker_rationale_73",
+      "services_algorithms_src_worker_rationale_90"
+    ],
+    "2": [
+      "ref_leaflet",
+      "ref_lucide_react",
+      "ref_oxlint",
+      "ref_react",
+      "ref_react_dom",
+      "ref_types_react",
+      "ref_types_react_dom",
+      "ref_vite",
+      "ref_vitejs_plugin_react",
+      "services_frontend_package",
+      "services_frontend_package_dependencies",
+      "services_frontend_package_dependencies_leaflet",
+      "services_frontend_package_dependencies_lucide_react",
+      "services_frontend_package_dependencies_react",
+      "services_frontend_package_dependencies_react_dom",
+      "services_frontend_package_dependencies_socket_io_client",
+      "services_frontend_package_devdependencies",
+      "services_frontend_package_devdependencies_oxlint",
+      "services_frontend_package_devdependencies_types_react",
+      "services_frontend_package_devdependencies_types_react_dom",
+      "services_frontend_package_devdependencies_vite",
+      "services_frontend_package_devdependencies_vitejs_plugin_react",
+      "services_frontend_package_json_ref_socket_io_client",
+      "services_frontend_package_name",
+      "services_frontend_package_private",
+      "services_frontend_package_scripts",
+      "services_frontend_package_scripts_build",
+      "services_frontend_package_scripts_dev",
+      "services_frontend_package_scripts_lint",
+      "services_frontend_package_scripts_preview",
+      "services_frontend_package_type",
+      "services_frontend_package_version",
+      "services_frontend_src_app",
+      "services_frontend_src_app_app",
+      "services_frontend_src_main",
+      "services_frontend_vite_config"
+    ],
+    "3": [
+      "database_schema",
+      "database_schema_activity_logs",
+      "database_schema_assignments",
+      "database_schema_field_assessments",
+      "database_schema_idx_assignments_incident",
+      "database_schema_idx_assignments_unit",
+      "database_schema_idx_field_assessments_incident",
+      "database_schema_idx_incident_candidates_center",
+      "database_schema_idx_incidents_location",
+      "database_schema_idx_incidents_status",
+      "database_schema_idx_reports_candidate",
+      "database_schema_idx_reports_emergency_loc",
+      "database_schema_idx_reports_incident",
+      "database_schema_idx_reports_reporter_loc",
+      "database_schema_idx_response_units_location",
+      "database_schema_incident_candidates",
+      "database_schema_incidents",
+      "database_schema_notifications",
+      "database_schema_permissions",
+      "database_schema_reports",
+      "database_schema_response_units",
+      "database_schema_role_permissions",
+      "database_schema_roles",
+      "database_schema_summaries",
+      "database_schema_users",
+      "migrations_003_phase3_state_machine_escalation",
+      "migrations_003_phase3_state_machine_escalation_idx_activity_logs_action",
+      "migrations_003_phase3_state_machine_escalation_idx_activity_logs_created_at",
+      "migrations_003_phase3_state_machine_escalation_idx_activity_logs_entity",
+      "migrations_003_phase3_state_machine_escalation_idx_incidents_escalation_level",
+      "migrations_003_phase3_state_machine_escalation_idx_incidents_status_escalation",
+      "migrations_003_phase3_state_machine_escalation_incident_audit_trail"
+    ],
+    "4": [
+      "ref_cors",
+      "ref_nodemon",
+      "ref_socket_io",
+      "ref_uuid",
+      "services_ingestion_package",
+      "services_ingestion_package_dependencies",
+      "services_ingestion_package_dependencies_amqplib",
+      "services_ingestion_package_dependencies_bcryptjs",
+      "services_ingestion_package_dependencies_cors",
+      "services_ingestion_package_dependencies_dotenv",
+      "services_ingestion_package_dependencies_express",
+      "services_ingestion_package_dependencies_jsonwebtoken",
+      "services_ingestion_package_dependencies_multer",
+      "services_ingestion_package_dependencies_pg",
+      "services_ingestion_package_dependencies_socket_io",
+      "services_ingestion_package_dependencies_uuid",
+      "services_ingestion_package_description",
+      "services_ingestion_package_devdependencies",
+      "services_ingestion_package_devdependencies_nodemon",
+      "services_ingestion_package_devdependencies_socket_io_client",
+      "services_ingestion_package_main",
+      "services_ingestion_package_name",
+      "services_ingestion_package_scripts",
+      "services_ingestion_package_scripts_dev",
+      "services_ingestion_package_scripts_start",
+      "services_ingestion_package_version"
+    ],
+    "5": [
+      "services_ingestion_src_config_rabbitmq_closerabbitmq",
+      "services_ingestion_src_index",
+      "services_ingestion_src_index_amqp",
+      "services_ingestion_src_index_app",
+      "services_ingestion_src_index_bindconsumers",
+      "services_ingestion_src_index_connectrabbitmq_closerabbitmq_exchange_name",
+      "services_ingestion_src_index_cors",
+      "services_ingestion_src_index_dotenv",
+      "services_ingestion_src_index_emittoroom",
+      "services_ingestion_src_index_escalationworker",
+      "services_ingestion_src_index_express",
+      "services_ingestion_src_index_http",
+      "services_ingestion_src_index_io",
+      "services_ingestion_src_index_jwt",
+      "services_ingestion_src_index_path",
+      "services_ingestion_src_index_server",
+      "services_ingestion_src_index_shutdown",
+      "services_ingestion_src_index_testconnection",
+      "services_ingestion_src_workers_escalationworker_stop"
+    ],
+    "6": [
+      "services_algorithms_src_allocation",
+      "services_algorithms_src_allocation_calculate_distance_meters",
+      "services_algorithms_src_allocation_handle_incident_validated",
+      "services_algorithms_src_allocation_optimize_allocations",
+      "services_algorithms_src_allocation_rationale_1",
+      "services_algorithms_src_allocation_rationale_13",
+      "services_algorithms_src_allocation_rationale_24",
+      "services_algorithms_src_allocation_rationale_65",
+      "services_algorithms_tests_test_algorithms",
+      "services_algorithms_tests_test_algorithms_rationale_1",
+      "services_algorithms_tests_test_algorithms_rationale_71",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents"
+    ],
+    "7": [
+      "ref_dotenv",
+      "scripts_verify_phase3",
+      "scripts_verify_phase3_amqp",
+      "scripts_verify_phase3_dotenv",
+      "scripts_verify_phase3_http",
+      "scripts_verify_phase3_io_ioclient",
+      "scripts_verify_phase3_jsonpost",
+      "scripts_verify_phase3_path",
+      "scripts_verify_phase3_test1_invalidtransition",
+      "scripts_verify_phase3_test2_escalation",
+      "scripts_verify_phase3_test3_rabbitmqrouting",
+      "scripts_verify_phase3_wait"
+    ],
+    "8": [
+      "ref_multer",
+      "services_ingestion_src_middleware_upload",
+      "services_ingestion_src_middleware_upload_allowed_mime_types",
+      "services_ingestion_src_middleware_upload_filefilter",
+      "services_ingestion_src_middleware_upload_multer",
+      "services_ingestion_src_middleware_upload_path",
+      "services_ingestion_src_middleware_upload_storage",
+      "services_ingestion_src_middleware_upload_upload",
+      "services_ingestion_src_middleware_upload_uploads_dir"
+    ],
+    "9": [
+      "scripts_simulate_disaster",
+      "scripts_simulate_disaster_build_report_payload",
+      "scripts_simulate_disaster_generate_jittered_coordinate",
+      "scripts_simulate_disaster_main",
+      "scripts_simulate_disaster_rationale_2",
+      "scripts_simulate_disaster_rationale_39",
+      "scripts_simulate_disaster_rationale_48",
+      "scripts_simulate_disaster_rationale_81",
+      "scripts_simulate_disaster_send_report"
+    ],
+    "10": [
+      "services_algorithms_src_summarizer_generate_template_summary",
+      "services_algorithms_src_summarizer_rationale_17",
+      "services_algorithms_src_summarizer_rationale_38",
+      "services_algorithms_src_summarizer_summarize_incident_cluster",
+      "services_algorithms_tests_test_algorithms_rationale_137",
+      "services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing"
+    ],
+    "11": [
+      "services_algorithms_src_clustering_cluster_reports",
+      "services_algorithms_src_clustering_rationale_29",
+      "services_algorithms_tests_test_algorithms_rationale_20",
+      "services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates"
+    ],
+    "12": [
+      "services_frontend_oxlintrc",
+      "services_frontend_oxlintrc_plugins",
+      "services_frontend_oxlintrc_rules",
+      "services_frontend_oxlintrc_rules_react_only_export_components",
+      "services_frontend_oxlintrc_rules_react_rules_of_hooks",
+      "services_frontend_oxlintrc_schema"
+    ],
+    "13": [
+      "seeds_02_initial_seeds",
+      "seeds_02_initial_seeds_idx_municipal_boundaries_geom",
+      "seeds_02_initial_seeds_municipal_boundaries"
+    ],
+    "14": [
+      "seeds_03_sample_emergencies"
+    ]
+  },
+  "cohesion": {
+    "0": 0.053410893707033315,
+    "1": 0.08246225319396051,
+    "2": 0.06031746031746032,
+    "3": 0.13306451612903225,
+    "4": 0.07692307692307693,
+    "5": 0.11695906432748537,
+    "6": 0.16911764705882354,
+    "7": 0.16666666666666666,
+    "8": 0.2222222222222222,
+    "9": 0.3055555555555556,
+    "10": 0.2777777777777778,
+    "11": 0.35714285714285715,
+    "12": 0.3333333333333333,
+    "13": 1.0,
+    "14": 1.0
+  },
+  "gods": [
+    {
+      "id": "services_algorithms_src_db_query",
+      "label": "query()",
+      "degree": 12
+    },
+    {
+      "id": "database_schema_incidents",
+      "label": "incidents",
+      "degree": 11
+    },
+    {
+      "id": "services_algorithms_src_db_get_connection",
+      "label": "get_connection()",
+      "degree": 9
+    },
+    {
+      "id": "services_algorithms_src_db_put_connection",
+      "label": "put_connection()",
+      "degree": 9
+    },
+    {
+      "id": "services_algorithms_src_clustering_handle_report_ingested",
+      "label": "handle_report_ingested()",
+      "degree": 8
+    },
+    {
+      "id": "services_algorithms_src_clustering_cluster_reports",
+      "label": "cluster_reports()",
+      "degree": 8
+    },
+    {
+      "id": "services_algorithms_src_allocation_optimize_allocations",
+      "label": "optimize_allocations()",
+      "degree": 8
+    },
+    {
+      "id": "ref_express",
+      "label": "express",
+      "degree": 8
+    },
+    {
+      "id": "database_schema_users",
+      "label": "users",
+      "degree": 8
+    },
+    {
+      "id": "services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "label": "TestHungarianAllocationAlgorithm",
+      "degree": 7
+    }
+  ],
+  "surprises": [
+    {
+      "source": "idx_activity_logs_action",
+      "target": "activity_logs",
+      "source_files": [
+        "migrations/003_phase3_state_machine_escalation.sql",
+        "database-schema.sql"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "indexes",
+      "why": "connects across different repos/directories; peripheral node `idx_activity_logs_action` unexpectedly reaches hub `activity_logs`"
+    },
+    {
+      "source": "idx_activity_logs_created_at",
+      "target": "activity_logs",
+      "source_files": [
+        "migrations/003_phase3_state_machine_escalation.sql",
+        "database-schema.sql"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "indexes",
+      "why": "connects across different repos/directories; peripheral node `idx_activity_logs_created_at` unexpectedly reaches hub `activity_logs`"
+    },
+    {
+      "source": "idx_activity_logs_entity",
+      "target": "activity_logs",
+      "source_files": [
+        "migrations/003_phase3_state_machine_escalation.sql",
+        "database-schema.sql"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "indexes",
+      "why": "connects across different repos/directories; peripheral node `idx_activity_logs_entity` unexpectedly reaches hub `activity_logs`"
+    },
+    {
+      "source": "idx_incidents_escalation_level",
+      "target": "incidents",
+      "source_files": [
+        "migrations/003_phase3_state_machine_escalation.sql",
+        "database-schema.sql"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "indexes",
+      "why": "connects across different repos/directories; peripheral node `idx_incidents_escalation_level` unexpectedly reaches hub `incidents`"
+    },
+    {
+      "source": "idx_incidents_status_escalation",
+      "target": "incidents",
+      "source_files": [
+        "migrations/003_phase3_state_machine_escalation.sql",
+        "database-schema.sql"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "indexes",
+      "why": "connects across different repos/directories; peripheral node `idx_incidents_status_escalation` unexpectedly reaches hub `incidents`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `socket.io-client` connect `Community 2` to `Community 4`?",
+      "why": "High betweenness centrality (0.107) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `express` connect `Community 0` to `Community 4`, `Community 5`?",
+      "why": "High betweenness centrality (0.077) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `amqp`, `jwt`, `{ authenticate, authorize }` to the rest of the system?",
+      "why": "104 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.053410893707033315 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08246225319396051 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 2` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06031746031746032 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 3` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13306451612903225 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

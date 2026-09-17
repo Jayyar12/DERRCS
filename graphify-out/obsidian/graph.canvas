@@ -1,0 +1,3975 @@
+{
+  "nodes": [
+    {
+      "id": "g0",
+      "type": "group",
+      "label": "Ingestion API & State Machine",
+      "x": 0,
+      "y": 0,
+      "width": 1760,
+      "height": 920,
+      "color": "1"
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror_constructor",
+      "type": "file",
+      "file": "dot-constructor().md",
+      "x": 20,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror",
+      "type": "file",
+      "file": "InvalidStateTransitionError.md",
+      "x": 220,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_transitions",
+      "type": "file",
+      "file": "TRANSITIONS.md",
+      "x": 420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker_escalateincident",
+      "type": "file",
+      "file": "_escalateIncident().md",
+      "x": 620,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker_runpollcycle",
+      "type": "file",
+      "file": "_runPollCycle().md",
+      "x": 820,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_rabbitmq_amqp",
+      "type": "file",
+      "file": "amqp.md",
+      "x": 1020,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_amqplib",
+      "type": "file",
+      "file": "amqplib.md",
+      "x": 1220,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_assignments",
+      "type": "file",
+      "file": "assignments.js.md",
+      "x": 1420,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_auth_authenticate",
+      "type": "file",
+      "file": "authenticate().md",
+      "x": 20,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_auth_authorize",
+      "type": "file",
+      "file": "authorize().md",
+      "x": 220,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth_bcrypt",
+      "type": "file",
+      "file": "bcrypt.md",
+      "x": 420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_bcryptjs",
+      "type": "file",
+      "file": "bcryptjs.md",
+      "x": 620,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates",
+      "type": "file",
+      "file": "candidates.js.md",
+      "x": 820,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_rabbitmq_connectrabbitmq",
+      "type": "file",
+      "file": "connectRabbitMQ().md",
+      "x": 1020,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_db",
+      "type": "file",
+      "file": "db.js.md",
+      "x": 1220,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker",
+      "type": "file",
+      "file": "escalationWorker.js.md",
+      "x": 1420,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_express",
+      "type": "file",
+      "file": "express_6.md",
+      "x": 20,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_assignments_express",
+      "type": "file",
+      "file": "express.md",
+      "x": 220,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth_express",
+      "type": "file",
+      "file": "express_1.md",
+      "x": 420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates_express",
+      "type": "file",
+      "file": "express_2.md",
+      "x": 620,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents_express",
+      "type": "file",
+      "file": "express_3.md",
+      "x": 820,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_reports_express",
+      "type": "file",
+      "file": "express_4.md",
+      "x": 1020,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_units_express",
+      "type": "file",
+      "file": "express_5.md",
+      "x": 1220,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents",
+      "type": "file",
+      "file": "incidents.js.md",
+      "x": 1420,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_isvalidtransition",
+      "type": "file",
+      "file": "isValidTransition().md",
+      "x": 20,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_jsonwebtoken",
+      "type": "file",
+      "file": "jsonwebtoken.md",
+      "x": 220,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_auth_jwt",
+      "type": "file",
+      "file": "jwt.md",
+      "x": 420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth_jwt",
+      "type": "file",
+      "file": "jwt_1.md",
+      "x": 620,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_auth",
+      "type": "file",
+      "file": "middlewareauth.js.md",
+      "x": 820,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_pg",
+      "type": "file",
+      "file": "pg.md",
+      "x": 1020,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "type": "file",
+      "file": "publishEvent().md",
+      "x": 1220,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_db_query",
+      "type": "file",
+      "file": "query().md",
+      "x": 1420,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_rabbitmq",
+      "type": "file",
+      "file": "rabbitmq.js.md",
+      "x": 20,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_reports",
+      "type": "file",
+      "file": "reports.js.md",
+      "x": 220,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_assignments_router",
+      "type": "file",
+      "file": "router.md",
+      "x": 420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth_router",
+      "type": "file",
+      "file": "router_1.md",
+      "x": 620,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates_router",
+      "type": "file",
+      "file": "router_2.md",
+      "x": 820,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents_router",
+      "type": "file",
+      "file": "router_3.md",
+      "x": 1020,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_reports_router",
+      "type": "file",
+      "file": "router_4.md",
+      "x": 1220,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_units_router",
+      "type": "file",
+      "file": "router_5.md",
+      "x": 1420,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth",
+      "type": "file",
+      "file": "routesauth.js.md",
+      "x": 20,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker_start",
+      "type": "file",
+      "file": "start().md",
+      "x": 220,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates_statemachine",
+      "type": "file",
+      "file": "stateMachine.md",
+      "x": 420,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents_statemachine",
+      "type": "file",
+      "file": "stateMachine_1.md",
+      "x": 620,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine",
+      "type": "file",
+      "file": "stateMachine.js.md",
+      "x": 820,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_db_testconnection",
+      "type": "file",
+      "file": "testConnection().md",
+      "x": 1020,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_transition",
+      "type": "file",
+      "file": "transition().md",
+      "x": 1220,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_units",
+      "type": "file",
+      "file": "units.js.md",
+      "x": 1420,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_reports_upload",
+      "type": "file",
+      "file": "upload.md",
+      "x": 20,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_db_pool",
+      "type": "file",
+      "file": "{ Pool }.md",
+      "x": 220,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_assignments_authenticate_authorize",
+      "type": "file",
+      "file": "{ authenticate, authorize }.md",
+      "x": 420,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates_authenticate_authorize",
+      "type": "file",
+      "file": "{ authenticate, authorize }_1.md",
+      "x": 620,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents_authenticate_authorize",
+      "type": "file",
+      "file": "{ authenticate, authorize }_2.md",
+      "x": 820,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_units_authenticate_authorize",
+      "type": "file",
+      "file": "{ authenticate, authorize }_3.md",
+      "x": 1020,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_assignments_pool",
+      "type": "file",
+      "file": "{ pool }_1.md",
+      "x": 1220,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_services_statemachine_pool",
+      "type": "file",
+      "file": "{ pool }_2.md",
+      "x": 1420,
+      "y": 560,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker_pool",
+      "type": "file",
+      "file": "{ pool }_3.md",
+      "x": 20,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_auth_query",
+      "type": "file",
+      "file": "{ query }.md",
+      "x": 220,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_reports_query",
+      "type": "file",
+      "file": "{ query }_1.md",
+      "x": 420,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_units_query",
+      "type": "file",
+      "file": "{ query }_2.md",
+      "x": 620,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_candidates_query_pool",
+      "type": "file",
+      "file": "{ query, pool }.md",
+      "x": 820,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_routes_incidents_query_pool",
+      "type": "file",
+      "file": "{ query, pool }_1.md",
+      "x": 1020,
+      "y": 640,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g1",
+      "type": "group",
+      "label": "Algorithms Worker & DB Access",
+      "x": 1840,
+      "y": 0,
+      "width": 1540,
+      "height": 720,
+      "color": "2"
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_rationale_17",
+      "type": "file",
+      "file": "Calculates great-circle distance between two points on earth in meters..md",
+      "x": 1860,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_83",
+      "type": "file",
+      "file": "Closes all connections in the pool..md",
+      "x": 2060,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_rationale_42",
+      "type": "file",
+      "file": "Creates a blocking connection to RabbitMQ with retry logic..md",
+      "x": 2260,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_1",
+      "type": "file",
+      "file": "DERRCS AI Incident Summarizer Module Calls Google Gemini API to generate\u2026.md",
+      "x": 2460,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_1",
+      "type": "file",
+      "file": "DERRCS PostgreSQL Connection Helper for Python Worker Provides a connection\u2026.md",
+      "x": 2660,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_rationale_1",
+      "type": "file",
+      "file": "DERRCS RabbitMQ Worker Service Consumes domain events from the derrcs.events\u2026.md",
+      "x": 2860,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_rationale_1",
+      "type": "file",
+      "file": "DERRCS Streaming DBSCAN Duplicate Detection Service Groups nearby citizen\u2026.md",
+      "x": 3060,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_121",
+      "type": "file",
+      "file": "Deterministic fallback handover template..md",
+      "x": 1860,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_77",
+      "type": "file",
+      "file": "Executes a SQL query and returns a single row as a dict, or None..md",
+      "x": 2060,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_57",
+      "type": "file",
+      "file": "Executes a SQL query and returns results as a list of dicts. For INSERTUPDATE,\u2026.md",
+      "x": 2260,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_77",
+      "type": "file",
+      "file": "Generate a hospital pre-arrival handover report..md",
+      "x": 2460,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_rationale_90",
+      "type": "file",
+      "file": "Generic message callback that routes to the correct handler..md",
+      "x": 2660,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_47",
+      "type": "file",
+      "file": "Gets a connection from the pool. Caller must return it with put_connection()..md",
+      "x": 2860,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_rationale_117",
+      "type": "file",
+      "file": "Initializes queues, binds routing keys, and starts consuming..md",
+      "x": 3060,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_rationale_73",
+      "type": "file",
+      "file": "Publishes an event back to the derrcs.events exchange..md",
+      "x": 1860,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_144",
+      "type": "file",
+      "file": "RabbitMQ handler for candidate.created events. Queries reports linked to the\u2026.md",
+      "x": 2060,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_206",
+      "type": "file",
+      "file": "RabbitMQ handler for field.assessment.submitted events. Queries reports and\u2026.md",
+      "x": 2260,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_rationale_97",
+      "type": "file",
+      "file": "RabbitMQ handler for report.ingested events. 1. Query active candidates and\u2026.md",
+      "x": 2460,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_18",
+      "type": "file",
+      "file": "Reads PostgreSQL connection parameters from environment variables..md",
+      "x": 2660,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_52",
+      "type": "file",
+      "file": "Returns a connection back to the pool..md",
+      "x": 2860,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_rationale_33",
+      "type": "file",
+      "file": "Returns a thread-safe connection pool, creating it on first call..md",
+      "x": 3060,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_template_handover_debrief",
+      "type": "file",
+      "file": "_template_handover_debrief().md",
+      "x": 1860,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_close_pool",
+      "type": "file",
+      "file": "close_pool().md",
+      "x": 2060,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering",
+      "type": "file",
+      "file": "clustering.py.md",
+      "x": 2260,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db",
+      "type": "file",
+      "file": "db.py.md",
+      "x": 2460,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_generate_handover_debrief",
+      "type": "file",
+      "file": "generate_handover_debrief().md",
+      "x": 2660,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_get_connection",
+      "type": "file",
+      "file": "get_connection().md",
+      "x": 2860,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_get_connection_params",
+      "type": "file",
+      "file": "get_connection_params().md",
+      "x": 3060,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_get_pool",
+      "type": "file",
+      "file": "get_pool().md",
+      "x": 1860,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_get_rabbitmq_connection",
+      "type": "file",
+      "file": "get_rabbitmq_connection().md",
+      "x": 2060,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "type": "file",
+      "file": "handle_candidate_created().md",
+      "x": 2260,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "type": "file",
+      "file": "handle_field_assessment_submitted().md",
+      "x": 2460,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "type": "file",
+      "file": "handle_report_ingested().md",
+      "x": 2660,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_haversine_distance_meters",
+      "type": "file",
+      "file": "haversine_distance_meters().md",
+      "x": 2860,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_main",
+      "type": "file",
+      "file": "main().md",
+      "x": 3060,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_on_message",
+      "type": "file",
+      "file": "on_message().md",
+      "x": 1860,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker_publish_event",
+      "type": "file",
+      "file": "publish_event().md",
+      "x": 2060,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_put_connection",
+      "type": "file",
+      "file": "put_connection().md",
+      "x": 2260,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_query",
+      "type": "file",
+      "file": "query()_1.md",
+      "x": 2460,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_db_query_one",
+      "type": "file",
+      "file": "query_one().md",
+      "x": 2660,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer",
+      "type": "file",
+      "file": "summarizer.py.md",
+      "x": 2860,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_worker",
+      "type": "file",
+      "file": "worker.py.md",
+      "x": 3060,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g2",
+      "type": "group",
+      "label": "React PWA Frontend UI",
+      "x": 3460,
+      "y": 0,
+      "width": 1320,
+      "height": 720,
+      "color": "3"
+    },
+    {
+      "id": "n_ref_types_react",
+      "type": "file",
+      "file": "@typesreact_1.md",
+      "x": 3480,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies_types_react",
+      "type": "file",
+      "file": "@typesreact.md",
+      "x": 3680,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_types_react_dom",
+      "type": "file",
+      "file": "@typesreact-dom_1.md",
+      "x": 3880,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies_types_react_dom",
+      "type": "file",
+      "file": "@typesreact-dom.md",
+      "x": 4080,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_vitejs_plugin_react",
+      "type": "file",
+      "file": "@vitejsplugin-react_1.md",
+      "x": 4280,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies_vitejs_plugin_react",
+      "type": "file",
+      "file": "@vitejsplugin-react.md",
+      "x": 4480,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_src_app_app",
+      "type": "file",
+      "file": "App().md",
+      "x": 3480,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_src_app",
+      "type": "file",
+      "file": "App.jsx.md",
+      "x": 3680,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_scripts_build",
+      "type": "file",
+      "file": "build.md",
+      "x": 3880,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies",
+      "type": "file",
+      "file": "dependencies.md",
+      "x": 4080,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_scripts_dev",
+      "type": "file",
+      "file": "dev.md",
+      "x": 4280,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies",
+      "type": "file",
+      "file": "devDependencies.md",
+      "x": 4480,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package",
+      "type": "file",
+      "file": "frontendpackage.json.md",
+      "x": 3480,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_leaflet",
+      "type": "file",
+      "file": "leaflet_1.md",
+      "x": 3680,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies_leaflet",
+      "type": "file",
+      "file": "leaflet.md",
+      "x": 3880,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_scripts_lint",
+      "type": "file",
+      "file": "lint.md",
+      "x": 4080,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_lucide_react",
+      "type": "file",
+      "file": "lucide-react_1.md",
+      "x": 4280,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies_lucide_react",
+      "type": "file",
+      "file": "lucide-react.md",
+      "x": 4480,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_src_main",
+      "type": "file",
+      "file": "main.jsx.md",
+      "x": 3480,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_name",
+      "type": "file",
+      "file": "name.md",
+      "x": 3680,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_oxlint",
+      "type": "file",
+      "file": "oxlint_1.md",
+      "x": 3880,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies_oxlint",
+      "type": "file",
+      "file": "oxlint.md",
+      "x": 4080,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_scripts_preview",
+      "type": "file",
+      "file": "preview.md",
+      "x": 4280,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_private",
+      "type": "file",
+      "file": "private.md",
+      "x": 4480,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_react",
+      "type": "file",
+      "file": "react_1.md",
+      "x": 3480,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies_react",
+      "type": "file",
+      "file": "react.md",
+      "x": 3680,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_react_dom",
+      "type": "file",
+      "file": "react-dom_1.md",
+      "x": 3880,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies_react_dom",
+      "type": "file",
+      "file": "react-dom.md",
+      "x": 4080,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_scripts",
+      "type": "file",
+      "file": "scripts.md",
+      "x": 4280,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_dependencies_socket_io_client",
+      "type": "file",
+      "file": "socket.io-client.md",
+      "x": 4480,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_json_ref_socket_io_client",
+      "type": "file",
+      "file": "socket.io-client_1.md",
+      "x": 3480,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_type",
+      "type": "file",
+      "file": "type.md",
+      "x": 3680,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_version",
+      "type": "file",
+      "file": "version.md",
+      "x": 3880,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_vite",
+      "type": "file",
+      "file": "vite_1.md",
+      "x": 4080,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_package_devdependencies_vite",
+      "type": "file",
+      "file": "vite.md",
+      "x": 4280,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_vite_config",
+      "type": "file",
+      "file": "vite.config.js.md",
+      "x": 4480,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g3",
+      "type": "group",
+      "label": "PostgreSQL Schema & PostGIS Tables",
+      "x": 4860,
+      "y": 0,
+      "width": 1320,
+      "height": 720,
+      "color": "4"
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation",
+      "type": "file",
+      "file": "003_phase3_state_machine_escalation.sql.md",
+      "x": 4880,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_activity_logs",
+      "type": "file",
+      "file": "activity_logs.md",
+      "x": 5080,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_assignments",
+      "type": "file",
+      "file": "assignments.md",
+      "x": 5280,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema",
+      "type": "file",
+      "file": "database-schema.sql.md",
+      "x": 5480,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_field_assessments",
+      "type": "file",
+      "file": "field_assessments.md",
+      "x": 5680,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_idx_activity_logs_action",
+      "type": "file",
+      "file": "idx_activity_logs_action.md",
+      "x": 5880,
+      "y": 80,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_idx_activity_logs_created_at",
+      "type": "file",
+      "file": "idx_activity_logs_created_at.md",
+      "x": 4880,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_idx_activity_logs_entity",
+      "type": "file",
+      "file": "idx_activity_logs_entity.md",
+      "x": 5080,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_assignments_incident",
+      "type": "file",
+      "file": "idx_assignments_incident.md",
+      "x": 5280,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_assignments_unit",
+      "type": "file",
+      "file": "idx_assignments_unit.md",
+      "x": 5480,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_field_assessments_incident",
+      "type": "file",
+      "file": "idx_field_assessments_incident.md",
+      "x": 5680,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_incident_candidates_center",
+      "type": "file",
+      "file": "idx_incident_candidates_center.md",
+      "x": 5880,
+      "y": 160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_idx_incidents_escalation_level",
+      "type": "file",
+      "file": "idx_incidents_escalation_level.md",
+      "x": 4880,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_incidents_location",
+      "type": "file",
+      "file": "idx_incidents_location.md",
+      "x": 5080,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_incidents_status",
+      "type": "file",
+      "file": "idx_incidents_status.md",
+      "x": 5280,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_idx_incidents_status_escalation",
+      "type": "file",
+      "file": "idx_incidents_status_escalation.md",
+      "x": 5480,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_reports_candidate",
+      "type": "file",
+      "file": "idx_reports_candidate.md",
+      "x": 5680,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_reports_emergency_loc",
+      "type": "file",
+      "file": "idx_reports_emergency_loc.md",
+      "x": 5880,
+      "y": 240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_reports_incident",
+      "type": "file",
+      "file": "idx_reports_incident.md",
+      "x": 4880,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_reports_reporter_loc",
+      "type": "file",
+      "file": "idx_reports_reporter_loc.md",
+      "x": 5080,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_idx_response_units_location",
+      "type": "file",
+      "file": "idx_response_units_location.md",
+      "x": 5280,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_migrations_003_phase3_state_machine_escalation_incident_audit_trail",
+      "type": "file",
+      "file": "incident_audit_trail.md",
+      "x": 5480,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_incident_candidates",
+      "type": "file",
+      "file": "incident_candidates.md",
+      "x": 5680,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_incidents",
+      "type": "file",
+      "file": "incidents.md",
+      "x": 5880,
+      "y": 320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_notifications",
+      "type": "file",
+      "file": "notifications.md",
+      "x": 4880,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_permissions",
+      "type": "file",
+      "file": "permissions.md",
+      "x": 5080,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_reports",
+      "type": "file",
+      "file": "reports.md",
+      "x": 5280,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_response_units",
+      "type": "file",
+      "file": "response_units.md",
+      "x": 5480,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_role_permissions",
+      "type": "file",
+      "file": "role_permissions.md",
+      "x": 5680,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_roles",
+      "type": "file",
+      "file": "roles.md",
+      "x": 5880,
+      "y": 400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_summaries",
+      "type": "file",
+      "file": "summaries.md",
+      "x": 4880,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_database_schema_users",
+      "type": "file",
+      "file": "users.md",
+      "x": 5080,
+      "y": 480,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g4",
+      "type": "group",
+      "label": "Ingestion Dependencies & Config",
+      "x": 0,
+      "y": 1000,
+      "width": 1320,
+      "height": 620,
+      "color": "5"
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_amqplib",
+      "type": "file",
+      "file": "amqplib_1.md",
+      "x": 20,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_bcryptjs",
+      "type": "file",
+      "file": "bcryptjs_1.md",
+      "x": 220,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_cors",
+      "type": "file",
+      "file": "cors_1.md",
+      "x": 420,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_cors",
+      "type": "file",
+      "file": "cors.md",
+      "x": 620,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies",
+      "type": "file",
+      "file": "dependencies_1.md",
+      "x": 820,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_description",
+      "type": "file",
+      "file": "description.md",
+      "x": 1020,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_scripts_dev",
+      "type": "file",
+      "file": "dev_1.md",
+      "x": 20,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_devdependencies",
+      "type": "file",
+      "file": "devDependencies_1.md",
+      "x": 220,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_dotenv",
+      "type": "file",
+      "file": "dotenv.md",
+      "x": 420,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_express",
+      "type": "file",
+      "file": "express_7.md",
+      "x": 620,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package",
+      "type": "file",
+      "file": "ingestionpackage.json.md",
+      "x": 820,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_jsonwebtoken",
+      "type": "file",
+      "file": "jsonwebtoken_1.md",
+      "x": 1020,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_main",
+      "type": "file",
+      "file": "main.md",
+      "x": 20,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_multer",
+      "type": "file",
+      "file": "multer.md",
+      "x": 220,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_name",
+      "type": "file",
+      "file": "name_1.md",
+      "x": 420,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_nodemon",
+      "type": "file",
+      "file": "nodemon_1.md",
+      "x": 620,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_devdependencies_nodemon",
+      "type": "file",
+      "file": "nodemon.md",
+      "x": 820,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_pg",
+      "type": "file",
+      "file": "pg_1.md",
+      "x": 1020,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_scripts",
+      "type": "file",
+      "file": "scripts_1.md",
+      "x": 20,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_socket_io",
+      "type": "file",
+      "file": "socket.io_1.md",
+      "x": 220,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_socket_io",
+      "type": "file",
+      "file": "socket.io.md",
+      "x": 420,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_devdependencies_socket_io_client",
+      "type": "file",
+      "file": "socket.io-client_2.md",
+      "x": 620,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_scripts_start",
+      "type": "file",
+      "file": "start.md",
+      "x": 820,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_uuid",
+      "type": "file",
+      "file": "uuid_1.md",
+      "x": 1020,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_dependencies_uuid",
+      "type": "file",
+      "file": "uuid.md",
+      "x": 20,
+      "y": 1400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_package_version",
+      "type": "file",
+      "file": "version_1.md",
+      "x": 220,
+      "y": 1400,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g5",
+      "type": "group",
+      "label": "Server Entry Point & WebSockets",
+      "x": 1840,
+      "y": 1000,
+      "width": 1100,
+      "height": 520,
+      "color": "6"
+    },
+    {
+      "id": "n_services_ingestion_src_index_amqp",
+      "type": "file",
+      "file": "amqp_1.md",
+      "x": 1860,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_app",
+      "type": "file",
+      "file": "app.md",
+      "x": 2060,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_bindconsumers",
+      "type": "file",
+      "file": "bindConsumers().md",
+      "x": 2260,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_config_rabbitmq_closerabbitmq",
+      "type": "file",
+      "file": "closeRabbitMQ().md",
+      "x": 2460,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_cors",
+      "type": "file",
+      "file": "cors_2.md",
+      "x": 2660,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_dotenv",
+      "type": "file",
+      "file": "dotenv_1.md",
+      "x": 1860,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_emittoroom",
+      "type": "file",
+      "file": "emitToRoom().md",
+      "x": 2060,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_escalationworker",
+      "type": "file",
+      "file": "escalationWorker.md",
+      "x": 2260,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_express",
+      "type": "file",
+      "file": "express_8.md",
+      "x": 2460,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_http",
+      "type": "file",
+      "file": "http.md",
+      "x": 2660,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index",
+      "type": "file",
+      "file": "index.js.md",
+      "x": 1860,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_io",
+      "type": "file",
+      "file": "io.md",
+      "x": 2060,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_jwt",
+      "type": "file",
+      "file": "jwt_2.md",
+      "x": 2260,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_path",
+      "type": "file",
+      "file": "path.md",
+      "x": 2460,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_shutdown",
+      "type": "file",
+      "file": "shutdown().md",
+      "x": 2660,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_workers_escalationworker_stop",
+      "type": "file",
+      "file": "stop().md",
+      "x": 1860,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_server",
+      "type": "file",
+      "file": "{ Server }.md",
+      "x": 2060,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_connectrabbitmq_closerabbitmq_exchange_name",
+      "type": "file",
+      "file": "{ connectRabbitMQ, closeRabbitMQ, EXCHANGE_NAME }.md",
+      "x": 2260,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_index_testconnection",
+      "type": "file",
+      "file": "{ testConnection }.md",
+      "x": 2460,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g6",
+      "type": "group",
+      "label": "Modified Hungarian Allocation",
+      "x": 3460,
+      "y": 1000,
+      "width": 1100,
+      "height": 520,
+      "color": "1"
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "type": "file",
+      "file": "dot-test_balanced_allocation_minimizes_total_travel_time().md",
+      "x": 3480,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "type": "file",
+      "file": "dot-test_distance_calculation_accuracy().md",
+      "x": 3680,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "type": "file",
+      "file": "dot-test_empty_units_or_incidents_returns_empty().md",
+      "x": 3880,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "type": "file",
+      "file": "dot-test_unbalanced_more_incidents_than_units().md",
+      "x": 4080,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents",
+      "type": "file",
+      "file": "dot-test_unbalanced_more_units_than_incidents().md",
+      "x": 4280,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_rationale_13",
+      "type": "file",
+      "file": "Calculates great-circle distance between two GPS coordinates in meters..md",
+      "x": 3480,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_rationale_1",
+      "type": "file",
+      "file": "DERRCS Modified Hungarian Algorithm for Emergency Resource Allocation Optimizes\u2026.md",
+      "x": 3680,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_rationale_24",
+      "type": "file",
+      "file": "Finds optimal matching between available response units and active validated\u2026.md",
+      "x": 3880,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_rationale_65",
+      "type": "file",
+      "file": "RabbitMQ handler for incident.validated events. 1. Fetch the validated incident\u2026.md",
+      "x": 4080,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "type": "file",
+      "file": "TestHungarianAllocationAlgorithm.md",
+      "x": 4280,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_rationale_71",
+      "type": "file",
+      "file": "Tests for Modified Hungarian resource dispatch optimization..md",
+      "x": 3480,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_rationale_1",
+      "type": "file",
+      "file": "Unit and integration tests for DERRCS Algorithmic Services Tests both Streaming\u2026.md",
+      "x": 3680,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation",
+      "type": "file",
+      "file": "allocation.py.md",
+      "x": 3880,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_calculate_distance_meters",
+      "type": "file",
+      "file": "calculate_distance_meters().md",
+      "x": 4080,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "type": "file",
+      "file": "handle_incident_validated().md",
+      "x": 4280,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_allocation_optimize_allocations",
+      "type": "file",
+      "file": "optimize_allocations().md",
+      "x": 3480,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms",
+      "type": "file",
+      "file": "test_algorithms.py.md",
+      "x": 3680,
+      "y": 1320,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g7",
+      "type": "group",
+      "label": "Phase 3 Verification Suite",
+      "x": 4860,
+      "y": 1000,
+      "width": 880,
+      "height": 420,
+      "color": "2"
+    },
+    {
+      "id": "n_scripts_verify_phase3_amqp",
+      "type": "file",
+      "file": "amqp_2.md",
+      "x": 4880,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_dotenv",
+      "type": "file",
+      "file": "dotenv_3.md",
+      "x": 5080,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_dotenv",
+      "type": "file",
+      "file": "dotenv_2.md",
+      "x": 5280,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_http",
+      "type": "file",
+      "file": "http_1.md",
+      "x": 5480,
+      "y": 1080,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_jsonpost",
+      "type": "file",
+      "file": "jsonPost().md",
+      "x": 4880,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_path",
+      "type": "file",
+      "file": "path_1.md",
+      "x": 5080,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_test1_invalidtransition",
+      "type": "file",
+      "file": "test1_invalidTransition().md",
+      "x": 5280,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_test2_escalation",
+      "type": "file",
+      "file": "test2_escalation().md",
+      "x": 5480,
+      "y": 1160,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_test3_rabbitmqrouting",
+      "type": "file",
+      "file": "test3_rabbitMQRouting().md",
+      "x": 4880,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3",
+      "type": "file",
+      "file": "verify_phase3.js.md",
+      "x": 5080,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_wait",
+      "type": "file",
+      "file": "wait().md",
+      "x": 5280,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_verify_phase3_io_ioclient",
+      "type": "file",
+      "file": "{ io ioClient }.md",
+      "x": 5480,
+      "y": 1240,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g8",
+      "type": "group",
+      "label": "Multer Media Upload Middleware",
+      "x": 0,
+      "y": 1700,
+      "width": 660,
+      "height": 420,
+      "color": "3"
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_allowed_mime_types",
+      "type": "file",
+      "file": "ALLOWED_MIME_TYPES.md",
+      "x": 20,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_uploads_dir",
+      "type": "file",
+      "file": "UPLOADS_DIR.md",
+      "x": 220,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_filefilter",
+      "type": "file",
+      "file": "fileFilter().md",
+      "x": 420,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_ref_multer",
+      "type": "file",
+      "file": "multer_2.md",
+      "x": 20,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_multer",
+      "type": "file",
+      "file": "multer_1.md",
+      "x": 220,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_path",
+      "type": "file",
+      "file": "path_2.md",
+      "x": 420,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_storage",
+      "type": "file",
+      "file": "storage.md",
+      "x": 20,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload_upload",
+      "type": "file",
+      "file": "upload_1.md",
+      "x": 220,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_ingestion_src_middleware_upload",
+      "type": "file",
+      "file": "upload.js.md",
+      "x": 420,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g9",
+      "type": "group",
+      "label": "Disaster Simulator & Generator",
+      "x": 1840,
+      "y": 1700,
+      "width": 660,
+      "height": 420,
+      "color": "4"
+    },
+    {
+      "id": "n_scripts_simulate_disaster_rationale_39",
+      "type": "file",
+      "file": "Applies small random distance jitter to a coordinate. One degree\u2026.md",
+      "x": 1860,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_rationale_48",
+      "type": "file",
+      "file": "Constructs a realistic emergency report payload matching DERRCS api-\u2026.md",
+      "x": 2060,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_rationale_2",
+      "type": "file",
+      "file": "DERRCS Disaster Simulation and Report Generator Simulates incoming citizen\u2026.md",
+      "x": 2260,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_rationale_81",
+      "type": "file",
+      "file": "Sends JSON report payload via HTTP POST using standard urllib..md",
+      "x": 1860,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_build_report_payload",
+      "type": "file",
+      "file": "build_report_payload().md",
+      "x": 2060,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_generate_jittered_coordinate",
+      "type": "file",
+      "file": "generate_jittered_coordinate().md",
+      "x": 2260,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_main",
+      "type": "file",
+      "file": "main()_1.md",
+      "x": 1860,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster_send_report",
+      "type": "file",
+      "file": "send_report().md",
+      "x": 2060,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_scripts_simulate_disaster",
+      "type": "file",
+      "file": "simulate_disaster.py.md",
+      "x": 2260,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g10",
+      "type": "group",
+      "label": "AI & Fallback Incident Summarizer",
+      "x": 3460,
+      "y": 1700,
+      "width": 660,
+      "height": 420,
+      "color": "5"
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "type": "file",
+      "file": "dot-test_empty_reports_returns_fallback_message().md",
+      "x": 3480,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "type": "file",
+      "file": "dot-test_template_detects_trapped_individuals().md",
+      "x": 3680,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing",
+      "type": "file",
+      "file": "dot-test_template_handles_none_standardized_answers_without_crashing().md",
+      "x": 3880,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_17",
+      "type": "file",
+      "file": "Generates structured fallback summary when Gemini API is unavailable..md",
+      "x": 3480,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_rationale_38",
+      "type": "file",
+      "file": "Summarizes multiple citizen reports into a single actionable paragraph. Uses\u2026.md",
+      "x": 3680,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "type": "file",
+      "file": "TestSummarizerModule.md",
+      "x": 3880,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_rationale_137",
+      "type": "file",
+      "file": "Tests for AI and Template incident summarization..md",
+      "x": 3480,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "type": "file",
+      "file": "generate_template_summary().md",
+      "x": 3680,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "type": "file",
+      "file": "summarize_incident_cluster().md",
+      "x": 3880,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g11",
+      "type": "group",
+      "label": "Streaming DBSCAN Duplicate Detection",
+      "x": 4860,
+      "y": 1700,
+      "width": 660,
+      "height": 420,
+      "color": "6"
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "type": "file",
+      "file": "dot-test_clustering_execution_speed_under_100ms().md",
+      "x": 4880,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "type": "file",
+      "file": "dot-test_distant_reports_remain_unclustered_noise().md",
+      "x": 5080,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "type": "file",
+      "file": "dot-test_empty_reports_returns_empty_list().md",
+      "x": 5280,
+      "y": 1780,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates",
+      "type": "file",
+      "file": "dot-test_nearby_reports_clustered_as_duplicates().md",
+      "x": 4880,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_rationale_29",
+      "type": "file",
+      "file": "Clusters reports by location. Matches against existing candidates first, then\u2026.md",
+      "x": 5080,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "type": "file",
+      "file": "TestClusteringAlgorithm.md",
+      "x": 5280,
+      "y": 1860,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_tests_test_algorithms_rationale_20",
+      "type": "file",
+      "file": "Tests for DBSCAN duplicate report detection..md",
+      "x": 4880,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_algorithms_src_clustering_cluster_reports",
+      "type": "file",
+      "file": "cluster_reports().md",
+      "x": 5080,
+      "y": 1940,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g12",
+      "type": "group",
+      "label": "Frontend Tooling & Linter",
+      "x": 0,
+      "y": 2200,
+      "width": 660,
+      "height": 400,
+      "color": "1"
+    },
+    {
+      "id": "n_services_frontend_oxlintrc_schema",
+      "type": "file",
+      "file": "$schema.md",
+      "x": 20,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_oxlintrc",
+      "type": "file",
+      "file": "dot-oxlintrc.json.md",
+      "x": 220,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_oxlintrc_plugins",
+      "type": "file",
+      "file": "plugins.md",
+      "x": 420,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_oxlintrc_rules_react_only_export_components",
+      "type": "file",
+      "file": "reactonly-export-components.md",
+      "x": 20,
+      "y": 2360,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_oxlintrc_rules_react_rules_of_hooks",
+      "type": "file",
+      "file": "reactrules-of-hooks.md",
+      "x": 220,
+      "y": 2360,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_services_frontend_oxlintrc_rules",
+      "type": "file",
+      "file": "rules.md",
+      "x": 420,
+      "y": 2360,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g13",
+      "type": "group",
+      "label": "Tagoloan Municipal Boundaries",
+      "x": 1840,
+      "y": 2200,
+      "width": 600,
+      "height": 400,
+      "color": "2"
+    },
+    {
+      "id": "n_seeds_02_initial_seeds",
+      "type": "file",
+      "file": "02-initial-seeds.sql.md",
+      "x": 1860,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_seeds_02_initial_seeds_idx_municipal_boundaries_geom",
+      "type": "file",
+      "file": "idx_municipal_boundaries_geom.md",
+      "x": 2060,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "n_seeds_02_initial_seeds_municipal_boundaries",
+      "type": "file",
+      "file": "municipal_boundaries.md",
+      "x": 1860,
+      "y": 2360,
+      "width": 180,
+      "height": 60
+    },
+    {
+      "id": "g14",
+      "type": "group",
+      "label": "Sample Emergency Dataset",
+      "x": 3460,
+      "y": 2200,
+      "width": 600,
+      "height": 400,
+      "color": "3"
+    },
+    {
+      "id": "n_seeds_03_sample_emergencies",
+      "type": "file",
+      "file": "03-sample-emergencies.sql.md",
+      "x": 3480,
+      "y": 2280,
+      "width": 180,
+      "height": 60
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_services_ingestion_src_services_statemachine_invalidstatetransitionerror_services_ingestion_src_services_statemachine_transition",
+      "fromNode": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror",
+      "toNode": "n_services_ingestion_src_services_statemachine_transition",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_services_statemachine_invalidstatetransitionerror_services_ingestion_src_services_statemachine",
+      "fromNode": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror",
+      "toNode": "n_services_ingestion_src_services_statemachine",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_services_statemachine_invalidstatetransitionerror_services_ingestion_src_services_statemachine_invalidstatetransitionerror_constructor",
+      "fromNode": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror",
+      "toNode": "n_services_ingestion_src_services_statemachine_invalidstatetransitionerror_constructor",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testsummarizermodule_services_algorithms_tests_test_algorithms",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "toNode": "n_services_algorithms_tests_test_algorithms",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testsummarizermodule_services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testsummarizermodule_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testsummarizermodule_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testsummarizermodule_services_algorithms_tests_test_algorithms_rationale_137",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule",
+      "toNode": "n_services_algorithms_tests_test_algorithms_rationale_137",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testclusteringalgorithm_services_algorithms_tests_test_algorithms_rationale_20",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_rationale_20",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "label": "method [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_services_algorithms_tests_test_algorithms_rationale_71",
+      "fromNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm",
+      "toNode": "n_services_algorithms_tests_test_algorithms_rationale_71",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_config_db_testconnection",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_config_db_testconnection",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_routes_auth",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_routes_auth",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_routes_reports",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_routes_reports",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_routes_units",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_routes_units",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_query_services_ingestion_src_config_db",
+      "fromNode": "n_services_ingestion_src_config_db_query",
+      "toNode": "n_services_ingestion_src_config_db",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_testconnection_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_config_db_testconnection",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_testconnection_services_ingestion_src_config_db",
+      "fromNode": "n_services_ingestion_src_config_db_testconnection",
+      "toNode": "n_services_ingestion_src_config_db",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_connectrabbitmq_services_ingestion_src_config_rabbitmq_publishevent",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_connectrabbitmq",
+      "toNode": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_connectrabbitmq_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_connectrabbitmq",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_connectrabbitmq_services_ingestion_src_config_rabbitmq",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_connectrabbitmq",
+      "toNode": "n_services_ingestion_src_config_rabbitmq",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_publishevent_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_publishevent_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_publishevent_services_ingestion_src_routes_reports",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "toNode": "n_services_ingestion_src_routes_reports",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_publishevent_services_ingestion_src_config_rabbitmq",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_publishevent",
+      "toNode": "n_services_ingestion_src_config_rabbitmq",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authenticate_services_ingestion_src_routes_assignments",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authenticate",
+      "toNode": "n_services_ingestion_src_routes_assignments",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authenticate_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authenticate",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authenticate_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authenticate",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authenticate_services_ingestion_src_routes_units",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authenticate",
+      "toNode": "n_services_ingestion_src_routes_units",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authenticate_services_ingestion_src_middleware_auth",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authenticate",
+      "toNode": "n_services_ingestion_src_middleware_auth",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authorize_services_ingestion_src_routes_assignments",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authorize",
+      "toNode": "n_services_ingestion_src_routes_assignments",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authorize_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authorize",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authorize_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authorize",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authorize_services_ingestion_src_routes_units",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authorize",
+      "toNode": "n_services_ingestion_src_routes_units",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_auth_authorize_services_ingestion_src_middleware_auth",
+      "fromNode": "n_services_ingestion_src_middleware_auth_authorize",
+      "toNode": "n_services_ingestion_src_middleware_auth",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_services_statemachine_isvalidtransition_services_ingestion_src_services_statemachine_transition",
+      "fromNode": "n_services_ingestion_src_services_statemachine_isvalidtransition",
+      "toNode": "n_services_ingestion_src_services_statemachine_transition",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_services_statemachine_isvalidtransition_services_ingestion_src_services_statemachine",
+      "fromNode": "n_services_ingestion_src_services_statemachine_isvalidtransition",
+      "toNode": "n_services_ingestion_src_services_statemachine",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_services_statemachine_transition_services_ingestion_src_services_statemachine",
+      "fromNode": "n_services_ingestion_src_services_statemachine_transition",
+      "toNode": "n_services_ingestion_src_services_statemachine",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_escalateincident_services_ingestion_src_workers_escalationworker_runpollcycle",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_escalateincident",
+      "toNode": "n_services_ingestion_src_workers_escalationworker_runpollcycle",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_escalateincident_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_escalateincident",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_runpollcycle_services_ingestion_src_workers_escalationworker_start",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_runpollcycle",
+      "toNode": "n_services_ingestion_src_workers_escalationworker_start",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_runpollcycle_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_runpollcycle",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_start_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_start",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_db_query",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_db_query",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_clustering_haversine_distance_meters",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_clustering_haversine_distance_meters",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_db_get_connection",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_db_get_connection",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_db_put_connection",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_db_put_connection",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_clustering_cluster_reports",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_clustering_rationale_97",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_clustering_rationale_97",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_handle_report_ingested_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_clustering_handle_report_ingested",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_haversine_distance_meters_services_algorithms_src_clustering_cluster_reports",
+      "fromNode": "n_services_algorithms_src_clustering_haversine_distance_meters",
+      "toNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_haversine_distance_meters_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_clustering_haversine_distance_meters",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_haversine_distance_meters_services_algorithms_src_clustering_rationale_17",
+      "fromNode": "n_services_algorithms_src_clustering_haversine_distance_meters",
+      "toNode": "n_services_algorithms_src_clustering_rationale_17",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_close_pool_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_close_pool",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_close_pool_services_algorithms_src_db_rationale_83",
+      "fromNode": "n_services_algorithms_src_db_close_pool",
+      "toNode": "n_services_algorithms_src_db_rationale_83",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_db_get_pool",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_db_get_pool",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_db_query",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_db_query",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_summarizer_handle_candidate_created",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_services_algorithms_src_db_rationale_47",
+      "fromNode": "n_services_algorithms_src_db_get_connection",
+      "toNode": "n_services_algorithms_src_db_rationale_47",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_params_services_algorithms_src_db_get_pool",
+      "fromNode": "n_services_algorithms_src_db_get_connection_params",
+      "toNode": "n_services_algorithms_src_db_get_pool",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_params_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_get_connection_params",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_connection_params_services_algorithms_src_db_rationale_18",
+      "fromNode": "n_services_algorithms_src_db_get_connection_params",
+      "toNode": "n_services_algorithms_src_db_rationale_18",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_pool_services_algorithms_src_db_put_connection",
+      "fromNode": "n_services_algorithms_src_db_get_pool",
+      "toNode": "n_services_algorithms_src_db_put_connection",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_pool_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_get_pool",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_get_pool_services_algorithms_src_db_rationale_33",
+      "fromNode": "n_services_algorithms_src_db_get_pool",
+      "toNode": "n_services_algorithms_src_db_rationale_33",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_db_query",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_db_query",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_summarizer_handle_candidate_created",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_put_connection_services_algorithms_src_db_rationale_52",
+      "fromNode": "n_services_algorithms_src_db_put_connection",
+      "toNode": "n_services_algorithms_src_db_rationale_52",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_allocation_handle_incident_validated",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_db_query_one",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_db_query_one",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_summarizer_handle_candidate_created",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_allocation",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_allocation",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_services_algorithms_src_db_rationale_57",
+      "fromNode": "n_services_algorithms_src_db_query",
+      "toNode": "n_services_algorithms_src_db_rationale_57",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_one_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_db_query_one",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_one_services_algorithms_src_db",
+      "fromNode": "n_services_algorithms_src_db_query_one",
+      "toNode": "n_services_algorithms_src_db",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_db_query_one_services_algorithms_src_db_rationale_77",
+      "fromNode": "n_services_algorithms_src_db_query_one",
+      "toNode": "n_services_algorithms_src_db_rationale_77",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_handover_debrief_services_algorithms_src_summarizer_template_handover_debrief",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer_template_handover_debrief",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_handover_debrief_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_handover_debrief_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_handover_debrief_services_algorithms_src_summarizer_rationale_77",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_77",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_candidate_created_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "toNode": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_candidate_created_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_candidate_created_services_algorithms_src_summarizer_rationale_144",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_144",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_candidate_created_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_candidate_created",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_field_assessment_submitted_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_field_assessment_submitted_services_algorithms_src_summarizer_rationale_206",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_206",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_handle_field_assessment_submitted_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_summarizer_handle_field_assessment_submitted",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_template_handover_debrief_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_template_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_template_handover_debrief_services_algorithms_src_summarizer_rationale_121",
+      "fromNode": "n_services_algorithms_src_summarizer_template_handover_debrief",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_121",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_get_rabbitmq_connection_services_algorithms_src_worker_main",
+      "fromNode": "n_services_algorithms_src_worker_get_rabbitmq_connection",
+      "toNode": "n_services_algorithms_src_worker_main",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_get_rabbitmq_connection_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_worker_get_rabbitmq_connection",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_get_rabbitmq_connection_services_algorithms_src_worker_rationale_42",
+      "fromNode": "n_services_algorithms_src_worker_get_rabbitmq_connection",
+      "toNode": "n_services_algorithms_src_worker_rationale_42",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_main_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_worker_main",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_main_services_algorithms_src_worker_rationale_117",
+      "fromNode": "n_services_algorithms_src_worker_main",
+      "toNode": "n_services_algorithms_src_worker_rationale_117",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_main_services_algorithms_src_worker_on_message",
+      "fromNode": "n_services_algorithms_src_worker_main",
+      "toNode": "n_services_algorithms_src_worker_on_message",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_on_message_services_algorithms_src_worker_publish_event",
+      "fromNode": "n_services_algorithms_src_worker_on_message",
+      "toNode": "n_services_algorithms_src_worker_publish_event",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_on_message_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_worker_on_message",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_on_message_services_algorithms_src_worker_rationale_90",
+      "fromNode": "n_services_algorithms_src_worker_on_message",
+      "toNode": "n_services_algorithms_src_worker_rationale_90",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_publish_event_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_worker_publish_event",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_worker_publish_event_services_algorithms_src_worker_rationale_73",
+      "fromNode": "n_services_algorithms_src_worker_publish_event",
+      "toNode": "n_services_algorithms_src_worker_rationale_73",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_template_summary_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "toNode": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_template_summary_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_template_summary_services_algorithms_src_summarizer_rationale_17",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_17",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_template_summary_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_detects_trapped_individuals",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_generate_template_summary_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing",
+      "fromNode": "n_services_algorithms_src_summarizer_generate_template_summary",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_template_handles_none_standardized_answers_without_crashing",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_summarize_incident_cluster_services_algorithms_src_summarizer",
+      "fromNode": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "toNode": "n_services_algorithms_src_summarizer",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_summarize_incident_cluster_services_algorithms_src_summarizer_rationale_38",
+      "fromNode": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "toNode": "n_services_algorithms_src_summarizer_rationale_38",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_summarizer_summarize_incident_cluster_services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "fromNode": "n_services_algorithms_src_summarizer_summarize_incident_cluster",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testsummarizermodule_test_empty_reports_returns_fallback_message",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_src_clustering",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_src_clustering",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_src_clustering_rationale_29",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_src_clustering_rationale_29",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_clustering_execution_speed_under_100ms",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_distant_reports_remain_unclustered_noise",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_empty_reports_returns_empty_list",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_clustering_cluster_reports_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates",
+      "fromNode": "n_services_algorithms_src_clustering_cluster_reports",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testclusteringalgorithm_test_nearby_reports_clustered_as_duplicates",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_frontend_src_app_app_services_frontend_src_main",
+      "fromNode": "n_services_frontend_src_app_app",
+      "toNode": "n_services_frontend_src_main",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_frontend_src_app_app_services_frontend_src_app",
+      "fromNode": "n_services_frontend_src_app_app",
+      "toNode": "n_services_frontend_src_app",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_closerabbitmq_services_ingestion_src_index_shutdown",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_closerabbitmq",
+      "toNode": "n_services_ingestion_src_index_shutdown",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_closerabbitmq_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_closerabbitmq",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_closerabbitmq_services_ingestion_src_config_rabbitmq",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq_closerabbitmq",
+      "toNode": "n_services_ingestion_src_config_rabbitmq",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_ingestion_src_index_bindconsumers_services_ingestion_src_index_emittoroom",
+      "fromNode": "n_services_ingestion_src_index_bindconsumers",
+      "toNode": "n_services_ingestion_src_index_emittoroom",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_index_bindconsumers_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_index_bindconsumers",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_index_emittoroom_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_index_emittoroom",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_index_shutdown_services_ingestion_src_workers_escalationworker_stop",
+      "fromNode": "n_services_ingestion_src_index_shutdown",
+      "toNode": "n_services_ingestion_src_workers_escalationworker_stop",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_index_shutdown_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_index_shutdown",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_workers_escalationworker_stop_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_workers_escalationworker_stop",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_calculate_distance_meters_services_algorithms_src_allocation_optimize_allocations",
+      "fromNode": "n_services_algorithms_src_allocation_calculate_distance_meters",
+      "toNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_calculate_distance_meters_services_algorithms_src_allocation",
+      "fromNode": "n_services_algorithms_src_allocation_calculate_distance_meters",
+      "toNode": "n_services_algorithms_src_allocation",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_calculate_distance_meters_services_algorithms_src_allocation_rationale_13",
+      "fromNode": "n_services_algorithms_src_allocation_calculate_distance_meters",
+      "toNode": "n_services_algorithms_src_allocation_rationale_13",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_calculate_distance_meters_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "fromNode": "n_services_algorithms_src_allocation_calculate_distance_meters",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_distance_calculation_accuracy",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_handle_incident_validated_services_algorithms_src_allocation_optimize_allocations",
+      "fromNode": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "toNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_handle_incident_validated_services_algorithms_src_allocation",
+      "fromNode": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "toNode": "n_services_algorithms_src_allocation",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_handle_incident_validated_services_algorithms_src_allocation_rationale_65",
+      "fromNode": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "toNode": "n_services_algorithms_src_allocation_rationale_65",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_handle_incident_validated_services_algorithms_src_worker",
+      "fromNode": "n_services_algorithms_src_allocation_handle_incident_validated",
+      "toNode": "n_services_algorithms_src_worker",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_src_allocation",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_src_allocation",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_src_allocation_rationale_24",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_src_allocation_rationale_24",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_balanced_allocation_minimizes_total_travel_time",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_empty_units_or_incidents_returns_empty",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_incidents_than_units",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_services_algorithms_src_allocation_optimize_allocations_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents",
+      "fromNode": "n_services_algorithms_src_allocation_optimize_allocations",
+      "toNode": "n_services_algorithms_tests_test_algorithms_testhungarianallocationalgorithm_test_unbalanced_more_units_than_incidents",
+      "label": "calls [INFERRED]"
+    },
+    {
+      "id": "e_scripts_verify_phase3_jsonpost_scripts_verify_phase3",
+      "fromNode": "n_scripts_verify_phase3_jsonpost",
+      "toNode": "n_scripts_verify_phase3",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_verify_phase3_test1_invalidtransition_scripts_verify_phase3",
+      "fromNode": "n_scripts_verify_phase3_test1_invalidtransition",
+      "toNode": "n_scripts_verify_phase3",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_verify_phase3_test2_escalation_scripts_verify_phase3",
+      "fromNode": "n_scripts_verify_phase3_test2_escalation",
+      "toNode": "n_scripts_verify_phase3",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_verify_phase3_test3_rabbitmqrouting_scripts_verify_phase3",
+      "fromNode": "n_scripts_verify_phase3_test3_rabbitmqrouting",
+      "toNode": "n_scripts_verify_phase3",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_verify_phase3_wait_scripts_verify_phase3",
+      "fromNode": "n_scripts_verify_phase3_wait",
+      "toNode": "n_scripts_verify_phase3",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_middleware_upload_filefilter_services_ingestion_src_middleware_upload",
+      "fromNode": "n_services_ingestion_src_middleware_upload_filefilter",
+      "toNode": "n_services_ingestion_src_middleware_upload",
+      "label": "indirect_call [INFERRED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_build_report_payload_scripts_simulate_disaster_generate_jittered_coordinate",
+      "fromNode": "n_scripts_simulate_disaster_build_report_payload",
+      "toNode": "n_scripts_simulate_disaster_generate_jittered_coordinate",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_build_report_payload_scripts_simulate_disaster_main",
+      "fromNode": "n_scripts_simulate_disaster_build_report_payload",
+      "toNode": "n_scripts_simulate_disaster_main",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_build_report_payload_scripts_simulate_disaster",
+      "fromNode": "n_scripts_simulate_disaster_build_report_payload",
+      "toNode": "n_scripts_simulate_disaster",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_build_report_payload_scripts_simulate_disaster_rationale_48",
+      "fromNode": "n_scripts_simulate_disaster_build_report_payload",
+      "toNode": "n_scripts_simulate_disaster_rationale_48",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_generate_jittered_coordinate_scripts_simulate_disaster",
+      "fromNode": "n_scripts_simulate_disaster_generate_jittered_coordinate",
+      "toNode": "n_scripts_simulate_disaster",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_generate_jittered_coordinate_scripts_simulate_disaster_rationale_39",
+      "fromNode": "n_scripts_simulate_disaster_generate_jittered_coordinate",
+      "toNode": "n_scripts_simulate_disaster_rationale_39",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_main_scripts_simulate_disaster_send_report",
+      "fromNode": "n_scripts_simulate_disaster_main",
+      "toNode": "n_scripts_simulate_disaster_send_report",
+      "label": "calls [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_main_scripts_simulate_disaster",
+      "fromNode": "n_scripts_simulate_disaster_main",
+      "toNode": "n_scripts_simulate_disaster",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_send_report_scripts_simulate_disaster",
+      "fromNode": "n_scripts_simulate_disaster_send_report",
+      "toNode": "n_scripts_simulate_disaster",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_scripts_simulate_disaster_send_report_scripts_simulate_disaster_rationale_81",
+      "fromNode": "n_scripts_simulate_disaster_send_report",
+      "toNode": "n_scripts_simulate_disaster_rationale_81",
+      "label": "rationale_for [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_ref_pg",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_ref_pg",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_assignments",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_assignments",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_auth",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_auth",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_reports",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_reports",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_routes_units",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_routes_units",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_services_statemachine",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_services_statemachine",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_services_ingestion_src_config_db_pool",
+      "fromNode": "n_services_ingestion_src_config_db",
+      "toNode": "n_services_ingestion_src_config_db_pool",
+      "label": "contains [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_pool_services_ingestion_src_routes_assignments",
+      "fromNode": "n_services_ingestion_src_config_db_pool",
+      "toNode": "n_services_ingestion_src_routes_assignments",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_pool_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_config_db_pool",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_pool_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_config_db_pool",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_pool_services_ingestion_src_services_statemachine",
+      "fromNode": "n_services_ingestion_src_config_db_pool",
+      "toNode": "n_services_ingestion_src_services_statemachine",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_db_pool_services_ingestion_src_workers_escalationworker",
+      "fromNode": "n_services_ingestion_src_config_db_pool",
+      "toNode": "n_services_ingestion_src_workers_escalationworker",
+      "label": "imports [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_ref_amqplib",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq",
+      "toNode": "n_ref_amqplib",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_services_ingestion_src_index",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq",
+      "toNode": "n_services_ingestion_src_index",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_services_ingestion_src_routes_candidates",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq",
+      "toNode": "n_services_ingestion_src_routes_candidates",
+      "label": "imports_from [EXTRACTED]"
+    },
+    {
+      "id": "e_services_ingestion_src_config_rabbitmq_services_ingestion_src_routes_incidents",
+      "fromNode": "n_services_ingestion_src_config_rabbitmq",
+      "toNode": "n_services_ingestion_src_routes_incidents",
+      "label": "imports_from [EXTRACTED]"
+    }
+  ]
+}

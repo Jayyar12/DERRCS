@@ -177,7 +177,7 @@ async function test2_escalation() {
 // ---------------------------------------------------------------------------
 async function test3_rabbitMQRouting() {
   console.log('\n──────────────────────────────────────────────────');
-  console.log('[TEST 3] RabbitMQ cluster.completed → dispatcher:candidate:new');
+  console.log('[TEST 3] RabbitMQ candidate.created → dispatcher:candidate:new');
   console.log('──────────────────────────────────────────────────');
 
   // Step A: Connect a Dispatcher Socket.IO client and listen for the event
@@ -196,7 +196,7 @@ async function test3_rabbitMQRouting() {
     socket.on('connect', async () => {
       console.log('[TEST 3] Dispatcher socket connected:', socket.id);
 
-      // Step B: Publish a cluster.completed message to RabbitMQ
+      // Step B: Publish a candidate.created message to RabbitMQ (matching Python clustering worker)
       try {
         const conn    = await amqp.connect(RABBITMQ_URL);
         const channel = await conn.createChannel();
@@ -207,19 +207,19 @@ async function test3_rabbitMQRouting() {
           clusterLabel:  'VERIFY-TEST-CLUSTER',
           emergencyType: 'Fire',
           reportCount:   3,
-          location:      { lat: 8.5275, lng: 124.7459 },
+          centerLocation: { lat: 8.5275, lng: 124.7459 },
           summary:       'Verification test cluster from verify_phase3.js',
-          createdAt:     new Date().toISOString(),
+          timestamp:     new Date().toISOString(),
         };
 
         channel.publish(
           EXCHANGE_NAME,
-          'cluster.completed',
+          'candidate.created',
           Buffer.from(JSON.stringify(payload)),
           { contentType: 'application/json', persistent: true }
         );
 
-        console.log('[TEST 3] Published cluster.completed to RabbitMQ:', payload.candidateId);
+        console.log('[TEST 3] Published candidate.created to RabbitMQ:', payload.candidateId);
         await channel.close();
         await conn.close();
       } catch (err) {

@@ -6,9 +6,10 @@
  *  2. Initialize Socket.IO with JWT authentication middleware and room assignments.
  *  3. Connect to PostgreSQL (hard dependency — exits on failure).
  *  4. Connect to RabbitMQ and bind consumers:
- *       cluster.completed          → dispatchers room  (dispatcher:candidate:new)
- *       unit.assigned              → unit:<unit_id>    (unit:dispatch:alert)
- *       field.assessment.completed → dispatchers room  (dispatcher:field:resolved)
+ *       candidate.created / candidate.updated → dispatchers room  (dispatcher:candidate:new)
+ *       unit.assigned                         → unit:<unit_id>    (unit:dispatch:alert)
+ *       assignment.recommended                → dispatchers room  (dispatcher:assignment:recommended)
+ *       field.assessment.submitted            → dispatchers room  (dispatcher:field:resolved)
  *  5. Start the escalation background worker.
  *  6. Register graceful shutdown handlers.
  */
@@ -159,13 +160,13 @@ function emitToRoom(room, event, payload) {
 
 /**
  * Binds all RabbitMQ consumers to the shared topic exchange.
- * Each consumer asserts its own durable queue, binds a routing key,
+ * Each consumer asserts its own durable queue, binds matching routing keys,
  * and acks only AFTER the Socket.IO emit completes.
  *
  * Queues:
- *   ingestion.cluster.completed          ← cluster.completed
- *   ingestion.unit.assigned              ← unit.assigned
- *   ingestion.field.assessment.completed ← field.assessment.completed
+ *   ingestion.candidate.created          ← candidate.created, candidate.updated, cluster.completed
+ *   ingestion.unit.assigned              ← unit.assigned, assignment.recommended
+ *   ingestion.field.assessment.submitted ← field.assessment.submitted, field.assessment.completed
  *
  * @param {import('amqplib').Channel} channel - An open AMQP channel.
  */
@@ -174,10 +175,12 @@ async function bindConsumers(channel) {
   // prevents overwhelming Socket.IO on burst traffic.
   await channel.prefetch(1);
 
-  // ─── Consumer 1: cluster.completed → dispatchers ──────────────────────────
-  const clusterQueue = 'ingestion.cluster.completed';
+  // ─── Consumer 1: candidate.created & candidate.updated → dispatchers ──────
+  const clusterQueue = 'ingestion.candidate.created';
   await channel.assertQueue(clusterQueue, { durable: true });
-  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'cluster.completed');
+  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'candidate.created');
+  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'candidate.updated');
+  await channel.bindQueue(clusterQueue, EXCHANGE_NAME, 'cluster.completed'); // backward-compatibility alias
 
   channel.consume(clusterQueue, (msg) => {
     if (!msg) return; // Broker sent null (queue cancelled)
@@ -187,46 +190,53 @@ async function bindConsumers(channel) {
       emitToRoom('dispatchers', 'dispatcher:candidate:new', payload);
       channel.ack(msg);
     } catch (err) {
-      console.error('[Consumer] cluster.completed parse error:', err.message);
+      console.error('[Consumer] candidate event parse error:', err.message);
       // Nack without requeue to avoid poison-pill loops
       channel.nack(msg, false, false);
     }
   });
 
-  console.log(`[RabbitMQ] Consumer bound: cluster.completed → dispatcher:candidate:new`);
+  console.log(`[RabbitMQ] Consumer bound: candidate.created, candidate.updated → dispatcher:candidate:new`);
 
-  // ─── Consumer 2: unit.assigned → unit:<unit_id> ───────────────────────────
+  // ─── Consumer 2: unit.assigned & assignment.recommended ───────────────────
   const unitQueue = 'ingestion.unit.assigned';
   await channel.assertQueue(unitQueue, { durable: true });
   await channel.bindQueue(unitQueue, EXCHANGE_NAME, 'unit.assigned');
+  await channel.bindQueue(unitQueue, EXCHANGE_NAME, 'assignment.recommended');
 
   channel.consume(unitQueue, (msg) => {
     if (!msg) return;
 
     try {
-      const payload  = JSON.parse(msg.content.toString());
-      const { unitId } = payload;
+      const payload = JSON.parse(msg.content.toString());
+      const routingKey = msg.fields ? msg.fields.routingKey : '';
+      const unitId = payload.unitId || payload.recommendedUnitId;
 
-      if (!unitId) {
-        console.error('[Consumer] unit.assigned message missing unitId; nacking.', payload);
-        channel.nack(msg, false, false);
-        return;
+      if (routingKey === 'assignment.recommended') {
+        // Algorithm recommended unit: notify dispatchers
+        emitToRoom('dispatchers', 'dispatcher:assignment:recommended', payload);
       }
 
-      emitToRoom(`unit:${unitId}`, 'unit:dispatch:alert', payload);
+      if (unitId) {
+        emitToRoom(`unit:${unitId}`, 'unit:dispatch:alert', payload);
+      } else {
+        console.warn('[Consumer] unit event missing unitId for direct alert:', payload);
+      }
+
       channel.ack(msg);
     } catch (err) {
-      console.error('[Consumer] unit.assigned parse error:', err.message);
+      console.error('[Consumer] unit event parse error:', err.message);
       channel.nack(msg, false, false);
     }
   });
 
-  console.log(`[RabbitMQ] Consumer bound: unit.assigned → unit:dispatch:alert`);
+  console.log(`[RabbitMQ] Consumer bound: unit.assigned, assignment.recommended → unit:dispatch:alert`);
 
-  // ─── Consumer 3: field.assessment.completed → dispatchers ─────────────────
-  const fieldQueue = 'ingestion.field.assessment.completed';
+  // ─── Consumer 3: field.assessment.submitted → dispatchers ─────────────────
+  const fieldQueue = 'ingestion.field.assessment.submitted';
   await channel.assertQueue(fieldQueue, { durable: true });
-  await channel.bindQueue(fieldQueue, EXCHANGE_NAME, 'field.assessment.completed');
+  await channel.bindQueue(fieldQueue, EXCHANGE_NAME, 'field.assessment.submitted');
+  await channel.bindQueue(fieldQueue, EXCHANGE_NAME, 'field.assessment.completed'); // backward-compatibility alias
 
   channel.consume(fieldQueue, (msg) => {
     if (!msg) return;
@@ -236,12 +246,12 @@ async function bindConsumers(channel) {
       emitToRoom('dispatchers', 'dispatcher:field:resolved', payload);
       channel.ack(msg);
     } catch (err) {
-      console.error('[Consumer] field.assessment.completed parse error:', err.message);
+      console.error('[Consumer] field.assessment.submitted parse error:', err.message);
       channel.nack(msg, false, false);
     }
   });
 
-  console.log(`[RabbitMQ] Consumer bound: field.assessment.completed → dispatcher:field:resolved`);
+  console.log(`[RabbitMQ] Consumer bound: field.assessment.submitted → dispatcher:field:resolved`);
 }
 
 // ---------------------------------------------------------------------------
