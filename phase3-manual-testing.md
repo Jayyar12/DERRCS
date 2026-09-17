@@ -181,7 +181,7 @@ curl -s -X POST http://localhost:5000/api/v1/incidents/8f73f4a3-371c-47da-9c05-3
 ### Step 3: Arrive on scene (Dispatched → Active)
 
 ```bash
-curl -s -X PATCH http://localhost:5000/api/v1/incidents/assignments/1a950deb-8abe-4de6-9fbf-f96f52e4c95a/status \
+curl -s -X PATCH http://localhost:5000/api/v1/assignments/1a950deb-8abe-4de6-9fbf-f96f52e4c95a/status \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $UNIT_TOKEN" \
   -d '{"status":"OnScene"}'
