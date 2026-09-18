@@ -48,9 +48,10 @@ router.post('/', upload.single('photo'), async (req, res) => {
     });
   }
 
-  const { latitude: eLat, longitude: eLng } = parsedEmergency;
+  const eLat = Number(parsedEmergency.latitude);
+  const eLng = Number(parsedEmergency.longitude);
 
-  if (eLat < -90 || eLat > 90 || eLng < -180 || eLng > 180) {
+  if (!Number.isFinite(eLat) || !Number.isFinite(eLng) || eLat < -90 || eLat > 90 || eLng < -180 || eLng > 180) {
     return res.status(400).json({
       success: false,
       error: {
@@ -61,10 +62,17 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 
   // Build optional reporter location point
-  let reporterPoint = null;
+  let normalizedReporterCoordinates = null;
   if (parsedReporter) {
-    const { latitude: rLat, longitude: rLng } = parsedReporter;
-    reporterPoint = `ST_SetSRID(ST_MakePoint(${rLng}, ${rLat}), 4326)`;
+    const rLat = Number(parsedReporter.latitude);
+    const rLng = Number(parsedReporter.longitude);
+    if (!Number.isFinite(rLat) || !Number.isFinite(rLng) || rLat < -90 || rLat > 90 || rLng < -180 || rLng > 180) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Reporter coordinates are invalid.' }
+      });
+    }
+    normalizedReporterCoordinates = { latitude: rLat, longitude: rLng };
   }
 
   // Resolve uploaded photo URL or use provided photoUrl
@@ -73,16 +81,37 @@ router.post('/', upload.single('photo'), async (req, res) => {
     : (req.body.photoUrl || null);
 
   try {
+    // The emergency, not merely the reporter, must be within Tagoloan's
+    // operational boundary. The boundary is seeded by 02-initial-seeds.sql.
+    const boundaryResult = await query(
+      `SELECT EXISTS (
+         SELECT 1 FROM municipal_boundaries
+         WHERE ST_Covers(boundary, ST_SetSRID(ST_MakePoint($1, $2), 4326))
+       ) AS is_within_boundary`,
+      [eLng, eLat]
+    );
+    if (!boundaryResult.rows[0]?.is_within_boundary) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'OUT_OF_BOUNDS', message: 'Emergency coordinates must be within Tagoloan operational bounds.' }
+      });
+    }
+
     const result = await query(
       `INSERT INTO reports
          (session_id, emergency_type, description, reporter_location, emergency_location, photo_url, standardized_answers, status)
        VALUES
-         ($1, $2, $3, ${reporterPoint || 'NULL'}, ST_SetSRID(ST_MakePoint($4, $5), 4326), $6, $7, 'Received')
+         ($1, $2, $3,
+          CASE WHEN $4::double precision IS NULL THEN NULL
+               ELSE ST_SetSRID(ST_MakePoint($5, $4), 4326) END,
+          ST_SetSRID(ST_MakePoint($6, $7), 4326), $8, $9, 'Received')
        RETURNING id, created_at`,
       [
         sessionId || null,
         emergencyType,
         description || null,
+        normalizedReporterCoordinates?.latitude || null,
+        normalizedReporterCoordinates?.longitude || null,
         eLng,
         eLat,
         photoUrl,

@@ -29,9 +29,11 @@ router.post('/login', async (req, res) => {
   try {
     // Fetch user with their role name by joining roles table
     const result = await query(
-      `SELECT u.id, u.username, u.password_hash, u.full_name, u.is_active, r.name AS role
+      `SELECT u.id, u.username, u.password_hash, u.full_name, u.is_active, r.name AS role,
+              ru.id AS unit_id
        FROM users u
        JOIN roles r ON u.role_id = r.id
+       LEFT JOIN response_units ru ON ru.user_id = u.id
        WHERE u.username = $1`,
       [username]
     );
@@ -54,7 +56,12 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, username: user.username, role: user.role },
+      {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        unitId: user.unit_id || null
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
@@ -65,7 +72,8 @@ router.post('/login', async (req, res) => {
         token,
         role: user.role,
         fullName: user.full_name,
-        userId: user.id
+        userId: user.id,
+        unitId: user.unit_id || null
       }
     });
   } catch (err) {

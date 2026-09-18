@@ -134,6 +134,7 @@ app.use('/api/v1/candidates',  require('./routes/candidates'));
 app.use('/api/v1/incidents',   require('./routes/incidents'));
 app.use('/api/v1/assignments', require('./routes/assignments'));
 app.use('/api/v1/units',       require('./routes/units'));
+app.use('/api/v1/admin',       require('./routes/admin'));
 
 // ---------------------------------------------------------------------------
 // RabbitMQ consumer setup

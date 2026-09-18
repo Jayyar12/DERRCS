@@ -219,7 +219,8 @@ python3 src/worker.py
 
 ## 6. Frontend Service (React Progressive Web App)
 
-The Frontend Service provides the Citizen Intake Form and Dispatcher Dashboard.
+The Frontend Service provides the citizen intake PWA, dispatcher command dashboard,
+responder field portal, and administrator dashboard.
 
 * **Path:** `services/frontend/`
 * **Installed Packages:** `react`, `react-dom`, `leaflet`, `socket.io-client`, `lucide-react`, `vite`.
@@ -229,6 +230,23 @@ The Frontend Service provides the Citizen Intake Form and Dispatcher Dashboard.
   npm run dev
   ```
 * **Access the UI:** Open `http://localhost:5173` in your web browser.
+
+The Vite development server proxies `/api` and `/socket.io` to the ingestion service
+on port `5000`. For a production deployment, configure the web server to proxy those
+same paths to the ingestion service, or set `VITE_API_BASE_URL` and `VITE_SOCKET_URL`
+when building the frontend.
+
+### Phase 4 Database Migration
+
+After applying the base schema and seeds, apply the Phase 3 and Phase 4 migrations:
+
+```bash
+psql -U derrcs_user -d derrcs_db -h localhost -f migrations/003_phase3_state_machine_escalation.sql
+psql -U derrcs_user -d derrcs_db -h localhost -f migrations/004_phase4_frontend_support.sql
+```
+
+The Phase 4 migration adds the documented `EnRoute` assignment status. It must be
+applied before a responder marks an assignment as En Route.
 
 ---
 

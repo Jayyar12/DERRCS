@@ -13,6 +13,102 @@ const stateMachine = require('../services/stateMachine');
 const router = express.Router();
 
 /**
+ * @route  GET /api/v1/incidents
+ * @desc   Lists incidents for dispatcher/admin dashboard bootstrap.
+ * @access Dispatcher, Admin
+ */
+router.get('/', authenticate, authorize('Dispatcher', 'Admin'), async (req, res) => {
+  const status = req.query.status;
+  const allowedStatuses = ['Reported', 'Validated', 'Dispatched', 'Active', 'Resolved', 'Closed'];
+
+  if (status && !allowedStatuses.includes(status)) {
+    return res.status(400).json({
+      success: false,
+      error: { code: 'VALIDATION_ERROR', message: 'Invalid incident status filter.' }
+    });
+  }
+
+  try {
+    const result = await query(
+      `SELECT i.id, i.incident_code, i.emergency_type, i.severity, i.status,
+              i.escalation_level, i.created_at, i.validated_at, i.dispatched_at,
+              i.resolved_at, i.closed_at, ST_AsGeoJSON(i.location)::json AS location,
+              ic.cluster_label, ic.report_count
+       FROM incidents i
+       LEFT JOIN incident_candidates ic ON ic.id = i.candidate_id
+       WHERE ($1::text IS NULL OR i.status = $1)
+       ORDER BY i.created_at DESC`,
+      [status || null]
+    );
+    return res.status(200).json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error('[Incidents] List error:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch incidents.' }
+    });
+  }
+});
+
+/**
+ * @route  GET /api/v1/incidents/:incidentId
+ * @desc   Fetches incident details, assignments, reports, assessment, and latest handover.
+ * @access Dispatcher, Admin
+ */
+router.get('/:incidentId', authenticate, authorize('Dispatcher', 'Admin'), async (req, res) => {
+  const { incidentId } = req.params;
+  try {
+    const [incidentResult, assignmentsResult, reportsResult, assessmentsResult] = await Promise.all([
+      query(
+        `SELECT i.*, ST_AsGeoJSON(i.location)::json AS location_geojson,
+                s.content AS handover_summary, s.is_fallback AS handover_is_fallback
+         FROM incidents i
+         LEFT JOIN LATERAL (
+           SELECT content, is_fallback FROM summaries
+           WHERE incident_id = i.id AND summary_type = 'HandoverDebrief'
+           ORDER BY version DESC LIMIT 1
+         ) s ON true
+         WHERE i.id = $1`,
+        [incidentId]
+      ),
+      query(
+        `SELECT a.*, ru.unit_code, ru.unit_type, ru.current_status, u.full_name AS responder_name
+         FROM assignments a
+         JOIN response_units ru ON ru.id = a.unit_id
+         LEFT JOIN users u ON u.id = ru.user_id
+         WHERE a.incident_id = $1 ORDER BY a.assigned_at DESC`,
+        [incidentId]
+      ),
+      query(
+        `SELECT id, description, photo_url, standardized_answers, created_at
+         FROM reports WHERE incident_id = $1 ORDER BY created_at ASC`,
+        [incidentId]
+      ),
+      query(
+        `SELECT * FROM field_assessments WHERE incident_id = $1 ORDER BY created_at DESC`,
+        [incidentId]
+      )
+    ]);
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Incident not found.' } });
+    }
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...incidentResult.rows[0],
+        assignments: assignmentsResult.rows,
+        reports: reportsResult.rows,
+        assessments: assessmentsResult.rows
+      }
+    });
+  } catch (err) {
+    console.error('[Incidents] Detail error:', err.message);
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to fetch incident details.' } });
+  }
+});
+
+/**
  * @route  POST /api/v1/incidents/:incidentId/assign
  * @desc   Assigns an available response unit to a Validated incident. Transitions to Dispatched.
  * @access Dispatcher
@@ -182,6 +278,21 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
   try {
     await client.query('BEGIN');
 
+    // Validate that this response unit owns the assignment for this incident.
+    const assignmentResult = await client.query(
+      `SELECT a.id, a.status FROM assignments a
+       JOIN response_units ru ON ru.id = a.unit_id
+       WHERE a.id = $1 AND a.incident_id = $2 AND ru.user_id = $3 FOR UPDATE`,
+      [assignmentId, incidentId, req.user.userId]
+    );
+    if (assignmentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Assignment not found for this response unit and incident.' }
+      });
+    }
+
     // Validate incident is Active
     const incidentResult = await client.query(
       `SELECT id, status FROM incidents WHERE id = $1 FOR UPDATE`,
@@ -288,6 +399,39 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
       success: false,
       error: { code: 'SERVER_ERROR', message: 'Failed to submit field assessment.' }
     });
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * @route  POST /api/v1/incidents/:incidentId/close
+ * @desc   Closes a Resolved incident after dispatcher/admin review.
+ * @access Dispatcher, Admin
+ */
+router.post('/:incidentId/close', authenticate, authorize('Dispatcher', 'Admin'), async (req, res) => {
+  const { incidentId } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const incidentResult = await client.query('SELECT id FROM incidents WHERE id = $1 FOR UPDATE', [incidentId]);
+    if (incidentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Incident not found.' } });
+    }
+    const incident = await stateMachine.transition(incidentId, 'Closed', req.user.userId, { client });
+    await client.query('COMMIT');
+    return res.status(200).json({ success: true, data: { incidentId: incident.id, status: incident.status, closedAt: incident.closed_at } });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: { code: 'INVALID_STATE_TRANSITION', message: err.message, currentState: err.currentState, targetState: err.targetState }
+      });
+    }
+    console.error('[Incidents] Close error:', err.message);
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to close incident.' } });
   } finally {
     client.release();
   }

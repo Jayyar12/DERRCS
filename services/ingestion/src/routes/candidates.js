@@ -61,6 +61,57 @@ router.get('/', authenticate, authorize('Dispatcher', 'Admin'), async (req, res)
  *         to Validated — preserving the 6-stage lifecycle inside a single transaction.
  * @access Dispatcher
  */
+router.get('/:candidateId', authenticate, authorize('Dispatcher', 'Admin'), async (req, res) => {
+  const { candidateId } = req.params;
+
+  try {
+    const [candidateResult, reportsResult] = await Promise.all([
+      query(
+        `SELECT ic.id, ic.cluster_label, ic.emergency_type, ic.status, ic.report_count,
+                ST_AsGeoJSON(ic.center_location)::json AS center_location,
+                ic.created_at, ic.updated_at,
+                i.id AS incident_id, i.incident_code, i.status AS incident_status,
+                i.severity, i.escalation_level,
+                s.content AS latest_summary, s.is_fallback AS summary_is_fallback
+         FROM incident_candidates ic
+         LEFT JOIN incidents i ON i.candidate_id = ic.id
+         LEFT JOIN LATERAL (
+           SELECT content, is_fallback FROM summaries
+           WHERE candidate_id = ic.id AND summary_type = 'ClusterIntake'
+           ORDER BY version DESC LIMIT 1
+         ) s ON true
+         WHERE ic.id = $1`,
+        [candidateId]
+      ),
+      query(
+        `SELECT id, session_id, description, photo_url, standardized_answers,
+                ST_AsGeoJSON(reporter_location)::json AS reporter_location,
+                ST_AsGeoJSON(emergency_location)::json AS emergency_location, created_at
+         FROM reports WHERE candidate_id = $1 ORDER BY created_at ASC`,
+        [candidateId]
+      )
+    ]);
+
+    if (candidateResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Candidate not found.' }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: { ...candidateResult.rows[0], reports: reportsResult.rows }
+    });
+  } catch (err) {
+    console.error('[Candidates] Detail error:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch candidate details.' }
+    });
+  }
+});
+
 router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), async (req, res) => {
   const { candidateId } = req.params;
   const client = await pool.connect();
@@ -95,31 +146,31 @@ router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), asyn
       });
     }
 
-    // 2. Generate incident code: INC-YYYY-NNNN
-    const year = new Date().getFullYear();
-    const countResult = await client.query(
-      `SELECT COUNT(*) FROM incidents WHERE incident_code LIKE $1`,
-      [`INC-${year}-%`]
-    );
-    const seq = String(parseInt(countResult.rows[0].count, 10) + 1).padStart(4, '0');
-    const incidentCode = `INC-${year}-${seq}`;
-
-    // 3. Create incident at 'Reported' first (preserves 6-stage lifecycle)
+    // 2. DBSCAN created this incident with status Reported. Confirm that exact
+    // row instead of creating a second incident for the same candidate.
     const incidentResult = await client.query(
-      `INSERT INTO incidents
-         (candidate_id, incident_code, emergency_type, severity, status, location)
-       VALUES
-         ($1, $2, $3, 'Moderate', 'Reported', (SELECT center_location FROM incident_candidates WHERE id = $1))
-       RETURNING id, incident_code, created_at`,
-      [candidateId, incidentCode, candidate.emergency_type]
+      `SELECT id, incident_code, status FROM incidents
+       WHERE candidate_id = $1 FOR UPDATE`,
+      [candidateId]
     );
+
+    if (incidentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'CANDIDATE_INCIDENT_MISSING',
+          message: 'The candidate has no linked Reported incident to validate.'
+        }
+      });
+    }
 
     const incident = incidentResult.rows[0];
 
-    // 4. Transition Reported -> Validated via state machine (writes activity_log atomically)
+    // 3. Transition Reported -> Validated via state machine (writes activity_log atomically)
     await stateMachine.transition(incident.id, 'Validated', req.user.userId, { client });
 
-    // 5. Mark the candidate as Confirmed
+    // 4. Mark the candidate as Confirmed
     await client.query(
       `UPDATE incident_candidates SET status = 'Confirmed', updated_at = NOW() WHERE id = $1`,
       [candidateId]

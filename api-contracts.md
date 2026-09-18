@@ -50,6 +50,10 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
   * **Auth:** Bearer JWT (Role: `Dispatcher` or `Admin`).
   * **Response:** Returns list of active `incident_candidates` with attached report counts and AI summary content.
 
+* **`GET /api/v1/candidates/:candidateId`**
+  * **Auth:** Bearer JWT (Role: `Dispatcher` or `Admin`).
+  * **Response:** Returns the candidate, its linked incident, latest intake summary, and grouped raw reports for dispatcher review.
+
 * **`POST /api/v1/candidates/:candidateId/confirm`**
   * **Auth:** Bearer JWT (Role: `Dispatcher`).
   * **Action:** Confirms the `incident_candidate` and transitions the linked `incident` record from `Reported` to `Validated`.
@@ -77,6 +81,14 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
 ```
   * **Response (200 OK):** Sets status to `Dispatched`. Triggers WebSocket alert to response unit.
 
+* **`GET /api/v1/incidents`** and **`GET /api/v1/incidents/:incidentId`**
+  * **Auth:** Bearer JWT (Role: `Dispatcher` or `Admin`).
+  * **Response:** Lists dashboard incidents or returns an incident with assignments, linked reports, assessments, and latest handover summary.
+
+* **`POST /api/v1/incidents/:incidentId/close`**
+  * **Auth:** Bearer JWT (Role: `Dispatcher` or `Admin`).
+  * **Action:** Transitions an incident from `Resolved` to `Closed` through the state machine after record review.
+
 ---
 
 ### 1.3 Response Unit Endpoints (Tablet / Field)
@@ -85,10 +97,14 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
   * **Request Body:**
 ```json
 {
-  "status": "OnScene"
+  "status": "EnRoute"
 }
 ```
-  * **Action:** Updates assignment and incident state machine to `Active`.
+  * **Action:** Accepts `EnRoute` or `OnScene` only for the response unit that owns the assignment. `OnScene` transitions the incident to `Active`.
+
+* **`GET /api/v1/assignments/current`**
+  * **Auth:** Bearer JWT (Role: `ResponseUnit`).
+  * **Response:** Returns the caller's active assignment, incident location, status, and caller notes, or `null` when the unit has no current dispatch.
 
 * **`POST /api/v1/incidents/:incidentId/field-assessment`**
   * **Auth:** Bearer JWT (Role: `ResponseUnit`).
@@ -108,6 +124,14 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
 }
 ```
   * **Action:** Stores the Pre-Hospital Care Report. Updates incident status from `Active` to `Resolved`. Triggers AI debrief generation.
+
+### 1.4 Administrator Endpoints
+
+All endpoints below require a Bearer JWT with the `Admin` role.
+
+* **`GET /api/v1/admin/users`**, **`POST /api/v1/admin/users`**, and **`PATCH /api/v1/admin/users/:userId`** manage existing `users` and `roles` schema records. Passwords are never returned.
+* **`GET /api/v1/admin/audit-logs?limit=50`** returns the newest activity log rows with the acting user when available.
+* **`GET /api/v1/admin/config`** exposes read-only deployment values used by clustering and escalation services. Runtime updates are intentionally unsupported because they would not persist or reach the Python worker.
 
 ---
 
@@ -153,6 +177,8 @@ This document defines the HTTP REST contracts and RabbitMQ message payloads for 
 ---
 
 ## 3. Real-Time WebSocket Events (Socket.IO)
+
+* **`dispatcher:assignment:recommended`** â€” Pushes an allocation recommendation to dispatchers. It is advisory only; a dispatcher must still confirm the assignment through the REST API.
 
 * **`dispatcher:candidate:new`** — Pushes new clustered candidate with AI summary to dashboard map.
 * **`dispatcher:incident:escalated`** — Pushes visual alarm when an incident exceeds timeout thresholds.
