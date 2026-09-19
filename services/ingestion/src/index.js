@@ -214,14 +214,14 @@ async function bindConsumers(channel) {
       const unitId = payload.unitId || payload.recommendedUnitId;
 
       if (routingKey === 'assignment.recommended') {
-        // Algorithm recommended unit: notify dispatchers
+        // Algorithm recommended unit: notify dispatchers (advisory only)
         emitToRoom('dispatchers', 'dispatcher:assignment:recommended', payload);
-      }
-
-      if (unitId) {
-        emitToRoom(`unit:${unitId}`, 'unit:dispatch:alert', payload);
-      } else {
-        console.warn('[Consumer] unit event missing unitId for direct alert:', payload);
+      } else if (routingKey === 'unit.assigned') {
+        if (unitId) {
+          emitToRoom(`unit:${unitId}`, 'unit:dispatch:alert', payload);
+        } else {
+          console.warn('[Consumer] unit event missing unitId for direct alert:', payload);
+        }
       }
 
       channel.ack(msg);

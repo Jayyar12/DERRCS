@@ -19,6 +19,44 @@ import tagoloanUrl from "../../assets/geo/tagoloan.geojson?url";
    FIT AND RESTRICT MAP TO TAGOLOAN
 ========================================== */
 
+function MapResizeObserver() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container) return;
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+
+    handleResize();
+    const t1 = setTimeout(handleResize, 100);
+    const t2 = setTimeout(handleResize, 350);
+    const t3 = setTimeout(handleResize, 700);
+
+    let observer;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        map.invalidateSize();
+      });
+      observer.observe(container);
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      observer?.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [map]);
+
+  return null;
+}
+
 function FitTagoloan({ data }) {
   const map = useMap();
 
@@ -30,34 +68,29 @@ function FitTagoloan({ data }) {
 
     if (!bounds.isValid()) return;
 
-    /*
-     * Show the entire Municipality of Tagoloan.
-     */
-    map.fitBounds(bounds, {
-      padding: [30, 30],
-    });
+    const applyFit = () => {
+      map.invalidateSize();
+      map.fitBounds(bounds, {
+        padding: [30, 30],
+        animate: false,
+      });
 
-    /*
-     * Prevent the user from zooming farther
-     * out than the whole Tagoloan view.
-     */
-    const fittedZoom = map.getZoom();
+      const fittedZoom = map.getBoundsZoom(bounds, false, [30, 30]);
+      map.setMinZoom(Math.max(10, fittedZoom - 2));
 
-    map.setMinZoom(fittedZoom);
+      const allowedBounds = bounds.pad(0.35);
+      map.setMaxBounds(allowedBounds);
+      map.options.maxBoundsViscosity = 0.8;
+    };
 
-    /*
-     * Allow a small amount of space outside
-     * Tagoloan but prevent dragging far away.
-     */
-    const allowedBounds = bounds.pad(0.15);
+    applyFit();
+    const t1 = setTimeout(applyFit, 150);
+    const t2 = setTimeout(applyFit, 400);
 
-    map.setMaxBounds(allowedBounds);
-
-    /*
-     * Strongly prevents dragging outside
-     * the allowed map area.
-     */
-    map.options.maxBoundsViscosity = 1.0;
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [data, map]);
 
   return null;
@@ -76,23 +109,37 @@ function FitTagoloan({ data }) {
  * so the actual municipality remains visible.
  */
 function OutsideTagoloanMask({ data }) {
-  if (!data) return null;
+  const map = useMap();
+  const [zoom, setZoom] = useState(map.getZoom());
+
+  useEffect(() => {
+    const handleZoom = () => setZoom(map.getZoom());
+    map.on("zoomend", handleZoom);
+    return () => map.off("zoomend", handleZoom);
+  }, [map]);
+
+  // When zoomed in to street level, the viewport is completely within Tagoloan.
+  // Rendering an inverted global mask at high zoom causes SVG coordinate overflow
+  // and clipping inversion bugs that black out the screen.
+  if (!data || zoom >= 15) return null;
 
   /*
-   * Large rectangle covering the map/world.
+   * Regional bounding box covering Tagoloan's vicinity (Misamis Oriental)
+   * instead of the entire planet [-90, -180] to [90, 180], preventing multi-million
+   * pixel SVG coordinate overflow in Leaflet's path renderer.
    */
   const world = [
-    [-90, -180],
-    [-90, 180],
-    [90, 180],
-    [90, -180],
+    [7.5, 123.5],
+    [7.5, 126.0],
+    [9.5, 126.0],
+    [9.5, 123.5],
   ];
 
   const holes = [];
 
   /*
    * Get each barangay polygon and use it
-   * as a hole in the white mask.
+   * as a hole in the mask.
    */
   data.features?.forEach((feature) => {
     const geometry = feature.geometry;
@@ -103,8 +150,7 @@ function OutsideTagoloanMask({ data }) {
      * Normal Polygon
      */
     if (geometry.type === "Polygon") {
-      const outerRing =
-        geometry.coordinates?.[0];
+      const outerRing = geometry.coordinates?.[0];
 
       if (outerRing) {
         holes.push(
@@ -120,20 +166,18 @@ function OutsideTagoloanMask({ data }) {
      * MultiPolygon
      */
     if (geometry.type === "MultiPolygon") {
-      geometry.coordinates.forEach(
-        (polygon) => {
-          const outerRing = polygon?.[0];
+      geometry.coordinates.forEach((polygon) => {
+        const outerRing = polygon?.[0];
 
-          if (outerRing) {
-            holes.push(
-              outerRing.map(([lng, lat]) => [
-                lat,
-                lng,
-              ])
-            );
-          }
+        if (outerRing) {
+          holes.push(
+            outerRing.map(([lng, lat]) => [
+              lat,
+              lng,
+            ])
+          );
         }
-      );
+      });
     }
   });
 
@@ -142,8 +186,8 @@ function OutsideTagoloanMask({ data }) {
       positions={[world, ...holes]}
       pathOptions={{
         stroke: false,
-        fillColor: "#ffffff",
-        fillOpacity: 0.55,
+        fillColor: "#09090b",
+        fillOpacity: 0.65,
       }}
       interactive={false}
     />
@@ -256,23 +300,26 @@ function TagoloanMap({
       <MapContainer
         center={[8.5391, 124.7538]}
         zoom={13}
-        maxZoom={19}
+        maxZoom={20}
         maxBoundsViscosity={1.0}
-        className="h-full w-full rounded-xl"
+        className="h-full w-full"
         aria-label={
           interactive
             ? "Tagoloan map. Select the emergency location."
             : "Tagoloan incident map"
         }
       >
+        <MapResizeObserver />
 
         {/* ==================================
             OPENSTREETMAP BASEMAP
         ================================== */}
 
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={20}
+          maxNativeZoom={19}
         />
 
 

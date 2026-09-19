@@ -1,8 +1,23 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError } from '../api/client';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, Camera, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
 
-const emergencyTypes = ['Fire', 'Flood', 'Medical', 'Road Accident', 'Rescue'];
+const emergencyTypes = [
+  { name: 'Fire', icon: Flame, color: 'text-orange-500' },
+  { name: 'Flood', icon: Droplets, color: 'text-blue-500' },
+  { name: 'Medical', icon: Activity, color: 'text-rose-500' },
+  { name: 'Road Accident', icon: Car, color: 'text-amber-500' },
+  { name: 'Rescue', icon: LifeBuoy, color: 'text-emerald-500' }
+];
+
 const questionSets = {
   Fire: [['structureType', 'What is burning?', ['Residential', 'Commercial', 'Vegetation', 'Vehicle', 'Other']], ['peopleTrapped', 'Are people trapped?', ['Yes', 'No', 'Unknown']], ['hazardousMaterialsNearby', 'Are hazardous materials nearby?', ['Yes', 'No', 'Unknown']]],
   Flood: [['waterDepth', 'Estimated water depth', ['Below ankle', 'Knee deep', 'Waist deep', 'Above waist', 'Unknown']], ['peopleStranded', 'Are people stranded?', ['Yes', 'No', 'Unknown']]],
@@ -23,36 +38,38 @@ function createSessionId() {
 function CitizenReport() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ emergencyType: '', description: '', answers: {} });
-  const [reporterCoordinates, setReporterCoordinates] = useState(null);
   const [emergencyCoordinates, setEmergencyCoordinates] = useState(null);
+  const [reporterCoordinates, setReporterCoordinates] = useState(null);
+  const [locationMessage, setLocationMessage] = useState('');
   const [photo, setPhoto] = useState(null);
   const [error, setError] = useState('');
-  const [locationMessage, setLocationMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
+
   const questions = useMemo(() => questionSets[form.emergencyType] || [], [form.emergencyType]);
 
-  const updateForm = (field, value) => setForm((current) => ({ ...current, [field]: value }));
-  const updateAnswer = (key, value) => setForm((current) => ({ ...current, answers: { ...current.answers, [key]: value } }));
+  const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const updateAnswer = (key, value) => setForm((prev) => ({ ...prev, answers: { ...prev.answers, [key]: value } }));
 
   function useMyLocation() {
-    setLocationMessage('Requesting your location…');
-    if (!navigator.geolocation) return setLocationMessage('This browser cannot provide location. Place the emergency pin manually.');
+    setLocationMessage('Getting location...');
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const location = { latitude: coords.latitude, longitude: coords.longitude };
-        setReporterCoordinates(location);
-        setEmergencyCoordinates((current) => current || location);
-        setLocationMessage('Your location was recorded. Adjust the emergency pin if the emergency is elsewhere.');
+      (pos) => {
+        const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        setEmergencyCoordinates(coords);
+        setReporterCoordinates(coords);
+        setLocationMessage('Location acquired via GPS.');
       },
-      () => setLocationMessage('Location was unavailable. Place the emergency pin manually.'),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      (err) => {
+        setLocationMessage(err.code === 1 ? 'Location access denied. Please place the pin on the map.' : 'Unable to acquire location automatically.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   }
 
   function nextStep() {
     setError('');
-    if (step === 1 && (!form.emergencyType || !form.description.trim())) return setError('Choose an emergency type and briefly describe what is happening.');
+    if (step === 1 && (!form.emergencyType || !form.description.trim())) return setError('Select an emergency type and provide a short description.');
     if (step === 2 && questions.some(([key]) => !form.answers[key])) return setError('Answer each operational question before continuing.');
     if (step === 3 && !emergencyCoordinates) return setError('Use your location or place the emergency pin on the Tagoloan map.');
     setStep((current) => Math.min(current + 1, 4));
@@ -78,15 +95,203 @@ function CitizenReport() {
     } finally { setSubmitting(false); }
   }
 
-  if (confirmation) return <main className="grid min-h-svh place-items-center bg-slate-950 px-4 py-10 text-slate-900" id="main-content" tabIndex="-1"><section className="w-full max-w-xl rounded-2xl bg-white p-7 shadow-2xl sm:p-10" aria-labelledby="confirmation-title"><p className="text-sm font-bold tracking-wide text-emerald-700">REPORT RECEIVED</p><h1 className="mt-2 text-3xl font-bold text-slate-950" id="confirmation-title">Help is being coordinated.</h1><p className="mt-4 leading-7 text-slate-700">Keep yourself safe. MDRRMO will review your report with nearby submissions.</p><dl className="mt-6 grid gap-4 rounded-xl bg-slate-100 p-5 text-left"><div><dt className="text-sm font-semibold text-slate-500">Tracking identifier</dt><dd className="mt-1 break-all font-mono text-base text-slate-950">{confirmation.reportId}</dd></div><div><dt className="text-sm font-semibold text-slate-500">Received</dt><dd className="mt-1 text-slate-950">{new Date(confirmation.receivedAt).toLocaleString()}</dd></div></dl><button className="mt-7 w-full rounded-lg bg-blue-700 px-5 py-3 font-bold text-white hover:bg-blue-800" onClick={() => window.location.reload()}>Submit another report</button></section></main>;
+  if (confirmation) {
+    return (
+      <main className="min-h-svh flex items-center justify-center p-4">
+        <Card className="w-full max-w-xl text-center border-border">
+          <CardContent className="pt-10 pb-8 flex flex-col items-center">
+            <CheckCircle2 className="size-16 text-primary mb-4" />
+            <h1 className="text-xl font-bold mb-2">Help is being coordinated.</h1>
+            <p className="text-base text-muted-foreground mb-8 max-w-md">Keep yourself safe. MDRRMO will review your report with nearby submissions.</p>
+            
+            <div className="w-full text-left p-6 bg-secondary/30 rounded-xl mb-8 space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground">Tracking Identifier</p>
+                <p className="font-mono text-lg">{confirmation.reportId}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground">Received At</p>
+                <p className="text-base">{new Date(confirmation.receivedAt).toLocaleString()}</p>
+              </div>
+            </div>
+            
+            <Button className="w-full text-base" size="lg" onClick={() => window.location.reload()}>Submit Another Report</Button>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
 
-  return <div className="min-h-svh bg-slate-950 text-slate-900"><a className="skip-link" href="#main-content">Skip to report form</a><header className="border-b border-slate-700 bg-slate-900 px-4 py-4 text-white sm:px-8"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4"><div><p className="text-sm font-bold tracking-widest text-amber-300">TAGOLOAN MDRRMO</p><h1 className="text-xl font-bold">DERRCS Emergency Reporting</h1></div><a className="text-sm underline" href="/login">Staff login</a></div></header><main className="mx-auto max-w-5xl px-4 py-7 sm:px-8" id="main-content" tabIndex="-1"><section className="rounded-2xl bg-white p-5 shadow-xl sm:p-8" aria-labelledby="report-title"><p className="text-sm font-semibold text-blue-700">Step {step} of 4</p><h2 className="mt-1 text-2xl font-bold text-slate-950" id="report-title">Report an emergency</h2><p className="mt-2 max-w-2xl text-slate-600">For immediate danger, move to safety first. This form records both your location and the actual emergency location.</p><div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-blue-700 transition-all" style={{ width: `${step * 25}%` }} /></div>{error && <div className="mt-5 rounded-lg border border-red-300 bg-red-50 p-4 text-red-800" role="alert">{error}</div>}<p className="sr-only" aria-live="polite">{locationMessage}</p><form className="mt-7" onSubmit={submit}>
-      {step === 1 && <fieldset><legend className="text-lg font-bold">What is happening?</legend><div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{emergencyTypes.map((type) => <label key={type} className={`cursor-pointer rounded-xl border-2 p-4 font-semibold ${form.emergencyType === type ? 'border-blue-700 bg-blue-50 text-blue-950' : 'border-slate-200 hover:border-blue-400'}`}><input className="sr-only" name="emergencyType" type="radio" value={type} checked={form.emergencyType === type} onChange={() => updateForm('emergencyType', type)} />{type}</label>)}</div><label className="mt-6 block font-semibold" htmlFor="description">Short description</label><p className="mt-1 text-sm text-slate-600" id="description-hint">Describe hazards, visible damage, and people needing help.</p><textarea className="mt-2 w-full rounded-lg border border-slate-300 p-3" id="description" name="description" value={form.description} onChange={(event) => updateForm('description', event.target.value)} aria-describedby="description-hint" rows="4" required /></fieldset>}
-      {step === 2 && <fieldset><legend className="text-lg font-bold">Operational details</legend><div className="mt-5 grid gap-5">{questions.map(([key, label, options]) => <div key={key}><label className="block font-semibold" htmlFor={key}>{label}</label><select className="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3" id={key} value={form.answers[key] || ''} onChange={(event) => updateAnswer(key, event.target.value)} required><option value="">Select an answer</option>{options.map((option) => <option key={option}>{option}</option>)}</select></div>)}</div></fieldset>}
-      {step === 3 && <fieldset><legend className="text-lg font-bold">Set the emergency location</legend><p className="mt-2 text-slate-600">Your GPS can identify you, but tap the map when the emergency is somewhere else.</p><div className="mt-4 flex flex-wrap gap-3"><button className="rounded-lg bg-blue-700 px-4 py-3 font-bold text-white hover:bg-blue-800" type="button" onClick={useMyLocation}>Use my location</button>{locationMessage && <span className="self-center text-sm text-slate-700">{locationMessage}</span>}</div><div className="mt-5 h-80 overflow-hidden rounded-xl border border-slate-300"><TagoloanMap interactive selectedPoint={emergencyCoordinates} onLocationChange={setEmergencyCoordinates} /></div><label className="mt-5 block font-semibold" htmlFor="photo">Photo (optional)</label><input className="mt-2 block w-full rounded-lg border border-slate-300 p-2" id="photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => setPhoto(event.target.files?.[0] || null)} /></fieldset>}
-      {step === 4 && <section aria-labelledby="review-title"><h3 className="text-lg font-bold" id="review-title">Review before submitting</h3><dl className="mt-4 grid gap-4 rounded-xl bg-slate-100 p-5"><div><dt className="text-sm font-semibold text-slate-500">Emergency</dt><dd>{form.emergencyType}</dd></div><div><dt className="text-sm font-semibold text-slate-500">Description</dt><dd>{form.description}</dd></div><div><dt className="text-sm font-semibold text-slate-500">Emergency pin</dt><dd>{emergencyCoordinates ? `${emergencyCoordinates.latitude.toFixed(5)}, ${emergencyCoordinates.longitude.toFixed(5)}` : 'Not set'}</dd></div></dl></section>}
-      <div className="mt-8 flex flex-wrap justify-between gap-3">{step > 1 ? <button className="rounded-lg border border-slate-300 px-5 py-3 font-bold text-slate-800 hover:bg-slate-100" type="button" onClick={() => setStep((current) => current - 1)}>Back</button> : <span />}{step < 4 ? <button className="rounded-lg bg-blue-700 px-5 py-3 font-bold text-white hover:bg-blue-800" type="button" onClick={nextStep}>Continue</button> : <button className="rounded-lg bg-red-700 px-5 py-3 font-bold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-red-300" disabled={submitting} type="submit">{submitting ? 'Submitting…' : 'Submit emergency report'}</button>}</div>
-    </form></section></main></div>;
+  return (
+    <div className="min-h-svh bg-background text-foreground pb-20">
+      <header className="border-b border-border bg-background/95 backdrop-blur px-4 py-4 sticky top-0 z-50">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div>
+            <p className="text-sm font-bold tracking-widest text-muted-foreground uppercase">TAGOLOAN MDRRMO</p>
+            <h1 className="text-xl font-bold">Emergency Report</h1>
+          </div>
+          <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Agency Login</Link>
+        </div>
+      </header>
+      
+      <main className="mx-auto max-w-2xl px-4 py-8" id="main-content">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-primary">Step {step} of 4</span>
+              <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
+                <div className="h-full bg-primary transition-all duration-300" style={{ width: `${step * 25}%` }} />
+              </div>
+            </div>
+            <CardTitle className="text-lg font-bold">Report an Emergency</CardTitle>
+            <CardDescription className="text-sm">Move to safety first. This form alerts nearby dispatchers.</CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            {error && <Alert variant="destructive" className="mb-6"><AlertDescription>{error}</AlertDescription></Alert>}
+            
+            <form id="report-form" onSubmit={submit} className="space-y-6">
+              
+              {step === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                      <AlertTriangle className="size-5 text-warning" /> What is happening?
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {emergencyTypes.map(({ name, icon: Icon, color }) => (
+                        <div
+                          key={name}
+                          onClick={() => updateForm('emergencyType', name)}
+                          className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center gap-2 transition-colors ${form.emergencyType === name ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-muted-foreground/50'}`}
+                        >
+                          <Icon className={`size-7 ${color} ${form.emergencyType === name ? 'opacity-100 drop-shadow-md' : 'opacity-70'}`} />
+                          <span className={`text-sm font-semibold ${form.emergencyType === name ? 'text-primary' : 'text-muted-foreground'}`}>{name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="description">Short description</FieldLabel>
+                      <Textarea 
+                        id="description" 
+                        name="description" 
+                        placeholder="Describe hazards, visible damage, etc."
+                        value={form.description} 
+                        onChange={(event) => updateForm('description', event.target.value)} 
+                        rows={4} 
+                        required 
+                      />
+                    </Field>
+                  </FieldGroup>
+                </div>
+              )}
+              
+              {step === 2 && (
+                <div className="space-y-6">
+                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
+                    <ClipboardList className="size-5 text-primary" /> Operational Details
+                  </h3>
+                  <FieldGroup>
+                    {questions.map(([key, label, options]) => (
+                      <Field key={key}>
+                        <FieldLabel htmlFor={key}>{label}</FieldLabel>
+                        <select 
+                          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
+                          id={key} 
+                          value={form.answers[key] || ''} 
+                          onChange={(event) => updateAnswer(key, event.target.value)} 
+                          required
+                        >
+                          <option value="" disabled>Select an answer</option>
+                          {options.map((option) => <option key={option}>{option}</option>)}
+                        </select>
+                      </Field>
+                    ))}
+                  </FieldGroup>
+                </div>
+              )}
+              
+              {step === 3 && (
+                <div className="space-y-6">
+                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
+                    <Map className="size-5 text-primary" /> Emergency Location
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Tap the map to set the exact location.</p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                    <Button type="button" variant="secondary" onClick={useMyLocation}>
+                      <MapPin className="size-4 mr-2" /> Use my GPS location
+                    </Button>
+                    {locationMessage && <span className="text-sm text-muted-foreground">{locationMessage}</span>}
+                  </div>
+                  
+                  <div className="h-[300px] w-full rounded-xl overflow-hidden border border-border [&_.leaflet-layer]:filter [&_.leaflet-layer]:invert [&_.leaflet-layer]:hue-rotate-180 [&_.leaflet-layer]:brightness-75 [&_.leaflet-layer]:contrast-125">
+                    <TagoloanMap interactive selectedPoint={emergencyCoordinates} onLocationChange={setEmergencyCoordinates} />
+                  </div>
+                  
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="photo">Attach Photo (Optional)</FieldLabel>
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          id="photo" 
+                          type="file" 
+                          accept="image/jpeg,image/png,image/webp" 
+                          capture="environment" 
+                          onChange={(event) => setPhoto(event.target.files?.[0] || null)} 
+                          className="file:text-foreground file:bg-secondary file:px-3 file:py-1 file:rounded-md file:border-none file:mr-4 file:cursor-pointer"
+                        />
+                      </div>
+                    </Field>
+                  </FieldGroup>
+                </div>
+              )}
+              
+              {step === 4 && (
+                <div className="space-y-6">
+                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
+                    <Eye className="size-5 text-primary" /> Review Summary
+                  </h3>
+                  <div className="grid gap-4 bg-secondary/30 rounded-xl p-5 border border-border">
+                    <div>
+                      <p className="text-sm font-semibold text-muted-foreground">Type</p>
+                      <p className="text-base">{form.emergencyType}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-muted-foreground">Description</p>
+                      <p className="text-base">{form.description}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-muted-foreground">Coordinates</p>
+                      <p className="font-mono text-sm">{emergencyCoordinates ? `${emergencyCoordinates.latitude.toFixed(5)}, ${emergencyCoordinates.longitude.toFixed(5)}` : 'Not set'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </form>
+          </CardContent>
+          
+          <CardFooter className="flex justify-between border-t border-border bg-card/50 pt-6">
+            {step > 1 ? (
+              <Button type="button" variant="outline" onClick={() => setStep((current) => current - 1)}>Back</Button>
+            ) : <div />}
+            
+            {step < 4 ? (
+              <Button type="button" onClick={nextStep}>Continue</Button>
+            ) : (
+              <Button type="submit" form="report-form" disabled={submitting}>
+                {submitting ? 'Submitting...' : 'Submit Emergency'}
+              </Button>
+            )}
+          </CardFooter>
+        </Card>
+      </main>
+    </div>
+  );
 }
 
 export default CitizenReport;

@@ -115,15 +115,21 @@ router.patch('/:assignmentId/status', authenticate, authorize('ResponseUnit'), a
     // Update assignment status. Arrival time is recorded only on scene arrival.
     await client.query(
       `UPDATE assignments
-       SET status = $1, acknowledged_at = CASE WHEN $1 = 'EnRoute' THEN COALESCE(acknowledged_at, NOW()) ELSE acknowledged_at END,
-           arrived_at = CASE WHEN $1 = 'OnScene' THEN NOW() ELSE arrived_at END
+       SET status = $1::varchar, acknowledged_at = CASE WHEN $1::text = 'EnRoute' THEN COALESCE(acknowledged_at, NOW()) ELSE acknowledged_at END,
+           arrived_at = CASE WHEN $1::text = 'OnScene' THEN NOW() ELSE arrived_at END
        WHERE id = $2`,
       [status, assignmentId]
     );
 
     if (status === 'OnScene') {
-      // Transition Dispatched -> Active via state machine (writes activity_log atomically)
-      await stateMachine.transition(assignment.incident_id, 'Active', req.user.userId, { client });
+      const { rows: incRows } = await client.query(
+        'SELECT status FROM incidents WHERE id = $1 FOR UPDATE',
+        [assignment.incident_id]
+      );
+      if (incRows.length > 0 && incRows[0].status === 'Dispatched') {
+        // Transition Dispatched -> Active via state machine (writes activity_log atomically)
+        await stateMachine.transition(assignment.incident_id, 'Active', req.user.userId, { client });
+      }
     }
 
     // Update the response unit operational status to match the field update.
@@ -145,6 +151,17 @@ router.patch('/:assignmentId/status', authenticate, authorize('ResponseUnit'), a
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[Assignments] Status update error:', err.message);
     return res.status(500).json({
       success: false,

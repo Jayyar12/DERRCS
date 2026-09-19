@@ -14,7 +14,7 @@ import "./App.css";
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<main className="grid min-h-svh place-items-center bg-slate-950 text-white">Loading DERRCS…</main>}>
+      <Suspense fallback={<main className="grid min-h-svh place-items-center bg-background text-foreground">Loading DERRCS…</main>}>
       <Routes>
         {/* Public Citizen Page */}
         <Route path="/" element={<CitizenReport />} />

@@ -196,6 +196,9 @@ def handle_candidate_created(payload, publish):
             )
             summary_id = cur.fetchone()[0]
             conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
     finally:
         put_connection(conn)
 
@@ -278,6 +281,9 @@ def handle_field_assessment_submitted(payload, publish):
             )
             summary_id = cur.fetchone()[0]
             conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
     finally:
         put_connection(conn)
 

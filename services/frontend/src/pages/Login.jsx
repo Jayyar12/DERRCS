@@ -1,6 +1,12 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom';
 import { api, ApiError, getSession, saveSession } from '../api/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft } from 'lucide-react';
 
 const destinations = { Dispatcher: '/dispatcher', ResponseUnit: '/responder', Admin: '/admin' };
 
@@ -25,10 +31,85 @@ function Login() {
       navigate(location.state?.from || destinations[result.role] || '/', { replace: true });
     } catch (requestError) {
       setError(requestError instanceof ApiError ? requestError.message : 'Unable to sign in.');
-    } finally { setSubmitting(false); }
+    } finally { 
+      setSubmitting(false); 
+    }
   }
 
-  return <main className="grid min-h-svh place-items-center bg-slate-950 px-4 py-10" id="main-content" tabIndex="-1"><section className="w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl sm:p-9" aria-labelledby="login-title"><a className="text-sm font-semibold text-blue-700 underline" href="/">← Emergency reporting</a><p className="mt-6 text-sm font-bold tracking-widest text-amber-700">TAGOLOAN MDRRMO</p><h1 className="mt-2 text-3xl font-bold text-slate-950" id="login-title">Staff sign in</h1><p className="mt-2 text-slate-600">For dispatchers, response units, and administrators.</p>{error && <div className="mt-5 rounded-lg border border-red-300 bg-red-50 p-3 text-red-800" role="alert">{error}</div>}<form className="mt-6 grid gap-5" onSubmit={submit}><div><label className="font-semibold" htmlFor="username">Username</label><input className="mt-2 w-full rounded-lg border border-slate-300 p-3" autoComplete="username" id="username" value={username} onChange={(event) => setUsername(event.target.value)} required /></div><div><label className="font-semibold" htmlFor="password">Password</label><input className="mt-2 w-full rounded-lg border border-slate-300 p-3" autoComplete="current-password" id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></div><button className="rounded-lg bg-blue-700 px-5 py-3 font-bold text-white hover:bg-blue-800 disabled:bg-blue-300" disabled={submitting} type="submit">{submitting ? 'Signing in…' : 'Sign in securely'}</button></form></section></main>;
+  return (
+    <main className="grid min-h-svh place-items-center bg-background px-4 py-10" id="main-content" tabIndex="-1">
+      <div className="w-full max-w-md flex flex-col gap-6">
+        
+        <Link to="/" className="text-sm font-semibold text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors w-fit">
+          <ArrowLeft className="size-4" />
+          Back to Public Portal
+        </Link>
+        
+        <div className="text-center space-y-1">
+          <h1 className="text-xl font-bold tracking-wider text-foreground">
+            TAGOLOAN MDRRMO
+          </h1>
+          <p className="text-sm font-bold tracking-widest text-warning uppercase">
+            Disaster Risk Reduction & Management
+          </p>
+        </div>
+
+        <Card className="py-2">
+          <CardHeader className="text-center space-y-1">
+            <CardTitle className="text-lg font-bold">Secure Access Portal</CardTitle>
+            <CardDescription className="text-sm">Sign in for dispatchers, response units, and administrators.</CardDescription>
+          </CardHeader>
+          
+          <CardContent className="mt-4">
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <form id="login-form" onSubmit={submit} className="space-y-6">
+              <FieldGroup className="gap-6">
+                <Field>
+                  <FieldLabel htmlFor="username">Badge ID / Username</FieldLabel>
+                  <Input 
+                    id="username" 
+                    autoComplete="username"
+                    placeholder="Enter your assigned badge ID"
+                    value={username} 
+                    onChange={(event) => setUsername(event.target.value)} 
+                    className="h-14 text-base px-4"
+                    required 
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={password} 
+                    onChange={(event) => setPassword(event.target.value)} 
+                    className="h-14 text-base px-4 tracking-[0.2em] placeholder:tracking-normal placeholder:text-base"
+                    required 
+                  />
+                </Field>
+              </FieldGroup>
+
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-bold mt-1" 
+                size="lg"
+                disabled={submitting}
+              >
+                {submitting ? 'Authenticating...' : 'Sign In Securely'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  );
 }
 
 export default Login;

@@ -201,7 +201,7 @@ router.post('/:incidentId/assign', authenticate, authorize('Dispatcher'), async 
 
     // Publish unit.assigned event for the real-time responder dispatch alert
     const { publishEvent } = require('../config/rabbitmq');
-    publishEvent('unit.assigned', {
+    await publishEvent('unit.assigned', {
       assignmentId: assignmentResult.rows[0].id,
       incidentId,
       unitId: responseUnitId,
@@ -363,7 +363,7 @@ router.post('/:incidentId/field-assessment', authenticate, authorize('ResponseUn
 
     // Publish field.assessment.submitted event for the summarizer worker
     const { publishEvent } = require('../config/rabbitmq');
-    publishEvent('field.assessment.submitted', {
+    await publishEvent('field.assessment.submitted', {
       assessmentId: assessmentResult.rows[0].id,
       incidentId,
       assignmentId,

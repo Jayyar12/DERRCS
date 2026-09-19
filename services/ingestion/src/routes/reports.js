@@ -123,7 +123,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
 
     // Publish report.ingested domain event to RabbitMQ for the clustering worker
     const { publishEvent } = require('../config/rabbitmq');
-    publishEvent('report.ingested', {
+    await publishEvent('report.ingested', {
       reportId,
       emergencyType,
       latitude: eLat,

@@ -56,7 +56,7 @@ async function _escalateIncident(incident, nextLevel) {
     // CAS update: only advance if no other worker beat us to this level
     const { rowCount } = await client.query(
       `UPDATE incidents
-          SET escalation_level = $1, updated_at = NOW()
+          SET escalation_level = $1
         WHERE id = $2
           AND escalation_level = $3
           AND status = $4`,
@@ -148,11 +148,11 @@ async function _runPollCycle() {
            WHEN status = 'Validated' THEN validated_at
          END)) * 1000 AS age_ms
        FROM incidents
-       WHERE
-         (status = 'Reported'  AND created_at  < $1)
-         OR
-         (status = 'Validated' AND validated_at < $2)
-       ORDER BY created_at ASC`,
+        WHERE
+          (status = 'Reported'  AND created_at  < $1 AND escalation_level < 1)
+          OR
+          (status = 'Validated' AND validated_at < $2 AND escalation_level < 2)
+        ORDER BY created_at ASC`,
       [reportedCutoff, validatedCutoff]
     );
 
@@ -161,8 +161,10 @@ async function _runPollCycle() {
     console.log(`[EscalationWorker] Found ${rows.length} overdue incident(s).`);
 
     for (const incident of rows) {
-      const nextLevel = incident.escalation_level + 1;
-      await _escalateIncident(incident, nextLevel);
+      const targetLevel = incident.status === 'Reported' ? 1 : 2;
+      if (incident.escalation_level < targetLevel) {
+        await _escalateIncident(incident, targetLevel);
+      }
     }
   } catch (err) {
     // Don't crash the process; log and wait for next cycle

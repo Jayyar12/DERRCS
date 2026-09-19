@@ -180,7 +180,7 @@ router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), asyn
 
     // Publish incident.validated domain event for the allocation worker
     const { publishEvent } = require('../config/rabbitmq');
-    publishEvent('incident.validated', {
+    await publishEvent('incident.validated', {
       incidentId: incident.id,
       incidentCode: incident.incident_code,
       candidateId,
@@ -199,6 +199,17 @@ router.post('/:candidateId/confirm', authenticate, authorize('Dispatcher'), asyn
     });
   } catch (err) {
     await client.query('ROLLBACK');
+    if (err.name === 'InvalidStateTransitionError') {
+      return res.status(422).json({
+        success: false,
+        error: {
+          code:         'INVALID_STATE_TRANSITION',
+          message:      err.message,
+          currentState: err.currentState,
+          targetState:  err.targetState,
+        }
+      });
+    }
     console.error('[Candidates] Confirm error:', err.message);
     return res.status(500).json({
       success: false,

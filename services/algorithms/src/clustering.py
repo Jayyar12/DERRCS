@@ -40,7 +40,9 @@ def cluster_reports(reports: list[dict], existing_candidates: list[dict] = None,
     for report in reports:
         attached = False
         for candidate in existing_candidates:
-            if candidate.get("emergencyType") == report.get("emergencyType"):
+            c_type: str | None = candidate.get("emergencyType") or candidate.get("emergency_type")
+            r_type: str | None = report.get("emergencyType") or report.get("emergency_type")
+            if c_type and r_type and c_type == r_type:
                 dist = haversine_distance_meters(
                     report["latitude"], report["longitude"],
                     candidate["latitude"], candidate["longitude"]
@@ -141,10 +143,14 @@ def handle_report_ingested(payload, publish):
             conn = get_connection()
             try:
                 with conn.cursor() as cur:
-                    # Update report to point at this candidate
+                    # Update report to point at this candidate and its linked incident
                     cur.execute(
-                        "UPDATE reports SET candidate_id = %s, status = 'Clustered' WHERE id = %s",
-                        (candidate_id, report_id)
+                        """UPDATE reports
+                           SET candidate_id = %s,
+                               incident_id = (SELECT id FROM incidents WHERE candidate_id = %s LIMIT 1),
+                               status = 'Clustered'
+                           WHERE id = %s""",
+                        (candidate_id, candidate_id, report_id)
                     )
 
                     # Recalculate centroid from all attached reports
@@ -160,6 +166,9 @@ def handle_report_ingested(payload, publish):
                         (new_count, candidate_id, candidate_id)
                     )
                     conn.commit()
+            except Exception as e:
+                conn.rollback()
+                raise e
             finally:
                 put_connection(conn)
 
@@ -210,6 +219,7 @@ def handle_report_ingested(payload, publish):
     # 5. For each new cluster, insert into incident_candidates and create a linked incident
     conn = get_connection()
     try:
+        created_events: list[dict] = []
         with conn.cursor() as cur:
             for cluster_label, member_report_ids in clusters.items():
                 # Compute cluster centroid from member reports
@@ -244,11 +254,13 @@ def handle_report_ingested(payload, publish):
                 # Generate incident code: INC-YYYY-NNNN
                 year = datetime.datetime.now().year
                 cur.execute(
-                    "SELECT COUNT(*) FROM incidents WHERE incident_code LIKE %s",
+                    """SELECT COALESCE(MAX(SUBSTRING(incident_code FROM 10)::int), 0) + 1
+                       FROM incidents
+                       WHERE incident_code LIKE %s""",
                     (f'INC-{year}-%',)
                 )
-                seq = str(cur.fetchone()[0] + 1).zfill(4)
-                incident_code = f"INC-{year}-{seq}"
+                seq: str = str(cur.fetchone()[0]).zfill(4)
+                incident_code: str = f"INC-{year}-{seq}"
 
                 # Create linked incident at 'Reported' (preserves 6-stage lifecycle)
                 cur.execute(
@@ -268,11 +280,9 @@ def handle_report_ingested(payload, publish):
                     (incident_id, candidate_id)
                 )
 
-                conn.commit()
-
                 print(f"[Clustering] New candidate {candidate_id} ({label}) with {len(member_report_ids)} reports. Incident {incident_code} created at Reported.")
 
-                publish('candidate.created', {
+                created_events.append({
                     'candidateId': str(candidate_id),
                     'incidentId': str(incident_id),
                     'incidentCode': incident_code,
@@ -281,6 +291,12 @@ def handle_report_ingested(payload, publish):
                     'latitude': c_lat,
                     'longitude': c_lng,
                 })
+
+            conn.commit()
+
+        # Publish events only after database transaction commits
+        for event in created_events:
+            publish('candidate.created', event)
     except Exception as e:
         conn.rollback()
         print(f"[Clustering] DB error during cluster insertion: {e}")

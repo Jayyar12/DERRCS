@@ -121,6 +121,20 @@ async function transition(incidentId, targetState, changedBy = null, options = {
       throw new InvalidStateTransitionError(incidentId, currentState, targetState);
     }
 
+    // Require valid field_assessments record before transitioning Active -> Resolved
+    if (targetState === 'Resolved') {
+      const { rows: assessmentRows } = await client.query(
+        `SELECT 1 FROM field_assessments WHERE incident_id = $1 LIMIT 1`,
+        [incidentId]
+      );
+      if (assessmentRows.length === 0) {
+        if (!externalClient) await client.query('ROLLBACK');
+        const err = new Error(`Cannot transition incident ${incidentId} to Resolved: missing required field assessment.`);
+        err.code = 'FIELD_ASSESSMENT_REQUIRED';
+        throw err;
+      }
+    }
+
     // 3. Build the UPDATE — each state has a matching timestamp column
     const timestampColumn = {
       Validated:  'validated_at',

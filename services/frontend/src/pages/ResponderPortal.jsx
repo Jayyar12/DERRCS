@@ -3,20 +3,50 @@ import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError, clearSession, getSession } from '../api/client';
 import { disconnectSocket, subscribeSocket } from '../api/socket';
 
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerTrigger } from "@/components/ui/drawer"
+import { toast } from "sonner"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+import { FieldSet, FieldLegend } from "@/components/ui/field"
+
 const injuryOptions = ['Laceration', 'Suspected fracture', 'Burn', 'Head trauma', 'Respiratory distress', 'Other'];
 const interventionOptions = ['Wound dressing', 'Cervical collar', 'Splinting', 'CPR', 'Oxygen therapy', 'Other'];
 const dispositions = ['TreatedOnScene', 'TransportedHealthCenter', 'TransportedNMMC', 'RefusedCare', 'Deceased'];
 
-function Checklist({ id: _id, label, options, values, onChange }) {
-  return <fieldset className="mt-5"><legend className="font-bold">{label}</legend><div className="mt-3 grid gap-2 sm:grid-cols-2">{options.map((option) => <label className="flex items-center gap-3 rounded-lg border border-slate-200 p-3" key={option}><input type="checkbox" checked={values.includes(option)} onChange={(event) => onChange(event.target.checked ? [...values, option] : values.filter((value) => value !== option))} />{option}</label>)}</div></fieldset>;
+function Checklist({ label, options, values, onChange }) {
+  return (
+    <FieldSet className="mt-6">
+      <FieldLegend>{label}</FieldLegend>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {options.map((option) => (
+          <label className="flex items-center gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors bg-card" key={option}>
+            <Checkbox 
+              checked={values.includes(option)} 
+              onCheckedChange={(checked) => onChange(checked ? [...values, option] : values.filter((value) => value !== option))} 
+              className="size-5"
+            />
+            <span className="text-sm font-medium">{option}</span>
+          </label>
+        ))}
+      </div>
+    </FieldSet>
+  );
 }
 
 function ResponderPortal() {
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [form, setForm] = useState({ patientName: '', approximateAge: '', gender: '', consciousnessLevel: '', injuriesObserved: [], interventionsRendered: [], disposition: '', destinationFacility: '', notes: '' });
   const session = getSession();
 
@@ -28,14 +58,14 @@ function ResponderPortal() {
   }
 
   useEffect(() => { loadAssignment(); }, []);
-  useEffect(() => subscribeSocket('unit:dispatch:alert', () => { setMessage('A dispatch update was received.'); loadAssignment({ quiet: true }); }), []);
+  useEffect(() => subscribeSocket('unit:dispatch:alert', () => { toast('A dispatch update was received.'); loadAssignment({ quiet: true }); }), []);
 
   async function updateStatus(status) {
     if (!assignment) return;
     setSaving(true); setError('');
     try {
       await api.updateAssignmentStatus(assignment.assignment_id, status);
-      setMessage(status === 'EnRoute' ? 'Unit marked En Route.' : 'Arrival recorded. You may now submit the field assessment.');
+      toast.success(status === 'EnRoute' ? 'Unit marked En Route.' : 'Arrival recorded. You may now submit the field assessment.');
       await loadAssignment({ quiet: true });
     } catch (requestError) { setError(requestError.message); }
     finally { setSaving(false); }
@@ -47,7 +77,8 @@ function ResponderPortal() {
     setSaving(true); setError('');
     try {
       await api.submitAssessment(assignment.incident_id, { ...form, approximateAge: form.approximateAge ? Number(form.approximateAge) : null, assignmentId: assignment.assignment_id });
-      setMessage('Field assessment saved. The incident is now resolved.');
+      toast.success('Field assessment saved. The incident is now resolved.');
+      setIsDrawerOpen(false);
       await loadAssignment({ quiet: true });
     } catch (requestError) { setError(requestError.message); }
     finally { setSaving(false); }
@@ -57,7 +88,201 @@ function ResponderPortal() {
   const status = assignment?.assignment_status;
   const onScene = assignment?.incident_status === 'Active' && status === 'OnScene';
 
-  return <div className="min-h-svh bg-slate-100 text-slate-900"><a className="skip-link" href="#responder-main">Skip to assigned emergency</a><header className="flex items-center justify-between gap-4 bg-slate-950 px-4 py-4 text-white sm:px-6"><div><p className="text-xs font-bold tracking-widest text-amber-300">TAGOLOAN MDRRMO</p><h1 className="text-xl font-bold">Response Unit Field Portal</h1></div><div className="flex items-center gap-3"><span className="text-sm">{session?.fullName || 'Response unit'}</span><button className="rounded border border-slate-500 px-3 py-2 text-sm font-semibold hover:bg-slate-800" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>Sign out</button></div></header><p className="sr-only" aria-live="polite">{message}</p><main className="mx-auto max-w-5xl px-4 py-6 sm:px-6" id="responder-main" tabIndex="-1">{error && <div className="mb-5 rounded-xl border border-red-300 bg-red-50 p-4 text-red-800" role="alert">{error}</div>}{loading ? <p>Loading dispatch…</p> : !assignment ? <section className="rounded-2xl bg-white p-8 shadow-sm"><h2 className="text-2xl font-bold">No active dispatch</h2><p className="mt-2 text-slate-600">Keep this page open. A new assignment will appear here in real time.</p><button className="mt-5 rounded-lg bg-blue-700 px-4 py-3 font-bold text-white" onClick={() => loadAssignment()}>Check again</button></section> : <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]"><section className="rounded-2xl bg-white p-5 shadow-sm sm:p-7"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-bold text-red-700">{assignment.incident_status}</p><h2 className="text-2xl font-bold">{assignment.incident_code}</h2><p className="mt-1 text-slate-600">{assignment.emergency_type} · {assignment.severity} severity</p></div><span className="rounded-full bg-slate-900 px-3 py-2 text-sm font-bold text-white">Unit: {status}</span></div><h3 className="mt-7 font-bold">Caller notes</h3>{assignment.caller_notes?.length ? <ul className="mt-3 grid gap-2">{assignment.caller_notes.map((note) => <li className="rounded-lg bg-slate-100 p-3" key={note}>{note}</li>)}</ul> : <p className="mt-2 text-slate-600">No caller notes provided.</p>}<div className="mt-7 flex flex-wrap gap-3">{['Dispatched', 'Acknowledged'].includes(status) && <button className="rounded-lg bg-blue-700 px-5 py-4 font-bold text-white hover:bg-blue-800 disabled:bg-blue-300" disabled={saving} onClick={() => updateStatus('EnRoute')}>Mark En Route</button>}{['Dispatched', 'Acknowledged', 'EnRoute'].includes(status) && <button className="rounded-lg bg-red-700 px-5 py-4 font-bold text-white hover:bg-red-800 disabled:bg-red-300" disabled={saving} onClick={() => updateStatus('OnScene')}>Arrived on Scene</button>}</div>{onScene && <form className="mt-8 border-t border-slate-200 pt-7" onSubmit={submitAssessment}><h3 className="text-xl font-bold">Field Casualty Assessment</h3><p className="mt-2 text-slate-600">Complete the pre-hospital care report to resolve this incident.</p><div className="mt-5 grid gap-5 sm:grid-cols-2"><div><label className="font-semibold" htmlFor="patient-name">Patient name or identity</label><input className="mt-2 w-full rounded-lg border border-slate-300 p-3" id="patient-name" autoComplete="name" value={form.patientName} onChange={(event) => setForm((current) => ({ ...current, patientName: event.target.value }))} /></div><div><label className="font-semibold" htmlFor="patient-age">Approximate age</label><input className="mt-2 w-full rounded-lg border border-slate-300 p-3" id="patient-age" type="number" min="0" max="130" inputMode="numeric" value={form.approximateAge} onChange={(event) => setForm((current) => ({ ...current, approximateAge: event.target.value }))} /></div><div><label className="font-semibold" htmlFor="gender">Gender</label><select className="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3" id="gender" value={form.gender} onChange={(event) => setForm((current) => ({ ...current, gender: event.target.value }))}><option value="">Not recorded</option><option>Male</option><option>Female</option><option>Other</option></select></div><div><label className="font-semibold" htmlFor="consciousness">Consciousness (AVPU)</label><select className="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3" id="consciousness" value={form.consciousnessLevel} onChange={(event) => setForm((current) => ({ ...current, consciousnessLevel: event.target.value }))}><option value="">Not recorded</option>{['Alert', 'Verbal', 'Pain', 'Unresponsive'].map((option) => <option key={option}>{option}</option>)}</select></div></div><Checklist id="injuries" label="Injuries observed" options={injuryOptions} values={form.injuriesObserved} onChange={(injuriesObserved) => setForm((current) => ({ ...current, injuriesObserved }))} /><Checklist id="interventions" label="Interventions rendered" options={interventionOptions} values={form.interventionsRendered} onChange={(interventionsRendered) => setForm((current) => ({ ...current, interventionsRendered }))} /><div className="mt-5 grid gap-5 sm:grid-cols-2"><div><label className="font-semibold" htmlFor="disposition">Disposition</label><select className="mt-2 w-full rounded-lg border border-slate-300 bg-white p-3" id="disposition" value={form.disposition} onChange={(event) => setForm((current) => ({ ...current, disposition: event.target.value }))} required><option value="">Select disposition</option>{dispositions.map((option) => <option key={option}>{option}</option>)}</select></div><div><label className="font-semibold" htmlFor="destination">Destination facility</label><input className="mt-2 w-full rounded-lg border border-slate-300 p-3" id="destination" value={form.destinationFacility} onChange={(event) => setForm((current) => ({ ...current, destinationFacility: event.target.value }))} /></div></div><label className="mt-5 block font-semibold" htmlFor="assessment-notes">Notes</label><textarea className="mt-2 w-full rounded-lg border border-slate-300 p-3" id="assessment-notes" rows="4" value={form.notes} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} /><button className="mt-6 rounded-lg bg-emerald-700 px-5 py-4 font-bold text-white hover:bg-emerald-800 disabled:bg-emerald-300" disabled={saving} type="submit">{saving ? 'Saving assessment…' : 'Submit assessment and resolve incident'}</button></form>}</section><aside className="rounded-2xl bg-white p-5 shadow-sm"><h2 className="font-bold">Emergency location</h2><p className="mt-2 text-sm text-slate-600">{location ? `${location[1].toFixed(5)}, ${location[0].toFixed(5)}` : 'Location unavailable'}</p>{location && <div className="mt-4 h-80 overflow-hidden rounded-xl border border-slate-300"><TagoloanMap selectedPoint={{ latitude: location[1], longitude: location[0] }} /></div>}</aside></div>}</main></div>;
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground pb-20 sm:pb-0">
+      <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-3 shadow-sm sm:px-6">
+        <div>
+          <p className="text-xs font-bold tracking-widest text-warning">TAGOLOAN MDRRMO</p>
+          <h1 className="text-xl font-bold">Response Unit Field Portal</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium hidden sm:inline">{session?.fullName || 'Response unit'}</span>
+          <Button variant="outline" size="sm" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
+            Sign out
+          </Button>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6" id="responder-main">
+        {error && (
+          <Alert variant="destructive" className="mb-5">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {loading ? (
+          <p className="text-muted-foreground animate-pulse">Loading dispatch…</p>
+        ) : !assignment ? (
+          <Card className="text-center py-10 shadow-sm border-dashed">
+            <CardHeader>
+              <CardTitle className="text-2xl">No active dispatch</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Keep this page open. A new assignment will appear here in real time.</p>
+            </CardContent>
+            <CardFooter className="justify-center pt-2">
+              <Button size="lg" onClick={() => loadAssignment()}>Check again</Button>
+            </CardFooter>
+          </Card>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <Card className="shadow-sm">
+              <CardContent className="p-5 sm:p-7">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+                  <div>
+                    <Badge variant="outline" className="text-destructive border-destructive mb-2">{assignment.incident_status}</Badge>
+                    <h2 className="text-3xl font-bold">{assignment.incident_code}</h2>
+                    <p className="mt-1 text-muted-foreground">{assignment.emergency_type} &middot; {assignment.severity} severity</p>
+                  </div>
+                  <Badge className="text-base py-1 px-3">Unit: {status}</Badge>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-bold border-b pb-2">Caller notes</h3>
+                  {assignment.caller_notes?.length ? (
+                    <ul className="grid gap-2">
+                      {assignment.caller_notes.map((note) => (
+                        <li className="rounded-lg bg-muted p-3 text-sm" key={note}>{note}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No caller notes provided.</p>
+                  )}
+                </div>
+
+                <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                  {['Dispatched', 'Acknowledged'].includes(status) && (
+                    <Button size="lg" className="w-full text-lg py-8 font-bold bg-primary hover:bg-primary/90" disabled={saving} onClick={() => updateStatus('EnRoute')}>
+                      Mark En Route
+                    </Button>
+                  )}
+                  {['Dispatched', 'Acknowledged', 'EnRoute'].includes(status) && (
+                    <Button size="lg" className="w-full text-lg py-8 font-bold bg-destructive hover:bg-destructive/90" disabled={saving} onClick={() => updateStatus('OnScene')}>
+                      Arrived on Scene
+                    </Button>
+                  )}
+                </div>
+
+                {onScene && (
+                  <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                    <DrawerTrigger asChild>
+                      <Button size="lg" className="w-full mt-6 text-lg py-8 font-bold bg-success hover:bg-success/90 text-success-foreground">
+                        Complete Field Assessment
+                      </Button>
+                    </DrawerTrigger>
+                    <DrawerContent className="max-h-[96svh]">
+                      <ScrollArea className="overflow-auto">
+                        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
+                          <DrawerHeader className="px-0 pt-0 text-left">
+                            <DrawerTitle className="text-2xl">Field Casualty Assessment</DrawerTitle>
+                            <DrawerDescription>Complete the pre-hospital care report to resolve this incident.</DrawerDescription>
+                          </DrawerHeader>
+                          
+                          <form className="mt-4 pb-10" onSubmit={submitAssessment}>
+                            <div className="grid gap-6 sm:grid-cols-2">
+                              <FieldGroup>
+                                <Field>
+                                  <FieldLabel htmlFor="patient-name">Patient name or identity</FieldLabel>
+                                  <Input id="patient-name" autoComplete="name" value={form.patientName} onChange={(e) => setForm({ ...form, patientName: e.target.value })} />
+                                </Field>
+                                <Field>
+                                  <FieldLabel htmlFor="patient-age">Approximate age</FieldLabel>
+                                  <Input id="patient-age" type="number" min="0" max="130" inputMode="numeric" value={form.approximateAge} onChange={(e) => setForm({ ...form, approximateAge: e.target.value })} />
+                                </Field>
+                              </FieldGroup>
+                              <FieldGroup>
+                                <Field>
+                                  <FieldLabel>Gender</FieldLabel>
+                                  <Select value={form.gender || 'none'} onValueChange={(val) => setForm({ ...form, gender: val === 'none' ? '' : val })}>
+                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">Not recorded</SelectItem>
+                                      <SelectItem value="Male">Male</SelectItem>
+                                      <SelectItem value="Female">Female</SelectItem>
+                                      <SelectItem value="Other">Other</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </Field>
+                                <Field>
+                                  <FieldLabel>Consciousness (AVPU)</FieldLabel>
+                                  <Select value={form.consciousnessLevel || 'none'} onValueChange={(val) => setForm({ ...form, consciousnessLevel: val === 'none' ? '' : val })}>
+                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">Not recorded</SelectItem>
+                                      {['Alert', 'Verbal', 'Pain', 'Unresponsive'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                </Field>
+                              </FieldGroup>
+                            </div>
+
+                            <Checklist label="Injuries observed" options={injuryOptions} values={form.injuriesObserved} onChange={(injuriesObserved) => setForm({ ...form, injuriesObserved })} />
+                            <Checklist label="Interventions rendered" options={interventionOptions} values={form.interventionsRendered} onChange={(interventionsRendered) => setForm({ ...form, interventionsRendered })} />
+
+                            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                              <FieldGroup>
+                                <Field>
+                                  <FieldLabel>Disposition *</FieldLabel>
+                                  <Select value={form.disposition} onValueChange={(val) => setForm({ ...form, disposition: val })} required>
+                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Select disposition" /></SelectTrigger>
+                                    <SelectContent>
+                                      {dispositions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                </Field>
+                              </FieldGroup>
+                              <FieldGroup>
+                                <Field>
+                                  <FieldLabel htmlFor="destination">Destination facility</FieldLabel>
+                                  <Input id="destination" value={form.destinationFacility} onChange={(e) => setForm({ ...form, destinationFacility: e.target.value })} />
+                                </Field>
+                              </FieldGroup>
+                            </div>
+
+                            <div className="mt-6">
+                              <FieldGroup>
+                                <Field>
+                                  <FieldLabel htmlFor="assessment-notes">Notes</FieldLabel>
+                                  <Textarea id="assessment-notes" rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                                </Field>
+                              </FieldGroup>
+                            </div>
+
+                            <DrawerFooter className="px-0 mt-8">
+                              <Button size="lg" className="w-full py-6 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground" disabled={saving} type="submit">
+                                {saving ? 'Saving assessment…' : 'Submit Assessment and Resolve'}
+                              </Button>
+                            </DrawerFooter>
+                          </form>
+                        </div>
+                      </ScrollArea>
+                    </DrawerContent>
+                  </Drawer>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Emergency location</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {location ? `${location[1].toFixed(5)}, ${location[0].toFixed(5)}` : 'Location unavailable'}
+                </p>
+                {location && (
+                  <div className="h-80 overflow-hidden rounded-xl border">
+                    <TagoloanMap selectedPoint={{ latitude: location[1], longitude: location[0] }} />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </main>
+    </div>
+  );
 }
 
 export default ResponderPortal;

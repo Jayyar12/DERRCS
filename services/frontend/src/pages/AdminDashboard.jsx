@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api, clearSession } from '../api/client';
 import { disconnectSocket } from '../api/socket';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { ShieldAlert, LogOut } from 'lucide-react';
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -16,6 +24,7 @@ function AdminDashboard() {
       setUsers(nextUsers); setLogs(nextLogs); setConfig(nextConfig); setError('');
     } catch (requestError) { setError(requestError.message || 'Unable to load the administrator dashboard.'); }
   }
+  
   useEffect(() => { load(); }, []);
 
   async function createUser(event) {
@@ -23,12 +32,196 @@ function AdminDashboard() {
     try { await api.createUser(form); setForm({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' }); setMessage('Staff account created.'); load(); }
     catch (requestError) { setError(requestError.message); }
   }
+  
   async function toggleUser(user) {
     try { await api.updateUser(user.id, { isActive: !user.is_active }); setMessage(`${user.full_name} is now ${user.is_active ? 'deactivated' : 'active'}.`); load(); }
     catch (requestError) { setError(requestError.message); }
   }
 
-  return <div className="min-h-svh bg-slate-100 text-slate-900"><a className="skip-link" href="#admin-main">Skip to administration</a><header className="flex flex-wrap items-center justify-between gap-4 bg-slate-950 px-4 py-4 text-white sm:px-6"><div><p className="text-xs font-bold tracking-widest text-amber-300">TAGOLOAN MDRRMO</p><h1 className="text-xl font-bold">Administrator Dashboard</h1></div><div className="flex gap-4"><a className="text-sm underline" href="/dispatcher">Dispatcher view</a><button className="rounded border border-slate-500 px-3 py-2 text-sm font-semibold hover:bg-slate-800" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>Sign out</button></div></header><p className="sr-only" aria-live="polite">{message}</p><main className="mx-auto grid max-w-7xl gap-6 p-4 sm:p-6 lg:grid-cols-2" id="admin-main" tabIndex="-1">{error && <div className="lg:col-span-2 rounded-xl border border-red-300 bg-red-50 p-4 text-red-800" role="alert">{error}</div>}<section className="rounded-2xl bg-white p-5 shadow-sm" aria-labelledby="staff-heading"><div className="flex items-center justify-between gap-4"><h2 className="text-xl font-bold" id="staff-heading">Staff accounts</h2><button className="text-sm font-bold text-blue-700 underline" onClick={load}>Refresh</button></div><div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><caption className="sr-only">DERRCS staff accounts</caption><thead><tr className="border-b text-slate-600"><th className="p-2" scope="col">Name</th><th className="p-2" scope="col">Role</th><th className="p-2" scope="col">Status</th><th className="p-2" scope="col"><span className="sr-only">Action</span></th></tr></thead><tbody>{users.map((user) => <tr className="border-b border-slate-100" key={user.id}><td className="p-2"><strong>{user.full_name}</strong><span className="block text-slate-500">{user.username}</span></td><td className="p-2">{user.role}</td><td className="p-2">{user.is_active ? 'Active' : 'Inactive'}</td><td className="p-2"><button className="text-sm font-bold text-blue-700 underline" disabled={user.id === localStorage.getItem('derrsc_user_id')} onClick={() => toggleUser(user)}>{user.is_active ? 'Deactivate' : 'Activate'}</button></td></tr>)}</tbody></table></div><form className="mt-6 border-t border-slate-200 pt-5" onSubmit={createUser}><h3 className="font-bold">Create staff account</h3><div className="mt-4 grid gap-4 sm:grid-cols-2"><div><label className="block font-semibold" htmlFor="new-full-name">Full name</label><input className="mt-1 w-full rounded-lg border border-slate-300 p-2" id="new-full-name" value={form.fullName} onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))} required /></div><div><label className="block font-semibold" htmlFor="new-username">Username</label><input className="mt-1 w-full rounded-lg border border-slate-300 p-2" id="new-username" autoComplete="username" value={form.username} onChange={(event) => setForm((current) => ({ ...current, username: event.target.value }))} required /></div><div><label className="block font-semibold" htmlFor="new-password">Temporary password</label><input className="mt-1 w-full rounded-lg border border-slate-300 p-2" id="new-password" type="password" minLength="8" autoComplete="new-password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} required /></div><div><label className="block font-semibold" htmlFor="new-role">Role</label><select className="mt-1 w-full rounded-lg border border-slate-300 bg-white p-2" id="new-role" value={form.role} onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}>{['Dispatcher', 'ResponseUnit', 'Admin'].map((role) => <option key={role}>{role}</option>)}</select></div><div><label className="block font-semibold" htmlFor="new-phone">Phone (optional)</label><input className="mt-1 w-full rounded-lg border border-slate-300 p-2" id="new-phone" type="tel" autoComplete="tel" value={form.phoneNumber} onChange={(event) => setForm((current) => ({ ...current, phoneNumber: event.target.value }))} /></div></div><button className="mt-4 rounded-lg bg-blue-700 px-4 py-3 font-bold text-white hover:bg-blue-800" type="submit">Create account</button></form></section><section className="grid content-start gap-6"><section className="rounded-2xl bg-white p-5 shadow-sm" aria-labelledby="config-heading"><h2 className="text-xl font-bold" id="config-heading">Operational configuration</h2>{config ? <dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><div className="rounded-lg bg-slate-100 p-3"><dt className="text-slate-600">DBSCAN radius</dt><dd className="mt-1 text-lg font-bold">{config.dbscanEpsilonMeters} m</dd></div><div className="rounded-lg bg-slate-100 p-3"><dt className="text-slate-600">Minimum reports</dt><dd className="mt-1 text-lg font-bold">{config.dbscanMinPoints}</dd></div><div className="rounded-lg bg-slate-100 p-3"><dt className="text-slate-600">Reported alert</dt><dd className="mt-1 text-lg font-bold">{config.reportedEscalationMinutes} min</dd></div><div className="rounded-lg bg-slate-100 p-3"><dt className="text-slate-600">Validated alert</dt><dd className="mt-1 text-lg font-bold">{config.validatedEscalationMinutes} min</dd></div></dl> : <p className="mt-3 text-slate-600">Loading configuration…</p>}<p className="mt-4 text-sm text-slate-600">Thresholds are deployment configuration shared with the Python worker. They are read-only here so changes cannot silently diverge across services.</p></section><section className="rounded-2xl bg-white p-5 shadow-sm" aria-labelledby="audit-heading"><h2 className="text-xl font-bold" id="audit-heading">Recent audit activity</h2><ol className="mt-4 grid gap-3">{logs.slice(0, 12).map((log) => <li className="border-l-4 border-blue-600 pl-3" key={log.id}><strong className="block">{log.action}</strong><span className="block text-sm text-slate-700">{log.actor_name || 'System'} · {log.entity_name} {log.entity_id}</span><time className="block text-xs text-slate-500">{new Date(log.created_at).toLocaleString()}</time></li>)}</ol></section></section></main></div>;
+  return (
+    <div className="min-h-svh bg-background text-foreground flex flex-col">
+      <header className="border-b border-border bg-card px-4 py-4 sm:px-6 shadow-sm sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <ShieldAlert className="size-6 text-warning" />
+          <div>
+            <p className="text-xs font-bold tracking-widest text-warning uppercase">TAGOLOAN MDRRMO</p>
+            <h1 className="text-xl font-bold leading-none">Admin Dashboard</h1>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <a className="text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4" href="/dispatcher">
+            Dispatcher View
+          </a>
+          <Button variant="outline" size="sm" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
+            <LogOut className="size-4 mr-2" /> Sign Out
+          </Button>
+        </div>
+      </header>
+      
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 grid gap-6 lg:grid-cols-[1fr_400px]">
+        {error && (
+          <Alert variant="destructive" className="lg:col-span-2">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {message && (
+          <Alert className="lg:col-span-2 border-success text-success bg-success/10">
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle>Staff Accounts</CardTitle>
+                <CardDescription>Manage dispatchers, responders, and admins.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border border-border overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-secondary/30">
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id} className="border-border">
+                        <TableCell>
+                          <div className="font-semibold">{user.full_name}</div>
+                          <div className="text-xs text-muted-foreground">{user.username}</div>
+                        </TableCell>
+                        <TableCell>{user.role}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.is_active ? 'default' : 'secondary'} className={user.is_active ? 'bg-success text-success-foreground hover:bg-success' : ''}>
+                            {user.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            disabled={user.id === localStorage.getItem('derrsc_user_id')} 
+                            onClick={() => toggleUser(user)}
+                          >
+                            {user.is_active ? 'Deactivate' : 'Activate'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Staff Account</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={createUser} className="space-y-6">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="new-full-name">Full Name</FieldLabel>
+                      <Input id="new-full-name" value={form.fullName} onChange={(e) => setForm((c) => ({ ...c, fullName: e.target.value }))} required />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="new-username">Username</FieldLabel>
+                      <Input id="new-username" autoComplete="username" value={form.username} onChange={(e) => setForm((c) => ({ ...c, username: e.target.value }))} required />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="new-phone">Phone (Optional)</FieldLabel>
+                      <Input id="new-phone" type="tel" autoComplete="tel" value={form.phoneNumber} onChange={(e) => setForm((c) => ({ ...c, phoneNumber: e.target.value }))} />
+                    </Field>
+                  </FieldGroup>
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="new-password">Temporary Password</FieldLabel>
+                      <Input id="new-password" type="password" minLength="8" autoComplete="new-password" value={form.password} onChange={(e) => setForm((c) => ({ ...c, password: e.target.value }))} required />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="new-role">Role</FieldLabel>
+                      <select 
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
+                        id="new-role" 
+                        value={form.role} 
+                        onChange={(e) => setForm((c) => ({ ...c, role: e.target.value }))}
+                      >
+                        {['Dispatcher', 'ResponseUnit', 'Admin'].map((role) => <option key={role}>{role}</option>)}
+                      </select>
+                    </Field>
+                  </FieldGroup>
+                </div>
+                <Button type="submit">Create Account</Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6 content-start">
+          <Card>
+            <CardHeader>
+              <CardTitle>Operational Configuration</CardTitle>
+              <CardDescription>Thresholds synced with algorithmic microservices.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {config ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
+                    <div className="text-sm text-muted-foreground mb-1">DBSCAN Radius</div>
+                    <div className="text-xl font-bold tabular-nums">{config.dbscanEpsilonMeters} m</div>
+                  </div>
+                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
+                    <div className="text-sm text-muted-foreground mb-1">Min Reports</div>
+                    <div className="text-xl font-bold tabular-nums">{config.dbscanMinPoints}</div>
+                  </div>
+                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
+                    <div className="text-sm text-muted-foreground mb-1">Reported Alert</div>
+                    <div className="text-xl font-bold tabular-nums">{config.reportedEscalationMinutes} min</div>
+                  </div>
+                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
+                    <div className="text-sm text-muted-foreground mb-1">Validated Alert</div>
+                    <div className="text-xl font-bold tabular-nums">{config.validatedEscalationMinutes} min</div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Loading configuration…</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Audit Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {logs.slice(0, 12).map((log) => (
+                  <div className="flex gap-4 items-start pb-4 border-b border-border last:border-0 last:pb-0" key={log.id}>
+                    <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold">{log.action}</p>
+                      <p className="text-xs text-muted-foreground">{log.actor_name || 'System'} &middot; {log.entity_name} {log.entity_id}</p>
+                      <p className="text-xs text-muted-foreground/60 tabular-nums mt-1">{new Date(log.created_at).toLocaleString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  );
 }
 
 export default AdminDashboard;

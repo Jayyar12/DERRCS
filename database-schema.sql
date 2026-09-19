@@ -113,7 +113,7 @@ CREATE TABLE assignments (
     unit_id UUID NOT NULL REFERENCES response_units(id),
     assigned_by UUID REFERENCES users(id),
     dispatch_recommended_by_algorithm BOOLEAN DEFAULT TRUE,
-    status VARCHAR(30) DEFAULT 'Dispatched' CHECK (status IN ('Dispatched', 'Acknowledged', 'OnScene', 'Completed', 'Cancelled')),
+    status VARCHAR(30) DEFAULT 'Dispatched' CHECK (status IN ('Dispatched', 'Acknowledged', 'EnRoute', 'OnScene', 'Completed', 'Cancelled')),
     assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     acknowledged_at TIMESTAMP WITH TIME ZONE,
     arrived_at TIMESTAMP WITH TIME ZONE,
