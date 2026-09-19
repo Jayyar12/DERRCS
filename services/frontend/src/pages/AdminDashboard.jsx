@@ -1,27 +1,70 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { api, clearSession } from '../api/client';
 import { disconnectSocket } from '../api/socket';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { ShieldAlert, LogOut } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarInset,
+  SidebarTrigger,
+  SidebarSeparator,
+} from '@/components/ui/sidebar';
+import { ShieldAlert, LogOut, Users, ScrollText, MonitorCog, BarChart3 } from 'lucide-react';
+
+const StaffView = lazy(() => import('./admin/StaffView'));
+const AuditView = lazy(() => import('./admin/AuditView'));
+const AnalyticsView = lazy(() => import('./admin/AnalyticsView'));
+
+const VIEW_LABELS = {
+  staff: 'Staff Accounts',
+  audit: 'Audit Activity',
+  analytics: 'Analytics',
+};
+
+function ViewFallback() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
+        ))}
+      </div>
+      <Skeleton className="h-64 rounded-xl" />
+    </div>
+  );
+}
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
   const [config, setConfig] = useState(null);
+  const [incidents, setIncidents] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [units, setUnits] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [form, setForm] = useState({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' });
+  const [view, setView] = useState('analytics');
 
   async function load() {
     try {
-      const [nextUsers, nextLogs, nextConfig] = await Promise.all([api.adminUsers(), api.auditLogs(), api.config()]);
-      setUsers(nextUsers); setLogs(nextLogs); setConfig(nextConfig); setError('');
+      const [nextUsers, nextLogs, nextConfig, nextIncidents, nextReports, nextUnits] = await Promise.all([
+        api.adminUsers(), api.auditLogs(), api.config(),
+        api.incidents(), api.reports(), api.units(),
+      ]);
+      setUsers(nextUsers); setLogs(nextLogs); setConfig(nextConfig);
+      setIncidents(nextIncidents); setReports(nextReports); setUnits(nextUnits);
+      setError('');
     } catch (requestError) { setError(requestError.message || 'Unable to load the administrator dashboard.'); }
   }
   
@@ -39,188 +82,133 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-svh bg-background text-foreground flex flex-col">
-      <header className="border-b border-border bg-card px-4 py-4 sm:px-6 shadow-sm sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <ShieldAlert className="size-6 text-warning" />
-          <div>
-            <p className="text-xs font-bold tracking-widest text-warning uppercase">TAGOLOAN MDRRMO</p>
-            <h1 className="text-xl font-bold leading-none">Admin Dashboard</h1>
+    <SidebarProvider>
+      <Sidebar>
+        {/* ── Brand ── */}
+        <SidebarHeader className="p-4">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="text-warning shrink-0" />
+            <div>
+              <p className="text-xs font-bold tracking-widest text-warning uppercase">TAGOLOAN MDRRMO</p>
+              <p className="text-sm font-semibold leading-tight text-sidebar-foreground">Admin Dashboard</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <a className="text-sm font-medium text-muted-foreground hover:text-foreground underline underline-offset-4" href="/dispatcher">
-            Dispatcher View
-          </a>
-          <Button variant="outline" size="sm" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
-            <LogOut className="size-4 mr-2" /> Sign Out
-          </Button>
-        </div>
-      </header>
-      
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 grid gap-6 lg:grid-cols-[1fr_400px]">
-        {error && (
-          <Alert variant="destructive" className="lg:col-span-2">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {message && (
-          <Alert className="lg:col-span-2 border-success text-success bg-success/10">
-            <AlertDescription>{message}</AlertDescription>
-          </Alert>
-        )}
+        </SidebarHeader>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle>Staff Accounts</CardTitle>
-                <CardDescription>Manage dispatchers, responders, and admins.</CardDescription>
-              </div>
-              <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border border-border overflow-hidden">
-                <Table>
-                  <TableHeader className="bg-secondary/30">
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id} className="border-border">
-                        <TableCell>
-                          <div className="font-semibold">{user.full_name}</div>
-                          <div className="text-xs text-muted-foreground">{user.username}</div>
-                        </TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.is_active ? 'default' : 'secondary'} className={user.is_active ? 'bg-success text-success-foreground hover:bg-success' : ''}>
-                            {user.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            disabled={user.id === localStorage.getItem('derrsc_user_id')} 
-                            onClick={() => toggleUser(user)}
-                          >
-                            {user.is_active ? 'Deactivate' : 'Activate'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+        <SidebarSeparator />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Staff Account</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={createUser} className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FieldGroup>
-                    <Field>
-                      <FieldLabel htmlFor="new-full-name">Full Name</FieldLabel>
-                      <Input id="new-full-name" value={form.fullName} onChange={(e) => setForm((c) => ({ ...c, fullName: e.target.value }))} required />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="new-username">Username</FieldLabel>
-                      <Input id="new-username" autoComplete="username" value={form.username} onChange={(e) => setForm((c) => ({ ...c, username: e.target.value }))} required />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="new-phone">Phone (Optional)</FieldLabel>
-                      <Input id="new-phone" type="tel" autoComplete="tel" value={form.phoneNumber} onChange={(e) => setForm((c) => ({ ...c, phoneNumber: e.target.value }))} />
-                    </Field>
-                  </FieldGroup>
-                  <FieldGroup>
-                    <Field>
-                      <FieldLabel htmlFor="new-password">Temporary Password</FieldLabel>
-                      <Input id="new-password" type="password" minLength="8" autoComplete="new-password" value={form.password} onChange={(e) => setForm((c) => ({ ...c, password: e.target.value }))} required />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="new-role">Role</FieldLabel>
-                      <select 
-                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
-                        id="new-role" 
-                        value={form.role} 
-                        onChange={(e) => setForm((c) => ({ ...c, role: e.target.value }))}
-                      >
-                        {['Dispatcher', 'ResponseUnit', 'Admin'].map((role) => <option key={role}>{role}</option>)}
-                      </select>
-                    </Field>
-                  </FieldGroup>
-                </div>
-                <Button type="submit">Create Account</Button>
-              </form>
-            </CardContent>
-          </Card>
+        {/* ── Navigation ── */}
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Management</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={view === 'analytics'} onClick={() => setView('analytics')} tooltip="Analytics">
+                  <BarChart3 />
+                  <span>Analytics</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={view === 'staff'} onClick={() => setView('staff')} tooltip="Staff Accounts">
+                  <Users />
+                  <span>Staff Accounts</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={view === 'audit'} onClick={() => setView('audit')} tooltip="Audit Activity">
+                  <ScrollText />
+                  <span>Audit Activity</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>External</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton render={<a href="/dispatcher" />} tooltip="Dispatcher View">
+                  <MonitorCog />
+                  <span>Dispatcher View</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+
+        {/* ── Footer ── */}
+        <SidebarSeparator />
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="Sign Out" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
+                <LogOut />
+                <span>Sign Out</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* ── Main content area ── */}
+      <SidebarInset>
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="mx-1 h-4" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="text-muted-foreground">Admin</span>
+            <span className="text-muted-foreground">/</span>
+            <span className="font-medium">{VIEW_LABELS[view]}</span>
+          </div>
+        </header>
+
+        <div className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col gap-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {message && (
+            <Alert className="border-success text-success bg-success/10">
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
+          )}
+
+          <Suspense fallback={<ViewFallback />}>
+            {view === 'staff' && (
+              <StaffView
+                users={users}
+                config={config}
+                form={form}
+                setForm={setForm}
+                onRefresh={load}
+                onCreateUser={createUser}
+                onToggleUser={toggleUser}
+              />
+            )}
+
+            {view === 'audit' && (
+              <AuditView
+                logs={logs}
+                onRefresh={load}
+              />
+            )}
+
+            {view === 'analytics' && (
+              <AnalyticsView
+                incidents={incidents}
+                reports={reports}
+                units={units}
+                logs={logs}
+                config={config}
+                onRefresh={load}
+              />
+            )}
+          </Suspense>
         </div>
-
-        <div className="space-y-6 content-start">
-          <Card>
-            <CardHeader>
-              <CardTitle>Operational Configuration</CardTitle>
-              <CardDescription>Thresholds synced with algorithmic microservices.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {config ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
-                    <div className="text-sm text-muted-foreground mb-1">DBSCAN Radius</div>
-                    <div className="text-xl font-bold tabular-nums">{config.dbscanEpsilonMeters} m</div>
-                  </div>
-                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
-                    <div className="text-sm text-muted-foreground mb-1">Min Reports</div>
-                    <div className="text-xl font-bold tabular-nums">{config.dbscanMinPoints}</div>
-                  </div>
-                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
-                    <div className="text-sm text-muted-foreground mb-1">Reported Alert</div>
-                    <div className="text-xl font-bold tabular-nums">{config.reportedEscalationMinutes} min</div>
-                  </div>
-                  <div className="rounded-lg bg-secondary/40 p-4 border border-border">
-                    <div className="text-sm text-muted-foreground mb-1">Validated Alert</div>
-                    <div className="text-xl font-bold tabular-nums">{config.validatedEscalationMinutes} min</div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Loading configuration…</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Audit Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {logs.slice(0, 12).map((log) => (
-                  <div className="flex gap-4 items-start pb-4 border-b border-border last:border-0 last:pb-0" key={log.id}>
-                    <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold">{log.action}</p>
-                      <p className="text-xs text-muted-foreground">{log.actor_name || 'System'} &middot; {log.entity_name} {log.entity_id}</p>
-                      <p className="text-xs text-muted-foreground/60 tabular-nums mt-1">{new Date(log.created_at).toLocaleString()}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
