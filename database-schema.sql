@@ -170,7 +170,10 @@ CREATE INDEX idx_response_units_location ON response_units USING GIST (current_l
 -- STANDARD B-TREE INDEXES
 CREATE INDEX idx_reports_incident ON reports(incident_id);
 CREATE INDEX idx_reports_candidate ON reports(candidate_id);
+CREATE INDEX idx_reports_status_created ON reports(status, created_at);
 CREATE INDEX idx_incidents_status ON incidents(status);
+CREATE INDEX idx_incident_candidates_status ON incident_candidates(status, emergency_type, created_at);
 CREATE INDEX idx_assignments_incident ON assignments(incident_id);
 CREATE INDEX idx_assignments_unit ON assignments(unit_id);
 CREATE INDEX idx_field_assessments_incident ON field_assessments(incident_id);
+

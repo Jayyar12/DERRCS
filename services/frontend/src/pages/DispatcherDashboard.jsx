@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError, clearSession, getSession } from '../api/client';
 import { disconnectSocket, subscribeSocket } from '../api/socket';
@@ -117,7 +117,7 @@ function DispatcherDashboard() {
     catch (requestError) { setError(requestError.message); }
   }
 
-  const markers = [
+  const markers = useMemo(() => [
     ...rawReports
       .filter((r) => r.latitude && r.longitude)
       .map((report) => ({
@@ -156,7 +156,7 @@ function DispatcherDashboard() {
           : '#dc2626',
         incidentId: incident.id,
       })),
-  ];
+  ], [rawReports, candidates, incidents, selected?.id]);
   const recommendation = selected?.incident_id ? recommendations[selected.incident_id] : null;
 
   return (
