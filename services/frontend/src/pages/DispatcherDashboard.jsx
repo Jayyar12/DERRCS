@@ -22,6 +22,7 @@ function DispatcherDashboard() {
   const [candidates, setCandidates] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [units, setUnits] = useState([]);
+  const [rawReports, setRawReports] = useState([]);
   const [selected, setSelected] = useState(null);
   const [recommendations, setRecommendations] = useState({});
   const [selectedUnitId, setSelectedUnitId] = useState('');
@@ -37,8 +38,8 @@ function DispatcherDashboard() {
   async function loadDashboard({ quiet = false } = {}) {
     if (!quiet) setLoading(true);
     try {
-      const [nextCandidates, nextUnits, nextIncidents] = await Promise.all([api.candidates(), api.units(), api.incidents()]);
-      setCandidates(nextCandidates); setUnits(nextUnits); setIncidents(nextIncidents); setError('');
+      const [nextCandidates, nextUnits, nextIncidents, nextReports] = await Promise.all([api.candidates(), api.units(), api.incidents(), api.reports()]);
+      setCandidates(nextCandidates); setUnits(nextUnits); setIncidents(nextIncidents); setRawReports(nextReports); setError('');
     } catch (requestError) { setError(requestError instanceof ApiError ? requestError.message : 'Unable to load the command dashboard.'); }
     finally { if (!quiet) setLoading(false); }
   }
@@ -68,6 +69,7 @@ function DispatcherDashboard() {
   useEffect(() => { loadDashboard(); }, []);
   useEffect(() => {
     const cleanup = [
+      subscribeSocket('dispatcher:report:new', () => { loadDashboard({ quiet: true }); }),
       subscribeSocket('dispatcher:candidate:new', () => { toast('Candidate activity received. Dashboard refreshed.'); loadDashboard({ quiet: true }); }),
       subscribeSocket('dispatcher:field:resolved', () => { toast('A field assessment was completed. Dashboard refreshed.'); loadDashboard({ quiet: true }); }),
       subscribeSocket('dispatcher:assignment:recommended', (payload) => setRecommendations((current) => ({ ...current, [payload.incidentId]: payload }))),
@@ -116,6 +118,17 @@ function DispatcherDashboard() {
   }
 
   const markers = [
+    ...rawReports
+      .filter((r) => r.latitude && r.longitude)
+      .map((report) => ({
+        id: `report-${report.id}`,
+        latitude: report.latitude,
+        longitude: report.longitude,
+        title: 'Unverified Report',
+        description: report.emergency_type,
+        color: '#9ca3af',
+        reportId: report.id,
+      })),
     ...candidates
       .filter((c) => c.center_location?.coordinates?.length >= 2)
       .map((candidate) => ({

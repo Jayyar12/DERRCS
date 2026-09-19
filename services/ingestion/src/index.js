@@ -176,6 +176,26 @@ async function bindConsumers(channel) {
   // prevents overwhelming Socket.IO on burst traffic.
   await channel.prefetch(1);
 
+  // ─── Consumer 0: report.ingested → dispatchers ────────────────────────────
+  const reportQueue = 'ingestion.report.ingested';
+  await channel.assertQueue(reportQueue, { durable: true });
+  await channel.bindQueue(reportQueue, EXCHANGE_NAME, 'report.ingested');
+
+  channel.consume(reportQueue, (msg) => {
+    if (!msg) return;
+
+    try {
+      const payload = JSON.parse(msg.content.toString());
+      emitToRoom('dispatchers', 'dispatcher:report:new', payload);
+      channel.ack(msg);
+    } catch (err) {
+      console.error('[Consumer] report.ingested parse error:', err.message);
+      channel.nack(msg, false, false);
+    }
+  });
+
+  console.log(`[RabbitMQ] Consumer bound: report.ingested → dispatcher:report:new`);
+
   // ─── Consumer 1: candidate.created & candidate.updated → dispatchers ──────
   const clusterQueue = 'ingestion.candidate.created';
   await channel.assertQueue(clusterQueue, { durable: true });

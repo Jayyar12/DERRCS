@@ -151,4 +151,38 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
+/**
+ * @route  GET /api/v1/reports
+ * @desc   Fetch raw, unclustered reports
+ * @access Public/Dispatchers
+ */
+router.get('/', async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT 
+         id, 
+         emergency_type, 
+         description, 
+         ST_Y(emergency_location::geometry) as latitude, 
+         ST_X(emergency_location::geometry) as longitude, 
+         created_at 
+       FROM reports 
+       WHERE status = 'Received' 
+       ORDER BY created_at DESC 
+       LIMIT 100`
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows
+    });
+  } catch (err) {
+    console.error('[Reports] Fetch error:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch reports.' }
+    });
+  }
+});
+
 module.exports = router;

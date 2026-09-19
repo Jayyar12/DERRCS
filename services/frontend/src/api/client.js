@@ -56,6 +56,7 @@ export async function apiRequest(path, { method = 'GET', body, headers = {}, sig
 
 export const api = {
   login: (credentials) => apiRequest('/auth/login', { method: 'POST', body: credentials }),
+  reports: () => apiRequest('/reports'),
   submitReport: (formData) => apiRequest('/reports', { method: 'POST', body: formData }),
   candidates: () => apiRequest('/candidates'),
   candidate: (id) => apiRequest(`/candidates/${id}`),
