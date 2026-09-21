@@ -15,7 +15,8 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-import { FieldSet, FieldLegend } from "@/components/ui/field"
+import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel } from "@/components/ui/field"
+import { AppHeader } from '@/components/layout/AppHeader';
 
 const injuryOptions = ['Laceration', 'Suspected fracture', 'Burn', 'Head trauma', 'Respiratory distress', 'Other'];
 const interventionOptions = ['Wound dressing', 'Cervical collar', 'Splinting', 'CPR', 'Oxygen therapy', 'Other'];
@@ -90,18 +91,17 @@ function ResponderPortal() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground pb-20 sm:pb-0">
-      <header className="flex items-center justify-between gap-4 border-b bg-card px-4 py-3 shadow-sm sm:px-6">
-        <div>
-          <p className="text-xs font-bold tracking-widest text-warning">TAGOLOAN MDRRMO</p>
-          <h1 className="text-xl font-bold">Response Unit Field Portal</h1>
-        </div>
-        <div className="flex items-center gap-3">
+      <AppHeader
+        title="Response Unit Field Portal"
+        actions={(
+          <>
           <span className="text-sm font-medium hidden sm:inline">{session?.fullName || 'Response unit'}</span>
           <Button variant="outline" size="sm" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
             Sign out
           </Button>
-        </div>
-      </header>
+          </>
+        )}
+      />
 
       <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6" id="responder-main">
         {error && (

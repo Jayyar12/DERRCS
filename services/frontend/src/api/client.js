@@ -55,29 +55,29 @@ export async function apiRequest(path, { method = 'GET', body, headers = {}, sig
 }
 
 export const api = {
-  login: (credentials) => apiRequest('/auth/login', { method: 'POST', body: credentials }),
-  reports: () => apiRequest('/reports'),
-  submitReport: (formData) => apiRequest('/reports', { method: 'POST', body: formData }),
-  candidates: () => apiRequest('/candidates'),
-  candidate: (id) => apiRequest(`/candidates/${id}`),
-  confirmCandidate: (id) => apiRequest(`/candidates/${id}/confirm`, { method: 'POST' }),
-  units: () => apiRequest('/units'),
-  incidents: () => apiRequest('/incidents'),
-  incident: (id) => apiRequest(`/incidents/${id}`),
-  assign: (incidentId, responseUnitId, notes) => apiRequest(`/incidents/${incidentId}/assign`, {
-    method: 'POST', body: { responseUnitId, notes },
+  login: (credentials, options = {}) => apiRequest('/auth/login', { method: 'POST', body: credentials, ...options }),
+  reports: (options = {}) => apiRequest('/reports', options),
+  submitReport: (formData, options = {}) => apiRequest('/reports', { method: 'POST', body: formData, ...options }),
+  candidates: (options = {}) => apiRequest('/candidates', options),
+  candidate: (id, options = {}) => apiRequest(`/candidates/${id}`, options),
+  confirmCandidate: (id, options = {}) => apiRequest(`/candidates/${id}/confirm`, { method: 'POST', ...options }),
+  units: (options = {}) => apiRequest('/units', options),
+  incidents: (options = {}) => apiRequest('/incidents', options),
+  incident: (id, options = {}) => apiRequest(`/incidents/${id}`, options),
+  assign: (incidentId, responseUnitId, notes, options = {}) => apiRequest(`/incidents/${incidentId}/assign`, {
+    method: 'POST', body: { responseUnitId, notes }, ...options,
   }),
-  closeIncident: (incidentId) => apiRequest(`/incidents/${incidentId}/close`, { method: 'POST' }),
-  currentAssignment: () => apiRequest('/assignments/current'),
-  updateAssignmentStatus: (assignmentId, status) => apiRequest(`/assignments/${assignmentId}/status`, {
-    method: 'PATCH', body: { status },
+  closeIncident: (incidentId, options = {}) => apiRequest(`/incidents/${incidentId}/close`, { method: 'POST', ...options }),
+  currentAssignment: (options = {}) => apiRequest('/assignments/current', options),
+  updateAssignmentStatus: (assignmentId, status, options = {}) => apiRequest(`/assignments/${assignmentId}/status`, {
+    method: 'PATCH', body: { status }, ...options,
   }),
-  submitAssessment: (incidentId, assessment) => apiRequest(`/incidents/${incidentId}/field-assessment`, {
-    method: 'POST', body: assessment,
+  submitAssessment: (incidentId, assessment, options = {}) => apiRequest(`/incidents/${incidentId}/field-assessment`, {
+    method: 'POST', body: assessment, ...options,
   }),
-  adminUsers: () => apiRequest('/admin/users'),
-  createUser: (user) => apiRequest('/admin/users', { method: 'POST', body: user }),
-  updateUser: (id, updates) => apiRequest(`/admin/users/${id}`, { method: 'PATCH', body: updates }),
-  auditLogs: () => apiRequest('/admin/audit-logs'),
-  config: () => apiRequest('/admin/config'),
+  adminUsers: (options = {}) => apiRequest('/admin/users', options),
+  createUser: (user, options = {}) => apiRequest('/admin/users', { method: 'POST', body: user, ...options }),
+  updateUser: (id, updates, options = {}) => apiRequest(`/admin/users/${id}`, { method: 'PATCH', body: updates, ...options }),
+  auditLogs: (options = {}) => apiRequest('/admin/audit-logs', options),
+  config: (options = {}) => apiRequest('/admin/config', options),
 };

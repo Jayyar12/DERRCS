@@ -34,3 +34,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# 6. Graphify Artifacts
+.graphify/
+graphify-out/

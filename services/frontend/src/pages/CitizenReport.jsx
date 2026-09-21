@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PublicPageHeader } from '@/components/layout/PublicPageHeader';
 import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, Camera, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
 
 const emergencyTypes = [
@@ -124,15 +125,10 @@ function CitizenReport() {
 
   return (
     <div className="min-h-svh bg-background text-foreground pb-20">
-      <header className="border-b border-border bg-background/95 backdrop-blur px-4 py-4 sticky top-0 z-50">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div>
-            <p className="text-sm font-bold tracking-widest text-muted-foreground uppercase">TAGOLOAN MDRRMO</p>
-            <h1 className="text-xl font-bold">Emergency Report</h1>
-          </div>
-          <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Agency Login</Link>
-        </div>
-      </header>
+      <PublicPageHeader
+        title="Emergency Report"
+        actions={<Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Agency Login</Link>}
+      />
       
       <main className="mx-auto max-w-2xl px-4 py-8" id="main-content">
         <Card>

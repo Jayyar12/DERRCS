@@ -21,4 +21,9 @@ export default defineConfig({
       '/uploads': 'http://localhost:5000',
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.js'],
+  },
 })

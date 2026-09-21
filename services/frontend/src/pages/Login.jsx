@@ -6,6 +6,7 @@ import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OrganizationHero } from '@/components/branding/OrganizationBrand';
 import { ArrowLeft } from 'lucide-react';
 
 const destinations = { Dispatcher: '/dispatcher', ResponseUnit: '/responder', Admin: '/admin' };
@@ -37,25 +38,18 @@ function Login() {
   }
 
   return (
-    <main className="grid min-h-svh place-items-center bg-background px-4 py-10" id="main-content" tabIndex="-1">
-      <div className="w-full max-w-md flex flex-col gap-6">
+    <main className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10" id="main-content" tabIndex="-1">
+      <OrganizationHero />
+
+      <div className="flex w-full max-w-md flex-col gap-6">
         
         <Link to="/" className="text-sm font-semibold text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors w-fit">
           <ArrowLeft className="size-4" />
           Back to Public Portal
         </Link>
-        
-        <div className="text-center space-y-1">
-          <h1 className="text-xl font-bold tracking-wider text-foreground">
-            TAGOLOAN MDRRMO
-          </h1>
-          <p className="text-sm font-bold tracking-widest text-warning uppercase">
-            Disaster Risk Reduction & Management
-          </p>
-        </div>
 
         <Card className="py-2">
-          <CardHeader className="text-center space-y-1">
+          <CardHeader className="text-center flex flex-col gap-1">
             <CardTitle className="text-lg font-bold">Secure Access Portal</CardTitle>
             <CardDescription className="text-sm">Sign in for dispatchers, response units, and administrators.</CardDescription>
           </CardHeader>
@@ -67,7 +61,7 @@ function Login() {
               </Alert>
             )}
             
-            <form id="login-form" onSubmit={submit} className="space-y-6">
+            <form id="login-form" onSubmit={submit} className="flex flex-col gap-6">
               <FieldGroup className="gap-6">
                 <Field>
                   <FieldLabel htmlFor="username">Badge ID / Username</FieldLabel>

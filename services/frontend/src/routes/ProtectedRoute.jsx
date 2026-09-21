@@ -7,7 +7,7 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   // No login token
   if (!token) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
 
   // Logged in, but wrong role

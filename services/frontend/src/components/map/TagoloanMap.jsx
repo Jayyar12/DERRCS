@@ -72,7 +72,8 @@ function FitTagoloan({ data }) {
       map.invalidateSize();
       map.fitBounds(bounds, {
         padding: [30, 30],
-        animate: false,
+        animate: true,
+        duration: 1.5,
       });
 
       const fittedZoom = map.getBoundsZoom(bounds, false, [30, 30]);
@@ -302,6 +303,7 @@ function TagoloanMap({
         zoom={13}
         maxZoom={20}
         maxBoundsViscosity={1.0}
+        preferCanvas={true}
         className="h-full w-full"
         aria-label={
           interactive
