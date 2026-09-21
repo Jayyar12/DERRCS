@@ -13,6 +13,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
+import { Users, Activity } from "lucide-react";
 import { AppHeader } from '@/components/layout/AppHeader';
 
 const statusColors = {
@@ -283,14 +286,14 @@ function DispatcherDashboard() {
             <ScrollArea className="h-full">
               <div className="flex flex-col gap-6 p-4">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-lg">Candidate Review</CardTitle>
                     <Button variant="link" size="sm" onClick={() => loadDashboard()}>
                       Refresh
                     </Button>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center space-x-2 mb-4">
+                    <div className="flex items-center gap-2 mb-4">
                       <Checkbox
                         id="audible"
                         checked={audibleAlerts}
@@ -305,9 +308,22 @@ function DispatcherDashboard() {
                     </div>
 
                     {loading ? (
-                      <p className="text-sm text-muted-foreground">Loading live candidates…</p>
+                      <div className="flex flex-col gap-3" role="status" aria-label="Loading live candidates">
+                        <Skeleton className="h-24 w-full rounded-lg" />
+                        <Skeleton className="h-24 w-full rounded-lg" />
+                      </div>
                     ) : candidates.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No pending candidate clusters.</p>
+                      <Empty className="border border-dashed py-6">
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <Users />
+                          </EmptyMedia>
+                          <EmptyTitle>No pending candidate clusters</EmptyTitle>
+                          <EmptyDescription>
+                            Incoming citizen reports will cluster here in real time.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     ) : (
                       <div className="grid gap-3">
                         {candidates.map((candidate) => (
@@ -349,8 +365,23 @@ function DispatcherDashboard() {
                     <CardTitle className="text-lg">Incident Status</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {incidents.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No active incidents.</p>
+                    {loading ? (
+                      <div className="flex flex-col gap-3" role="status" aria-label="Loading incidents">
+                        <Skeleton className="h-20 w-full rounded-lg" />
+                        <Skeleton className="h-20 w-full rounded-lg" />
+                      </div>
+                    ) : incidents.length === 0 ? (
+                      <Empty className="border border-dashed py-6">
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <Activity />
+                          </EmptyMedia>
+                          <EmptyTitle>No active incidents</EmptyTitle>
+                          <EmptyDescription>
+                            Validated emergencies will appear here for response tracking.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     ) : (
                       <div className="grid gap-3">
                         {incidents.map((incident) => (

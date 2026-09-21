@@ -1,23 +1,28 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { cn } from 'cn';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError } from '../api/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Field, FieldGroup, FieldLabel, FieldSet, FieldLegend } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Spinner } from '@/components/ui/spinner';
 import { PublicPageHeader } from '@/components/layout/PublicPageHeader';
 import { OrganizationHero } from '@/components/branding/OrganizationBrand';
-import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, Camera, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
 
 const emergencyTypes = [
-  { name: 'Fire', icon: Flame, color: 'text-orange-500' },
-  { name: 'Flood', icon: Droplets, color: 'text-blue-500' },
-  { name: 'Medical', icon: Activity, color: 'text-rose-500' },
-  { name: 'Road Accident', icon: Car, color: 'text-amber-500' },
-  { name: 'Rescue', icon: LifeBuoy, color: 'text-emerald-500' }
+  { name: 'Fire', icon: Flame, color: 'text-warning' },
+  { name: 'Flood', icon: Droplets, color: 'text-primary' },
+  { name: 'Medical', icon: Activity, color: 'text-destructive' },
+  { name: 'Road Accident', icon: Car, color: 'text-warning' },
+  { name: 'Rescue', icon: LifeBuoy, color: 'text-success' }
 ];
 
 const questionSets = {
@@ -60,27 +65,44 @@ function CitizenReport() {
         const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
         setEmergencyCoordinates(coords);
         setReporterCoordinates(coords);
-        setLocationMessage('Location acquired via GPS.');
+        setLocationMessage('Location attached from GPS.');
       },
-      (err) => {
-        setLocationMessage(err.code === 1 ? 'Location access denied. Please place the pin on the map.' : 'Unable to acquire location automatically.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
+      () => setLocationMessage('Unable to access GPS location.')
     );
   }
 
   function nextStep() {
     setError('');
-    if (step === 1 && (!form.emergencyType || !form.description.trim())) return setError('Select an emergency type and provide a short description.');
-    if (step === 2 && questions.some(([key]) => !form.answers[key])) return setError('Answer each operational question before continuing.');
-    if (step === 3 && !emergencyCoordinates) return setError('Use your location or place the emergency pin on the Tagoloan map.');
-    setStep((current) => Math.min(current + 1, 4));
+    if (step === 1 && !form.emergencyType) {
+      setError('Please select an emergency type.');
+      return;
+    }
+    if (step === 1 && !form.description.trim()) {
+      setError('Please provide a brief description.');
+      return;
+    }
+    if (step === 2) {
+      const unanswered = questions.filter(([k]) => !form.answers[k]);
+      if (unanswered.length) {
+        setError('Please answer all operational questions.');
+        return;
+      }
+    }
+    setStep((current) => current + 1);
   }
 
   async function submit(event) {
     event.preventDefault();
+    if (!form.emergencyType || !form.description.trim()) {
+      setError('Emergency type and description are required.');
+      return;
+    }
+    if (!emergencyCoordinates) {
+      setError('Please select an emergency location on the map.');
+      return;
+    }
+
     setError('');
-    if (!emergencyCoordinates) return setError('An emergency location is required.');
     setSubmitting(true);
     try {
       const data = new FormData();
@@ -91,10 +113,14 @@ function CitizenReport() {
       data.append('standardizedAnswers', JSON.stringify(form.answers));
       if (reporterCoordinates) data.append('reporterCoordinates', JSON.stringify(reporterCoordinates));
       if (photo) data.append('photo', photo);
-      setConfirmation(await api.submitReport(data));
+
+      const result = await api.submitReport(data);
+      setConfirmation(result);
     } catch (requestError) {
       setError(requestError instanceof ApiError ? requestError.message : 'Unable to submit the report. Please try again.');
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (confirmation) {
@@ -107,7 +133,7 @@ function CitizenReport() {
             <h1 className="text-xl font-bold mb-2">Help is being coordinated.</h1>
             <p className="text-base text-muted-foreground mb-8 max-w-md">Keep yourself safe. MDRRMO will review your report with nearby submissions.</p>
             
-            <div className="w-full text-left p-6 bg-secondary/30 rounded-xl mb-8 space-y-4">
+            <div className="w-full text-left p-6 bg-secondary/30 rounded-xl mb-8 flex flex-col gap-4">
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Tracking Identifier</p>
                 <p className="font-mono text-lg">{confirmation.reportId}</p>
@@ -135,11 +161,9 @@ function CitizenReport() {
       <main className="mx-auto max-w-2xl px-4 py-8" id="main-content">
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-semibold text-primary">Step {step} of 4</span>
-              <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-primary transition-all duration-300" style={{ width: `${step * 25}%` }} />
-              </div>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-sm font-semibold text-primary shrink-0">Step {step} of 4</span>
+              <Progress value={step * 25} className="flex-1" />
             </div>
             <CardTitle className="text-lg font-bold">Report an Emergency</CardTitle>
             <CardDescription className="text-sm">Move to safety first. This form alerts nearby dispatchers.</CardDescription>
@@ -148,27 +172,40 @@ function CitizenReport() {
           <CardContent>
             {error && <Alert variant="destructive" className="mb-6"><AlertDescription>{error}</AlertDescription></Alert>}
             
-            <form id="report-form" onSubmit={submit} className="space-y-6">
+            <form id="report-form" onSubmit={submit} className="flex flex-col gap-6">
               
               {step === 1 && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <div className="flex flex-col gap-6">
+                  <FieldSet>
+                    <FieldLegend className="flex items-center gap-2 text-base font-semibold mb-4">
                       <AlertTriangle className="size-5 text-warning" /> What is happening?
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {emergencyTypes.map(({ name, icon: Icon, color }) => (
-                        <div
-                          key={name}
-                          onClick={() => updateForm('emergencyType', name)}
-                          className={`cursor-pointer rounded-xl border p-4 flex flex-col items-center justify-center gap-2 transition-colors ${form.emergencyType === name ? 'border-primary bg-primary/10' : 'border-border bg-card hover:border-muted-foreground/50'}`}
-                        >
-                          <Icon className={`size-7 ${color} ${form.emergencyType === name ? 'opacity-100 drop-shadow-md' : 'opacity-70'}`} />
-                          <span className={`text-sm font-semibold ${form.emergencyType === name ? 'text-primary' : 'text-muted-foreground'}`}>{name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                    </FieldLegend>
+                    <ToggleGroup
+                      value={form.emergencyType ? [form.emergencyType] : []}
+                      onValueChange={(val) => updateForm('emergencyType', val[0] || '')}
+                      className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full"
+                    >
+                      {emergencyTypes.map(({ name, icon: Icon, color }) => {
+                        const isSelected = form.emergencyType === name;
+                        return (
+                          <ToggleGroupItem
+                            key={name}
+                            value={name}
+                            variant="outline"
+                            className={cn(
+                              "h-auto p-4 flex flex-col items-center justify-center gap-2 rounded-xl border transition-all cursor-pointer text-center",
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/40 shadow-sm"
+                                : "border-border bg-card text-foreground hover:border-muted-foreground/50 hover:bg-muted/30"
+                            )}
+                          >
+                            <Icon className={cn("size-7", isSelected ? "text-primary" : color)} />
+                            <span className="text-sm font-semibold">{name}</span>
+                          </ToggleGroupItem>
+                        );
+                      })}
+                    </ToggleGroup>
+                  </FieldSet>
                   
                   <FieldGroup>
                     <Field>
@@ -188,24 +225,31 @@ function CitizenReport() {
               )}
               
               {step === 2 && (
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6">
                   <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
                     <ClipboardList className="size-5 text-primary" /> Operational Details
                   </h3>
-                  <FieldGroup>
+                  <FieldGroup className="gap-6">
                     {questions.map(([key, label, options]) => (
                       <Field key={key}>
-                        <FieldLabel htmlFor={key}>{label}</FieldLabel>
-                        <select 
-                          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
-                          id={key} 
-                          value={form.answers[key] || ''} 
-                          onChange={(event) => updateAnswer(key, event.target.value)} 
-                          required
+                        <FieldLabel>{label}</FieldLabel>
+                        <Select
+                          value={form.answers[key] || ''}
+                          onValueChange={(val) => updateAnswer(key, val)}
                         >
-                          <option value="" disabled>Select an answer</option>
-                          {options.map((option) => <option key={option}>{option}</option>)}
-                        </select>
+                          <SelectTrigger className="w-full bg-background h-10 px-3 text-sm">
+                            <SelectValue placeholder="Select an answer" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {options.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
                       </Field>
                     ))}
                   </FieldGroup>
@@ -213,7 +257,7 @@ function CitizenReport() {
               )}
               
               {step === 3 && (
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6">
                   <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
                     <Map className="size-5 text-primary" /> Emergency Location
                   </h3>
@@ -221,7 +265,7 @@ function CitizenReport() {
                   
                   <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                     <Button type="button" variant="secondary" onClick={useMyLocation}>
-                      <MapPin className="size-4 mr-2" /> Use my GPS location
+                      <MapPin data-icon="inline-start" /> Use my GPS location
                     </Button>
                     {locationMessage && <span className="text-sm text-muted-foreground">{locationMessage}</span>}
                   </div>
@@ -249,7 +293,7 @@ function CitizenReport() {
               )}
               
               {step === 4 && (
-                <div className="space-y-6">
+                <div className="flex flex-col gap-6">
                   <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
                     <Eye className="size-5 text-primary" /> Review Summary
                   </h3>
@@ -282,7 +326,14 @@ function CitizenReport() {
               <Button type="button" onClick={nextStep}>Continue</Button>
             ) : (
               <Button type="submit" form="report-form" disabled={submitting}>
-                {submitting ? 'Submitting...' : 'Submit Emergency'}
+                {submitting ? (
+                  <>
+                    <Spinner data-icon="inline-start" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  'Submit Emergency'
+                )}
               </Button>
             )}
           </CardFooter>

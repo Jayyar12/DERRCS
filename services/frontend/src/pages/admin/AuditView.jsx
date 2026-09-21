@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
+import { ScrollText } from 'lucide-react';
 
 function AuditView({ logs, onRefresh }) {
   return (
@@ -36,7 +38,17 @@ function AuditView({ logs, onRefresh }) {
           </Table>
         </div>
         {logs.length === 0 && (
-          <p className="text-sm text-muted-foreground py-6 text-center">No audit entries yet.</p>
+          <Empty className="py-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ScrollText />
+              </EmptyMedia>
+              <EmptyTitle>No audit entries yet</EmptyTitle>
+              <EmptyDescription>
+                System actions and status changes will appear here in chronological order.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

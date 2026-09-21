@@ -3,8 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Search, Activity } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
@@ -134,7 +137,7 @@ function AnalyticsView({ incidents, reports, units, logs, config, onRefresh }) {
           {/* Chart row */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <CardTitle>Report Volume Trend</CardTitle>
                 <CardDescription>
                   Daily emergency reports over the last 7 days
@@ -189,32 +192,36 @@ function AnalyticsView({ incidents, reports, units, logs, config, onRefresh }) {
               <Button variant="outline" size="sm" onClick={onRefresh}>Refresh</Button>
             </div>
             {/* Time filter tabs */}
-            <div className="flex gap-1 rounded-lg bg-secondary/40 p-1 mt-2">
+            <ToggleGroup
+              value={[timeFilter]}
+              onValueChange={(val) => {
+                if (val && val[0]) setTimeFilter(val[0]);
+              }}
+              className="mt-2 flex w-full rounded-lg bg-secondary/40 p-1"
+              spacing={1}
+            >
               {TIME_FILTERS.map((f) => (
-                <button
+                <ToggleGroupItem
                   key={f.key}
-                  type="button"
-                  onClick={() => setTimeFilter(f.key)}
-                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    timeFilter === f.key
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                  value={f.key}
+                  size="sm"
+                  className="flex-1 rounded-md text-xs font-medium data-checked:bg-background data-checked:text-foreground data-checked:shadow-sm"
                 >
                   {f.label}
-                </button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             {/* Search */}
-            <div className="relative mt-2">
-              <Search className="absolute left-2.5 top-2.5 text-muted-foreground size-4" />
-              <Input
+            <InputGroup className="mt-2 h-9">
+              <InputGroupAddon align="inline-start">
+                <Search />
+              </InputGroupAddon>
+              <InputGroupInput
                 placeholder="Search activities"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 h-9"
               />
-            </div>
+            </InputGroup>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto max-h-[400px]">
             <p className="text-xs text-muted-foreground mb-3">
@@ -284,10 +291,10 @@ function AnalyticsView({ incidents, reports, units, logs, config, onRefresh }) {
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="pb-2">
-                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                <Skeleton className="h-4 w-24" />
               </CardHeader>
               <CardContent>
-                <div className="h-8 w-16 animate-pulse rounded bg-muted" />
+                <Skeleton className="h-8 w-16" />
               </CardContent>
             </Card>
           ))
@@ -343,7 +350,15 @@ function AnalyticsView({ incidents, reports, units, logs, config, onRefresh }) {
             </Table>
           </div>
           {monitoredIncidents.length === 0 && (
-            <p className="text-sm text-muted-foreground py-6 text-center">No active incidents.</p>
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Activity />
+                </EmptyMedia>
+                <EmptyTitle>No active incidents</EmptyTitle>
+                <EmptyDescription>All tracked incidents have been resolved or closed.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </CardContent>
       </Card>

@@ -3,17 +3,21 @@ import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError, clearSession, getSession } from '../api/client';
 import { disconnectSocket, subscribeSocket } from '../api/socket';
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerTrigger } from "@/components/ui/drawer"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "@/components/ui/empty"
+import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { LifeBuoy } from "lucide-react"
 
 import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { AppHeader } from '@/components/layout/AppHeader';
@@ -28,14 +32,19 @@ function Checklist({ label, options, values, onChange }) {
       <FieldLegend>{label}</FieldLegend>
       <div className="grid gap-3 sm:grid-cols-2">
         {options.map((option) => (
-          <label className="flex items-center gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors bg-card" key={option}>
+          <Field
+            key={option}
+            orientation="horizontal"
+            className="flex items-center gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors bg-card justify-start"
+          >
             <Checkbox 
+              id={`chk-${option}`}
               checked={values.includes(option)} 
               onCheckedChange={(checked) => onChange(checked ? [...values, option] : values.filter((value) => value !== option))} 
               className="size-5"
             />
-            <span className="text-sm font-medium">{option}</span>
-          </label>
+            <FieldLabel htmlFor={`chk-${option}`} className="text-sm font-medium cursor-pointer">{option}</FieldLabel>
+          </Field>
         ))}
       </div>
     </FieldSet>
@@ -112,19 +121,28 @@ function ResponderPortal() {
         )}
 
         {loading ? (
-          <p className="text-muted-foreground animate-pulse">Loading dispatch…</p>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]" role="status" aria-label="Loading dispatch">
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-28 w-full rounded-xl" />
+            </div>
+            <Skeleton className="h-80 w-full rounded-xl" />
+          </div>
         ) : !assignment ? (
-          <Card className="text-center py-10 shadow-sm border-dashed">
-            <CardHeader>
-              <CardTitle className="text-2xl">No active dispatch</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Keep this page open. A new assignment will appear here in real time.</p>
-            </CardContent>
-            <CardFooter className="justify-center pt-2">
+          <Empty className="border border-dashed py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <LifeBuoy />
+              </EmptyMedia>
+              <EmptyTitle>No active dispatch</EmptyTitle>
+              <EmptyDescription>
+                Keep this page open. A new assignment will appear here in real time.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
               <Button size="lg" onClick={() => loadAssignment()}>Check again</Button>
-            </CardFooter>
-          </Card>
+            </EmptyContent>
+          </Empty>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <Card className="shadow-sm">
@@ -138,7 +156,7 @@ function ResponderPortal() {
                   <Badge className="text-base py-1 px-3">Unit: {status}</Badge>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                   <h3 className="font-bold border-b pb-2">Caller notes</h3>
                   {assignment.caller_notes?.length ? (
                     <ul className="grid gap-2">
@@ -154,22 +172,34 @@ function ResponderPortal() {
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
                   {['Dispatched', 'Acknowledged'].includes(status) && (
                     <Button size="lg" className="w-full text-lg py-8 font-bold bg-primary hover:bg-primary/90" disabled={saving} onClick={() => updateStatus('EnRoute')}>
-                      Mark En Route
+                      {saving ? (
+                        <>
+                          <Spinner data-icon="inline-start" />
+                          <span>Updating status...</span>
+                        </>
+                      ) : (
+                        'Mark En Route'
+                      )}
                     </Button>
                   )}
                   {['Dispatched', 'Acknowledged', 'EnRoute'].includes(status) && (
                     <Button size="lg" className="w-full text-lg py-8 font-bold bg-destructive hover:bg-destructive/90" disabled={saving} onClick={() => updateStatus('OnScene')}>
-                      Arrived on Scene
+                      {saving ? (
+                        <>
+                          <Spinner data-icon="inline-start" />
+                          <span>Recording arrival...</span>
+                        </>
+                      ) : (
+                        'Arrived on Scene'
+                      )}
                     </Button>
                   )}
                 </div>
 
                 {onScene && (
                   <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                    <DrawerTrigger asChild>
-                      <Button size="lg" className="w-full mt-6 text-lg py-8 font-bold bg-success hover:bg-success/90 text-success-foreground">
-                        Complete Field Assessment
-                      </Button>
+                    <DrawerTrigger render={<Button size="lg" className="w-full mt-6 text-lg py-8 font-bold bg-success hover:bg-success/90 text-success-foreground" />}>
+                      Complete Field Assessment
                     </DrawerTrigger>
                     <DrawerContent className="max-h-[96svh]">
                       <ScrollArea className="overflow-auto">
@@ -197,10 +227,12 @@ function ResponderPortal() {
                                   <Select value={form.gender || 'none'} onValueChange={(val) => setForm({ ...form, gender: val === 'none' ? '' : val })}>
                                     <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="none">Not recorded</SelectItem>
-                                      <SelectItem value="Male">Male</SelectItem>
-                                      <SelectItem value="Female">Female</SelectItem>
-                                      <SelectItem value="Other">Other</SelectItem>
+                                      <SelectGroup>
+                                        <SelectItem value="none">Not recorded</SelectItem>
+                                        <SelectItem value="Male">Male</SelectItem>
+                                        <SelectItem value="Female">Female</SelectItem>
+                                        <SelectItem value="Other">Other</SelectItem>
+                                      </SelectGroup>
                                     </SelectContent>
                                   </Select>
                                 </Field>
@@ -209,8 +241,10 @@ function ResponderPortal() {
                                   <Select value={form.consciousnessLevel || 'none'} onValueChange={(val) => setForm({ ...form, consciousnessLevel: val === 'none' ? '' : val })}>
                                     <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="none">Not recorded</SelectItem>
-                                      {['Alert', 'Verbal', 'Pain', 'Unresponsive'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                      <SelectGroup>
+                                        <SelectItem value="none">Not recorded</SelectItem>
+                                        {['Alert', 'Verbal', 'Pain', 'Unresponsive'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                      </SelectGroup>
                                     </SelectContent>
                                   </Select>
                                 </Field>
@@ -227,7 +261,9 @@ function ResponderPortal() {
                                   <Select value={form.disposition} onValueChange={(val) => setForm({ ...form, disposition: val })} required>
                                     <SelectTrigger className="bg-background"><SelectValue placeholder="Select disposition" /></SelectTrigger>
                                     <SelectContent>
-                                      {dispositions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                      <SelectGroup>
+                                        {dispositions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                      </SelectGroup>
                                     </SelectContent>
                                   </Select>
                                 </Field>
@@ -251,7 +287,14 @@ function ResponderPortal() {
 
                             <DrawerFooter className="px-0 mt-8">
                               <Button size="lg" className="w-full py-6 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground" disabled={saving} type="submit">
-                                {saving ? 'Saving assessment…' : 'Submit Assessment and Resolve'}
+                                {saving ? (
+                                  <>
+                                    <Spinner data-icon="inline-start" />
+                                    <span>Saving assessment…</span>
+                                  </>
+                                ) : (
+                                  'Submit Assessment and Resolve'
+                                )}
                               </Button>
                             </DrawerFooter>
                           </form>

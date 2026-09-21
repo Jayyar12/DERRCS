@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
 
-function StaffView({ users, config, form, setForm, onRefresh, onCreateUser, onToggleUser }) {
+function StaffView({ users, form, setForm, onRefresh, onCreateUser, onToggleUser }) {
   return (
     <>
 
@@ -90,15 +91,24 @@ function StaffView({ users, config, form, setForm, onRefresh, onCreateUser, onTo
                   <Input id="new-password" type="password" minLength="8" autoComplete="new-password" value={form.password} onChange={(e) => setForm((c) => ({ ...c, password: e.target.value }))} required />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="new-role">Role</FieldLabel>
-                  <select 
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" 
-                    id="new-role" 
-                    value={form.role} 
-                    onChange={(e) => setForm((c) => ({ ...c, role: e.target.value }))}
+                  <FieldLabel>Role</FieldLabel>
+                  <Select
+                    value={form.role}
+                    onValueChange={(role) => setForm((c) => ({ ...c, role }))}
                   >
-                    {['Dispatcher', 'ResponseUnit', 'Admin'].map((role) => <option key={role}>{role}</option>)}
-                  </select>
+                    <SelectTrigger className="w-full bg-background h-10 px-3 text-sm">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {['Dispatcher', 'ResponseUnit', 'Admin'].map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </FieldGroup>
             </div>

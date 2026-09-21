@@ -13,18 +13,20 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from '@/components/ui/select';
+import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 
-const statusColors = {
-  Pending: 'bg-amber-500 text-white',
-  Reported: 'bg-amber-500 text-white',
-  Validated: 'bg-blue-600 text-white',
-  Dispatched: 'bg-purple-600 text-white',
-  Active: 'bg-red-600 text-white',
-  Resolved: 'bg-green-600 text-white',
-  Closed: 'bg-muted text-muted-foreground',
+const statusBadgeVariants = {
+  Pending: 'outline',
+  Reported: 'outline',
+  Validated: 'default',
+  Dispatched: 'secondary',
+  Active: 'destructive',
+  Resolved: 'default',
+  Closed: 'secondary',
 };
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
@@ -309,7 +311,7 @@ export function IncidentReviewSheet({
           <div className="flex justify-between items-start">
             <div>
               {effectiveStatus && (
-                <Badge className={`mb-2 ${statusColors[effectiveStatus] || 'bg-muted text-muted-foreground'}`}>
+                <Badge variant={statusBadgeVariants[effectiveStatus] || 'outline'} className="mb-2">
                   {effectiveStatus}
                 </Badge>
               )}
@@ -353,8 +355,8 @@ export function IncidentReviewSheet({
         )}
 
         {actionSuccessMessage && (
-          <Alert className="mb-4 border-green-600 bg-green-50 dark:bg-green-950/20 text-green-900 dark:text-green-200">
-            <AlertDescription>{actionSuccessMessage}</AlertDescription>
+          <Alert className="mb-4 border-success/40 bg-success/10">
+            <AlertDescription className="text-success font-medium">{actionSuccessMessage}</AlertDescription>
           </Alert>
         )}
 
@@ -370,8 +372,8 @@ export function IncidentReviewSheet({
               </CardHeader>
               {data.summaryIsFallback && (
                 <CardContent className="pt-0">
-                  <Alert className="bg-amber-50 dark:bg-amber-950/20 border-amber-300 text-amber-900 dark:text-amber-200 py-2">
-                    <AlertDescription className="text-xs">
+                  <Alert className="border-warning/40 bg-warning/10 py-2">
+                    <AlertDescription className="text-xs text-warning">
                       Template fallback summary in use.
                     </AlertDescription>
                   </Alert>
@@ -390,8 +392,8 @@ export function IncidentReviewSheet({
                 </CardHeader>
                 {data.handoverIsFallback && (
                   <CardContent className="pt-0">
-                    <Alert className="bg-amber-50 dark:bg-amber-950/20 border-amber-300 text-amber-900 dark:text-amber-200 py-2">
-                      <AlertDescription className="text-xs">
+                    <Alert className="border-warning/40 bg-warning/10 py-2">
+                      <AlertDescription className="text-xs text-warning">
                         Template fallback handover debrief in use.
                       </AlertDescription>
                     </Alert>
@@ -408,7 +410,14 @@ export function IncidentReviewSheet({
                 onClick={handleValidate}
                 disabled={submitting}
               >
-                {submitting ? 'Validating…' : 'Validate Incident'}
+                {submitting ? (
+                  <>
+                    <Spinner data-icon="inline-start" />
+                    <span>Validating…</span>
+                  </>
+                ) : (
+                  'Validate Incident'
+                )}
               </Button>
             )}
 
@@ -436,49 +445,47 @@ export function IncidentReviewSheet({
                 <CardContent>
                   {canDispatch ? (
                     <form onSubmit={handleDispatch} className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-2">
-                        <label htmlFor="unit-select" className="text-sm font-semibold">
-                          Response Unit
-                        </label>
-                        {availableUnitsList.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            No response units are currently available.
-                          </p>
-                        ) : (
-                          <Select
-                            value={selectedUnitId}
-                            onValueChange={setSelectedUnitId}
-                            required
-                          >
-                            <SelectTrigger id="unit-select" className="bg-background w-full">
-                              <SelectValue placeholder="Choose an available unit" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                {availableUnitsList.map((unit) => (
-                                  <SelectItem key={unit.id} value={unit.id}>
-                                    {unit.unit_code} &middot; {unit.unit_type}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </div>
+                      <FieldGroup className="gap-4">
+                        <Field>
+                          <FieldLabel htmlFor="unit-select">Response Unit</FieldLabel>
+                          {availableUnitsList.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                              No response units are currently available.
+                            </p>
+                          ) : (
+                            <Select
+                              value={selectedUnitId}
+                              onValueChange={setSelectedUnitId}
+                              required
+                            >
+                              <SelectTrigger id="unit-select" className="bg-background w-full">
+                                <SelectValue placeholder="Choose an available unit" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  {availableUnitsList.map((unit) => (
+                                    <SelectItem key={unit.id} value={unit.id}>
+                                      {unit.unit_code} &middot; {unit.unit_type}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </Field>
 
-                      <div className="flex flex-col gap-2">
-                        <label htmlFor="dispatch-notes" className="text-sm font-semibold">
-                          Dispatch Notes (optional)
-                        </label>
-                        <Textarea
-                          id="dispatch-notes"
-                          className="bg-background"
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          rows={3}
-                          placeholder="Special instructions for responders..."
-                        />
-                      </div>
+                        <Field>
+                          <FieldLabel htmlFor="dispatch-notes">Dispatch Notes (optional)</FieldLabel>
+                          <Textarea
+                            id="dispatch-notes"
+                            className="bg-background"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            rows={3}
+                            placeholder="Special instructions for responders..."
+                          />
+                        </Field>
+                      </FieldGroup>
 
                       <Button
                         type="submit"
@@ -486,7 +493,14 @@ export function IncidentReviewSheet({
                         className="w-full font-bold"
                         disabled={submitting || !selectedUnitId}
                       >
-                        {submitting ? 'Dispatching…' : 'Confirm Dispatch'}
+                        {submitting ? (
+                          <>
+                            <Spinner data-icon="inline-start" />
+                            <span>Dispatching…</span>
+                          </>
+                        ) : (
+                          'Confirm Dispatch'
+                        )}
                       </Button>
                     </form>
                   ) : (
@@ -500,7 +514,7 @@ export function IncidentReviewSheet({
 
             {/* Close incident action for resolved incident */}
             {canClose && (
-              <Card className="border-green-600 bg-green-50 dark:bg-green-950/10">
+              <Card className="border-success/40 bg-success/5">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Incident Closure</CardTitle>
                   <CardDescription>
@@ -510,12 +524,19 @@ export function IncidentReviewSheet({
                 <CardContent>
                   <Button
                     variant="default"
-                    className="w-full bg-green-700 hover:bg-green-800 text-white"
+                    className="w-full font-bold"
                     size="lg"
                     onClick={handleCloseIncident}
                     disabled={submitting}
                   >
-                    {submitting ? 'Closing Incident…' : 'Close Incident After Review'}
+                    {submitting ? (
+                      <>
+                        <Spinner data-icon="inline-start" />
+                        <span>Closing Incident…</span>
+                      </>
+                    ) : (
+                      'Close Incident After Review'
+                    )}
                   </Button>
                 </CardContent>
               </Card>

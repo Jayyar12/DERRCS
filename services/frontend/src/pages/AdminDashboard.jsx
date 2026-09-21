@@ -127,7 +127,7 @@ function AdminDashboard() {
             <SidebarGroupLabel>External</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<a href="/dispatcher" />} tooltip="Dispatcher View">
+                <SidebarMenuButton render={<a href="/dispatcher" />} nativeButton={false} tooltip="Dispatcher View">
                   <MonitorCog />
                   <span>Dispatcher View</span>
                 </SidebarMenuButton>
