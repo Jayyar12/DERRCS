@@ -7,13 +7,29 @@ const toneClasses = {
   public: 'text-sm text-muted-foreground uppercase',
 };
 
-export function OrganizationBrand({ pageTitle, tone = 'application' }) {
+export function OrganizationBrand({ pageTitle, tone = 'application', showLogos = true }) {
   return (
-    <div>
-      <p className={cn('font-bold tracking-widest', toneClasses[tone])}>
-        {ORGANIZATION_NAME}
-      </p>
-      <h1 className="text-xl font-bold">{pageTitle}</h1>
+    <div className="flex items-center gap-3">
+      {showLogos && (
+        <div className="flex items-center gap-2 shrink-0">
+          <img
+            src="/logo-tagoloan.png"
+            alt="Tagoloan Municipality Logo"
+            className="size-9 object-contain drop-shadow-sm sm:size-10"
+          />
+          <img
+            src="/logo-mdrrmo.png"
+            alt="MDRRMO Logo"
+            className="size-9 object-contain drop-shadow-sm sm:size-10"
+          />
+        </div>
+      )}
+      <div>
+        <p className={cn('font-bold tracking-widest', toneClasses[tone])}>
+          {ORGANIZATION_NAME}
+        </p>
+        <h1 className="text-xl font-bold leading-tight">{pageTitle}</h1>
+      </div>
     </div>
   );
 }

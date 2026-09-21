@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PublicPageHeader } from '@/components/layout/PublicPageHeader';
+import { OrganizationHero } from '@/components/branding/OrganizationBrand';
 import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, Camera, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
 
 const emergencyTypes = [
@@ -98,7 +99,8 @@ function CitizenReport() {
 
   if (confirmation) {
     return (
-      <main className="min-h-svh flex items-center justify-center p-4">
+      <main className="min-h-svh flex flex-col items-center justify-center p-4">
+        <OrganizationHero />
         <Card className="w-full max-w-xl text-center border-border">
           <CardContent className="pt-10 pb-8 flex flex-col items-center">
             <CheckCircle2 className="size-16 text-primary mb-4" />
