@@ -81,7 +81,6 @@ function FitTagoloan({ data }) {
 
       const allowedBounds = bounds.pad(0.35);
       map.setMaxBounds(allowedBounds);
-      map.options.maxBoundsViscosity = 0.8;
     };
 
     applyFit();

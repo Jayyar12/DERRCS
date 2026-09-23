@@ -1,10 +1,9 @@
-'use strict';
-
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const amqp = require('amqplib');
 const { io: ioClient } = require('socket.io-client');
 const jwt = require('jsonwebtoken');
 
-const SECRET = 'tagoloan_mdrrmo_secure_jwt_key_2026_integrative';
+const SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_here';
 const dispToken = jwt.sign({ userId: '22222222-2222-2222-2222-222222222222', username: 'dispatcher_tagoloan', role: 'Dispatcher' }, SECRET);
 const unitId = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const unitToken = jwt.sign({ userId: '33333333-3333-3333-3333-333333333333', username: 'rescue_alpha', role: 'ResponseUnit', unitId }, SECRET);
@@ -48,25 +47,26 @@ async function runTest() {
     receivedFieldResolved = true;
   });
 
-  const conn = await amqp.connect('amqp://derrcs_rabbit:rabbit_password_2026@localhost:5672');
+  const conn = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://derrcs_rabbit:your_secure_rabbit_password@localhost:5672');
   const ch = await conn.createChannel();
 
+  const crypto = require('crypto');
   // Test 1: candidate.created
   ch.publish('derrcs.events', 'candidate.created', Buffer.from(JSON.stringify({
-    candidateId: 'test-cand-' + Date.now(),
+    candidateId: crypto.randomUUID(),
     emergencyType: 'Fire'
   })));
 
   // Test 2: unit.assigned
   ch.publish('derrcs.events', 'unit.assigned', Buffer.from(JSON.stringify({
     unitId: unitId,
-    incidentId: 'test-inc-1'
+    incidentId: crypto.randomUUID()
   })));
 
   // Test 3: field.assessment.submitted
   ch.publish('derrcs.events', 'field.assessment.submitted', Buffer.from(JSON.stringify({
-    assessmentId: 'test-assess-1',
-    incidentId: 'test-inc-1'
+    assessmentId: crypto.randomUUID(),
+    incidentId: crypto.randomUUID()
   })));
 
   setTimeout(async () => {

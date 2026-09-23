@@ -56,7 +56,10 @@ function AdminDashboard() {
   const [form, setForm] = useState({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' });
   const [view, setView] = useState('analytics');
 
+  const [loading, setLoading] = useState(true);
+
   async function load() {
+    setLoading(true);
     try {
       const [nextUsers, nextLogs, nextConfig, nextIncidents, nextReports, nextUnits] = await Promise.all([
         api.adminUsers(), api.auditLogs(), api.config(),
@@ -66,6 +69,7 @@ function AdminDashboard() {
       setIncidents(nextIncidents); setReports(nextReports); setUnits(nextUnits);
       setError('');
     } catch (requestError) { setError(requestError.message || 'Unable to load the administrator dashboard.'); }
+    finally { setLoading(false); }
   }
   
   useEffect(() => { load(); }, []);
@@ -179,6 +183,7 @@ function AdminDashboard() {
             {view === 'staff' && (
               <StaffView
                 users={users}
+                loading={loading}
                 config={config}
                 form={form}
                 setForm={setForm}
@@ -191,6 +196,7 @@ function AdminDashboard() {
             {view === 'audit' && (
               <AuditView
                 logs={logs}
+                loading={loading}
                 onRefresh={load}
               />
             )}
@@ -201,6 +207,7 @@ function AdminDashboard() {
                 reports={reports}
                 units={units}
                 logs={logs}
+                loading={loading}
                 config={config}
                 onRefresh={load}
               />

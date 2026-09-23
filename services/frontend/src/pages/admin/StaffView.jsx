@@ -5,8 +5,10 @@ import { FieldGroup, Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 
-function StaffView({ users, form, setForm, onRefresh, onCreateUser, onToggleUser }) {
+function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onToggleUser }) {
   return (
     <>
 
@@ -22,42 +24,57 @@ function StaffView({ users, form, setForm, onRefresh, onCreateUser, onToggleUser
         </CardHeader>
         <CardContent>
           <div className="rounded-md border border-border overflow-hidden">
-            <Table>
-              <TableHeader className="bg-secondary/30">
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id} className="border-border">
-                    <TableCell>
-                      <div className="font-semibold">{user.full_name}</div>
-                      <div className="text-xs text-muted-foreground">{user.username}</div>
-                    </TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.is_active ? 'default' : 'secondary'} className={user.is_active ? 'bg-success text-success-foreground hover:bg-success' : ''}>
-                        {user.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        disabled={user.id === localStorage.getItem('derrsc_user_id')} 
-                        onClick={() => onToggleUser(user)}
-                      >
-                        {user.is_active ? 'Deactivate' : 'Activate'}
-                      </Button>
-                    </TableCell>
+            {loading ? (
+              <div className="p-4 space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : users.length === 0 ? (
+              <Empty className="py-8">
+                <EmptyHeader>
+                  <EmptyTitle>No staff accounts</EmptyTitle>
+                  <EmptyDescription>There are no staff accounts configured.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <Table>
+                <TableHeader className="bg-secondary/30">
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id} className="border-border">
+                      <TableCell>
+                        <div className="font-semibold">{user.full_name}</div>
+                        <div className="text-xs text-muted-foreground">{user.username}</div>
+                      </TableCell>
+                      <TableCell>{user.role}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.is_active ? 'default' : 'secondary'} className={user.is_active ? 'bg-success text-success-foreground hover:bg-success' : ''}>
+                          {user.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          disabled={user.id === localStorage.getItem('derrsc_user_id')} 
+                          onClick={() => onToggleUser(user)}
+                        >
+                          {user.is_active ? 'Deactivate' : 'Activate'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </CardContent>
       </Card>

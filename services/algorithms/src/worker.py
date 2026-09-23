@@ -109,8 +109,13 @@ def on_message(channel, method, properties, body):
         print(f"[Worker] Invalid JSON in {routing_key}: {e}. Rejecting message.")
         channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
     except Exception as e:
-        print(f"[Worker] Transient error processing {routing_key}: {e}. Requeuing message.")
-        channel.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+        print(f"[Worker] Error processing {routing_key}: {e}.")
+        if method.redelivered:
+            print(f"[Worker] Message {routing_key} failed after redelivery. Rejecting without requeue.")
+            channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+        else:
+            print(f"[Worker] Transient error processing {routing_key}. Requeuing once.")
+            channel.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
 
 
 def main():

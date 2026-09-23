@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { IncidentReviewSheet } from './IncidentReviewSheet';
 import { api } from '../../api/client';
 
@@ -312,11 +312,13 @@ describe('IncidentReviewSheet', () => {
 
     // Fire socket recommendation event
     expect(recommendationHandler).toBeDefined();
-    recommendationHandler({
-      incidentId: 'inc-rec-1',
-      unitId: 'unit-boat-1',
-      unitCode: 'BOAT-1',
-      estimatedTravelTimeMinutes: 8,
+    act(() => {
+      recommendationHandler({
+        incidentId: 'inc-rec-1',
+        unitId: 'unit-boat-1',
+        unitCode: 'BOAT-1',
+        estimatedTravelTimeMinutes: 8,
+      });
     });
 
     await waitFor(() => {
@@ -494,11 +496,13 @@ describe('IncidentReviewSheet', () => {
     });
 
     // Now resolve slow candidate late
-    slowResolve({
-      id: 'cand-slow',
-      emergency_type: 'Medical',
-      status: 'Pending',
-      reports: [],
+    await act(async () => {
+      slowResolve({
+        id: 'cand-slow',
+        emergency_type: 'Medical',
+        status: 'Pending',
+        reports: [],
+      });
     });
 
     // Verify view does not get overwritten by slow candidate
@@ -544,10 +548,12 @@ describe('IncidentReviewSheet', () => {
     fireEvent.click(validateBtn);
     expect(api.confirmCandidate).toHaveBeenCalledTimes(1);
 
-    confirmResolve({
-      incidentId: 'inc-dup-res',
-      incidentCode: 'INC-DUP',
-      status: 'Validated',
+    await act(async () => {
+      confirmResolve({
+        incidentId: 'inc-dup-res',
+        incidentCode: 'INC-DUP',
+        status: 'Validated',
+      });
     });
   });
 });

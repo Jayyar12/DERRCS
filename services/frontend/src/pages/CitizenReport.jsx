@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from 'cn';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError } from '../api/client';
+import { useGeolocation } from '../hooks/useGeolocation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel, FieldSet, FieldLegend } from '@/components/ui/field';
@@ -58,18 +59,21 @@ function CitizenReport() {
   const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const updateAnswer = (key, value) => setForm((prev) => ({ ...prev, answers: { ...prev.answers, [key]: value } }));
 
-  function useMyLocation() {
-    setLocationMessage('Getting location...');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-        setEmergencyCoordinates(coords);
-        setReporterCoordinates(coords);
-        setLocationMessage('Location attached from GPS.');
-      },
-      () => setLocationMessage('Unable to access GPS location.')
-    );
-  }
+  const { coordinates: geoCoords, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
+
+  // Watch for geoCoords and apply them
+  useEffect(() => {
+    if (geoCoords) {
+      const coords = { latitude: geoCoords.lat, longitude: geoCoords.lng };
+      setEmergencyCoordinates(coords);
+      setReporterCoordinates(coords);
+      setLocationMessage('Location attached from GPS.');
+    } else if (geoError) {
+      setLocationMessage('Unable to access GPS location.');
+    } else if (geoLoading) {
+      setLocationMessage('Getting location...');
+    }
+  }, [geoCoords, geoLoading, geoError]);
 
   function nextStep() {
     setError('');
@@ -264,7 +268,7 @@ function CitizenReport() {
                   <p className="text-sm text-muted-foreground">Tap the map to set the exact location.</p>
                   
                   <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                    <Button type="button" variant="secondary" onClick={useMyLocation}>
+                    <Button type="button" variant="secondary" onClick={requestLocation}>
                       <MapPin data-icon="inline-start" /> Use my GPS location
                     </Button>
                     {locationMessage && <span className="text-sm text-muted-foreground">{locationMessage}</span>}

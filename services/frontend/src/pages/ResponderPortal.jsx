@@ -4,52 +4,17 @@ import { api, ApiError, clearSession, getSession } from '../api/client';
 import { disconnectSocket, subscribeSocket } from '../api/socket';
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerTrigger } from "@/components/ui/drawer"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "@/components/ui/empty"
-import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { LifeBuoy } from "lucide-react"
 
-import { FieldSet, FieldLegend, FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { AppHeader } from '@/components/layout/AppHeader';
-
-const injuryOptions = ['Laceration', 'Suspected fracture', 'Burn', 'Head trauma', 'Respiratory distress', 'Other'];
-const interventionOptions = ['Wound dressing', 'Cervical collar', 'Splinting', 'CPR', 'Oxygen therapy', 'Other'];
-const dispositions = ['TreatedOnScene', 'TransportedHealthCenter', 'TransportedNMMC', 'RefusedCare', 'Deceased'];
-
-function Checklist({ label, options, values, onChange }) {
-  return (
-    <FieldSet className="mt-6">
-      <FieldLegend>{label}</FieldLegend>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {options.map((option) => (
-          <Field
-            key={option}
-            orientation="horizontal"
-            className="flex items-center gap-3 rounded-lg border border-border p-4 cursor-pointer hover:bg-muted/50 transition-colors bg-card justify-start"
-          >
-            <Checkbox 
-              id={`chk-${option}`}
-              checked={values.includes(option)} 
-              onCheckedChange={(checked) => onChange(checked ? [...values, option] : values.filter((value) => value !== option))} 
-              className="size-5"
-            />
-            <FieldLabel htmlFor={`chk-${option}`} className="text-sm font-medium cursor-pointer">{option}</FieldLabel>
-          </Field>
-        ))}
-      </div>
-    </FieldSet>
-  );
-}
+import { ActiveDispatchCard } from '../features/responder/components/ActiveDispatchCard';
+import { ResponderActionButtons } from '../features/responder/components/ResponderActionButtons';
+import { FieldAssessmentDrawer } from '../features/responder/components/FieldAssessmentDrawer';
 
 function ResponderPortal() {
   const [assignment, setAssignment] = useState(null);
@@ -84,11 +49,18 @@ function ResponderPortal() {
   async function submitAssessment(event) {
     event.preventDefault();
     if (!assignment) return;
+    if (!form.disposition) {
+      toast.error('A disposition must be selected to complete the casualty assessment.');
+      return;
+    }
+
     setSaving(true); setError('');
     try {
       await api.submitAssessment(assignment.incident_id, { ...form, approximateAge: form.approximateAge ? Number(form.approximateAge) : null, assignmentId: assignment.assignment_id });
       toast.success('Field assessment saved. The incident is now resolved.');
       setIsDrawerOpen(false);
+      // Reset form
+      setForm({ patientName: '', approximateAge: '', gender: '', consciousnessLevel: '', injuriesObserved: [], interventionsRendered: [], disposition: '', destinationFacility: '', notes: '' });
       await loadAssignment({ quiet: true });
     } catch (requestError) { setError(requestError.message); }
     finally { setSaving(false); }
@@ -145,166 +117,19 @@ function ResponderPortal() {
           </Empty>
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-            <Card className="shadow-sm">
-              <CardContent className="p-5 sm:p-7">
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
-                  <div>
-                    <Badge variant="outline" className="text-destructive border-destructive mb-2">{assignment.incident_status}</Badge>
-                    <h2 className="text-3xl font-bold">{assignment.incident_code}</h2>
-                    <p className="mt-1 text-muted-foreground">{assignment.emergency_type} &middot; {assignment.severity} severity</p>
-                  </div>
-                  <Badge className="text-base py-1 px-3">Unit: {status}</Badge>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-bold border-b pb-2">Caller notes</h3>
-                  {assignment.caller_notes?.length ? (
-                    <ul className="grid gap-2">
-                      {assignment.caller_notes.map((note) => (
-                        <li className="rounded-lg bg-muted p-3 text-sm" key={note}>{note}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No caller notes provided.</p>
-                  )}
-                </div>
-
-                <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                  {['Dispatched', 'Acknowledged'].includes(status) && (
-                    <Button size="lg" className="w-full text-lg py-8 font-bold bg-primary hover:bg-primary/90" disabled={saving} onClick={() => updateStatus('EnRoute')}>
-                      {saving ? (
-                        <>
-                          <Spinner data-icon="inline-start" />
-                          <span>Updating status...</span>
-                        </>
-                      ) : (
-                        'Mark En Route'
-                      )}
-                    </Button>
-                  )}
-                  {['Dispatched', 'Acknowledged', 'EnRoute'].includes(status) && (
-                    <Button size="lg" className="w-full text-lg py-8 font-bold bg-destructive hover:bg-destructive/90" disabled={saving} onClick={() => updateStatus('OnScene')}>
-                      {saving ? (
-                        <>
-                          <Spinner data-icon="inline-start" />
-                          <span>Recording arrival...</span>
-                        </>
-                      ) : (
-                        'Arrived on Scene'
-                      )}
-                    </Button>
-                  )}
-                </div>
-
-                {onScene && (
-                  <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                    <DrawerTrigger render={<Button size="lg" className="w-full mt-6 text-lg py-8 font-bold bg-success hover:bg-success/90 text-success-foreground" />}>
-                      Complete Field Assessment
-                    </DrawerTrigger>
-                    <DrawerContent className="max-h-[96svh]">
-                      <ScrollArea className="overflow-auto">
-                        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
-                          <DrawerHeader className="px-0 pt-0 text-left">
-                            <DrawerTitle className="text-2xl">Field Casualty Assessment</DrawerTitle>
-                            <DrawerDescription>Complete the pre-hospital care report to resolve this incident.</DrawerDescription>
-                          </DrawerHeader>
-                          
-                          <form className="mt-4 pb-10" onSubmit={submitAssessment}>
-                            <div className="grid gap-6 sm:grid-cols-2">
-                              <FieldGroup>
-                                <Field>
-                                  <FieldLabel htmlFor="patient-name">Patient name or identity</FieldLabel>
-                                  <Input id="patient-name" autoComplete="name" value={form.patientName} onChange={(e) => setForm({ ...form, patientName: e.target.value })} />
-                                </Field>
-                                <Field>
-                                  <FieldLabel htmlFor="patient-age">Approximate age</FieldLabel>
-                                  <Input id="patient-age" type="number" min="0" max="130" inputMode="numeric" value={form.approximateAge} onChange={(e) => setForm({ ...form, approximateAge: e.target.value })} />
-                                </Field>
-                              </FieldGroup>
-                              <FieldGroup>
-                                <Field>
-                                  <FieldLabel>Gender</FieldLabel>
-                                  <Select value={form.gender || 'none'} onValueChange={(val) => setForm({ ...form, gender: val === 'none' ? '' : val })}>
-                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        <SelectItem value="none">Not recorded</SelectItem>
-                                        <SelectItem value="Male">Male</SelectItem>
-                                        <SelectItem value="Female">Female</SelectItem>
-                                        <SelectItem value="Other">Other</SelectItem>
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                </Field>
-                                <Field>
-                                  <FieldLabel>Consciousness (AVPU)</FieldLabel>
-                                  <Select value={form.consciousnessLevel || 'none'} onValueChange={(val) => setForm({ ...form, consciousnessLevel: val === 'none' ? '' : val })}>
-                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        <SelectItem value="none">Not recorded</SelectItem>
-                                        {['Alert', 'Verbal', 'Pain', 'Unresponsive'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                </Field>
-                              </FieldGroup>
-                            </div>
-
-                            <Checklist label="Injuries observed" options={injuryOptions} values={form.injuriesObserved} onChange={(injuriesObserved) => setForm({ ...form, injuriesObserved })} />
-                            <Checklist label="Interventions rendered" options={interventionOptions} values={form.interventionsRendered} onChange={(interventionsRendered) => setForm({ ...form, interventionsRendered })} />
-
-                            <div className="mt-6 grid gap-6 sm:grid-cols-2">
-                              <FieldGroup>
-                                <Field>
-                                  <FieldLabel>Disposition *</FieldLabel>
-                                  <Select value={form.disposition} onValueChange={(val) => setForm({ ...form, disposition: val })} required>
-                                    <SelectTrigger className="bg-background"><SelectValue placeholder="Select disposition" /></SelectTrigger>
-                                    <SelectContent>
-                                      <SelectGroup>
-                                        {dispositions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
-                                      </SelectGroup>
-                                    </SelectContent>
-                                  </Select>
-                                </Field>
-                              </FieldGroup>
-                              <FieldGroup>
-                                <Field>
-                                  <FieldLabel htmlFor="destination">Destination facility</FieldLabel>
-                                  <Input id="destination" value={form.destinationFacility} onChange={(e) => setForm({ ...form, destinationFacility: e.target.value })} />
-                                </Field>
-                              </FieldGroup>
-                            </div>
-
-                            <div className="mt-6">
-                              <FieldGroup>
-                                <Field>
-                                  <FieldLabel htmlFor="assessment-notes">Notes</FieldLabel>
-                                  <Textarea id="assessment-notes" rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-                                </Field>
-                              </FieldGroup>
-                            </div>
-
-                            <DrawerFooter className="px-0 mt-8">
-                              <Button size="lg" className="w-full py-6 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground" disabled={saving} type="submit">
-                                {saving ? (
-                                  <>
-                                    <Spinner data-icon="inline-start" />
-                                    <span>Saving assessment…</span>
-                                  </>
-                                ) : (
-                                  'Submit Assessment and Resolve'
-                                )}
-                              </Button>
-                            </DrawerFooter>
-                          </form>
-                        </div>
-                      </ScrollArea>
-                    </DrawerContent>
-                  </Drawer>
-                )}
-              </CardContent>
-            </Card>
+            <ActiveDispatchCard assignment={assignment} status={status}>
+              <ResponderActionButtons status={status} saving={saving} updateStatus={updateStatus} />
+              {onScene && (
+                <FieldAssessmentDrawer 
+                  isOpen={isDrawerOpen} 
+                  setIsOpen={setIsDrawerOpen}
+                  form={form}
+                  setForm={setForm}
+                  submitAssessment={submitAssessment}
+                  saving={saving}
+                />
+              )}
+            </ActiveDispatchCard>
 
             <Card className="shadow-sm">
               <CardHeader className="pb-2">

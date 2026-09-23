@@ -1,22 +1,23 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useRef, useState, useMemo } from 'react';
 import TagoloanMap from '../components/map/TagoloanMap';
-import { api, ApiError, clearSession, getSession } from '../api/client';
-import { disconnectSocket, subscribeSocket } from '../api/socket';
+import { clearSession, getSession } from '../api/client';
+import { disconnectSocket } from '../api/socket';
 import { IncidentReviewSheet } from '../features/incident-review';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
-import { Users, Activity } from "lucide-react";
 import { AppHeader } from '@/components/layout/AppHeader';
+
+import { useIncidentData } from '../hooks/useIncidentData';
+import { useIncidentReview } from '../hooks/useIncidentReview';
+import { useSocketEvent } from '../hooks/useSocketEvent';
+
+import { AudioAlertManager } from '../features/dispatcher/components/AudioAlertManager';
+import { CandidateReviewPanel } from '../features/dispatcher/components/CandidateReviewPanel';
+import { IncidentStatusPanel } from '../features/dispatcher/components/IncidentStatusPanel';
 
 const statusColors = {
   Reported: 'bg-warning text-warning-foreground',
@@ -27,158 +28,47 @@ const statusColors = {
   Closed: 'bg-muted text-muted-foreground',
 };
 
-const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
-
-function parseReviewParam(reviewParam) {
-  if (!reviewParam || typeof reviewParam !== 'string') return null;
-  if (reviewParam.startsWith('candidate:')) {
-    const id = reviewParam.slice('candidate:'.length).trim();
-    return id ? { kind: 'candidate', id } : null;
-  }
-  if (reviewParam.startsWith('incident:')) {
-    const id = reviewParam.slice('incident:'.length).trim();
-    return id ? { kind: 'incident', id } : null;
-  }
-  return null;
-}
-
 function DispatcherDashboard() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [candidates, setCandidates] = useState([]);
-  const [incidents, setIncidents] = useState([]);
-  const [rawReports, setRawReports] = useState([]);
   const [alertMsg, setAlertMsg] = useState('');
   const [audibleAlerts, setAudibleAlerts] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  const audioContextRef = useRef(null);
+  
+  const audioManagerRef = useRef(null);
   const session = getSession();
 
-  const selection = useMemo(() => {
-    return parseReviewParam(searchParams.get('review'));
-  }, [searchParams]);
+  const { candidates, incidents, rawReports, loading, error, refresh } = useIncidentData();
+  const { selection, openCandidate, openIncident, clearSelection } = useIncidentReview();
 
-  const loadDashboard = useCallback(async ({ quiet = false } = {}) => {
-    if (!quiet) setLoading(true);
-    try {
-      const [nextCandidates, nextIncidents, nextReports] = await Promise.all([
-        api.candidates(),
-        api.incidents(),
-        api.reports(),
-      ]);
-      setCandidates(nextCandidates);
-      setIncidents(nextIncidents);
-      setRawReports(nextReports);
-      setError('');
-    } catch (requestError) {
-      setError(
-        requestError instanceof ApiError
-          ? requestError.message
-          : 'Unable to load the command dashboard.'
-      );
-    } finally {
-      if (!quiet) setLoading(false);
+  useSocketEvent('dispatcher:report:new', () => {
+    refresh();
+  });
+
+  useSocketEvent('dispatcher:candidate:new', () => {
+    toast('Candidate activity received. Dashboard refreshed.');
+    refresh();
+  });
+
+  useSocketEvent('dispatcher:field:resolved', () => {
+    toast('A field assessment was completed. Dashboard refreshed.');
+    refresh();
+  });
+
+  useSocketEvent('dispatcher:incident:escalated', (payload) => {
+    audioManagerRef.current?.playEscalationTone();
+    setAlertMsg(
+      `${payload.incidentCode || 'Incident'} needs attention: ${payload.status} has exceeded its response threshold.`
+    );
+    refresh();
+  });
+
+  const handleSelectionChange = (nextSelection) => {
+    if (!nextSelection) {
+      clearSelection();
+    } else if (nextSelection.kind === 'candidate') {
+      openCandidate(nextSelection.id);
+    } else if (nextSelection.kind === 'incident') {
+      openIncident(nextSelection.id);
     }
-  }, []);
-
-  function enableAudibleAlerts(enabled) {
-    if (enabled && !audioContextRef.current) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) audioContextRef.current = new AudioContext();
-    }
-    audioContextRef.current?.resume();
-    setAudibleAlerts(enabled);
-  }
-
-  function playEscalationTone() {
-    const context = audioContextRef.current;
-    if (!context || context.state !== 'running') return;
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.frequency.value = 880;
-    gain.gain.setValueAtTime(0.08, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.35);
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start();
-    oscillator.stop(context.currentTime + 0.35);
-  }
-
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
-
-  useEffect(() => {
-    const cleanup = [
-      subscribeSocket('dispatcher:report:new', () => {
-        loadDashboard({ quiet: true });
-      }),
-      subscribeSocket('dispatcher:candidate:new', () => {
-        toast('Candidate activity received. Dashboard refreshed.');
-        loadDashboard({ quiet: true });
-      }),
-      subscribeSocket('dispatcher:field:resolved', () => {
-        toast('A field assessment was completed. Dashboard refreshed.');
-        loadDashboard({ quiet: true });
-      }),
-      subscribeSocket('dispatcher:incident:escalated', (payload) => {
-        playEscalationTone();
-        setAlertMsg(
-          `${payload.incidentCode || 'Incident'} needs attention: ${payload.status} has exceeded its response threshold.`
-        );
-        loadDashboard({ quiet: true });
-      }),
-    ];
-    return () => cleanup.forEach((unsubscribe) => unsubscribe());
-  }, [loadDashboard]);
-
-  useEffect(() => () => audioContextRef.current?.close(), []);
-
-  const openCandidate = useCallback(
-    (candidateId) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('review', `candidate:${candidateId}`);
-          return next;
-        },
-        { replace: false }
-      );
-    },
-    [setSearchParams]
-  );
-
-  const openIncident = useCallback(
-    (incidentId) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('review', `incident:${incidentId}`);
-          return next;
-        },
-        { replace: false }
-      );
-    },
-    [setSearchParams]
-  );
-
-  const handleSelectionChange = useCallback(
-    (nextSelection) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (!nextSelection) {
-            next.delete('review');
-          } else {
-            next.set('review', `${nextSelection.kind}:${nextSelection.id}`);
-          }
-          return next;
-        },
-        { replace: true }
-      );
-    },
-    [setSearchParams]
-  );
+  };
 
   const markers = useMemo(() => [
     ...rawReports
@@ -201,7 +91,7 @@ function DispatcherDashboard() {
         title: `${candidate.emergency_type} candidate`,
         description: `${candidate.report_count} reports — Pending review`,
         color: '#f59e0b',
-        selected: selection?.kind === 'candidate' && selection?.id === candidate.id,
+        selected: selection?.type === 'candidate' && selection?.id === candidate.id,
         candidateId: candidate.id,
       })),
     ...incidents
@@ -217,10 +107,13 @@ function DispatcherDashboard() {
           : statusColors[incident.status]?.includes('warning')
           ? '#f59e0b'
           : '#dc2626',
-        selected: selection?.kind === 'incident' && selection?.id === incident.id,
+        selected: selection?.type === 'incident' && selection?.id === incident.id,
         incidentId: incident.id,
       })),
   ], [rawReports, candidates, incidents, selection]);
+
+  // Adjust selection object to match what IncidentReviewSheet expects (kind instead of type)
+  const normalizedSelection = selection ? { kind: selection.type, id: selection.id } : null;
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
@@ -263,7 +156,7 @@ function DispatcherDashboard() {
       {error && (
         <Alert variant="destructive" className="m-4">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{error.message || error}</AlertDescription>
         </Alert>
       )}
 
@@ -285,141 +178,26 @@ function DispatcherDashboard() {
           <ResizablePanel defaultSize={30} minSize={25} className="bg-muted/30">
             <ScrollArea className="h-full">
               <div className="flex flex-col gap-6 p-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg">Candidate Review</CardTitle>
-                    <Button variant="link" size="sm" onClick={() => loadDashboard()}>
-                      Refresh
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2 mb-4">
-                      <Checkbox
-                        id="audible"
-                        checked={audibleAlerts}
-                        onCheckedChange={(checked) => enableAudibleAlerts(checked)}
-                      />
-                      <label
-                        htmlFor="audible"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Play a brief tone for escalations
-                      </label>
-                    </div>
+                <CandidateReviewPanel
+                  candidates={candidates}
+                  loading={loading}
+                  selection={normalizedSelection}
+                  openCandidate={openCandidate}
+                  onRefresh={() => refresh()}
+                >
+                  <AudioAlertManager
+                    ref={audioManagerRef}
+                    audibleAlerts={audibleAlerts}
+                    setAudibleAlerts={setAudibleAlerts}
+                  />
+                </CandidateReviewPanel>
 
-                    {loading ? (
-                      <div className="flex flex-col gap-3" role="status" aria-label="Loading live candidates">
-                        <Skeleton className="h-24 w-full rounded-lg" />
-                        <Skeleton className="h-24 w-full rounded-lg" />
-                      </div>
-                    ) : candidates.length === 0 ? (
-                      <Empty className="border border-dashed py-6">
-                        <EmptyHeader>
-                          <EmptyMedia variant="icon">
-                            <Users />
-                          </EmptyMedia>
-                          <EmptyTitle>No pending candidate clusters</EmptyTitle>
-                          <EmptyDescription>
-                            Incoming citizen reports will cluster here in real time.
-                          </EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    ) : (
-                      <div className="grid gap-3">
-                        {candidates.map((candidate) => (
-                          <div
-                            key={candidate.id}
-                            role="button"
-                            tabIndex={0}
-                            className={`rounded-lg border p-3 hover:border-primary cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                              selection?.kind === 'candidate' && selection?.id === candidate.id
-                                ? 'border-primary ring-1 ring-primary'
-                                : ''
-                            }`}
-                            onClick={() => openCandidate(candidate.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                openCandidate(candidate.id);
-                              }
-                            }}
-                          >
-                            <strong className="block">{candidate.emergency_type}</strong>
-                            <span className="mt-1 block text-sm text-muted-foreground">
-                              {candidate.report_count} report
-                              {candidate.report_count === 1 ? '' : 's'} &middot;{' '}
-                              {formatDate(candidate.created_at)}
-                            </span>
-                            <span className="mt-2 block text-sm line-clamp-2">
-                              {candidate.latest_summary || 'Summary is being prepared.'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Incident Status</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="flex flex-col gap-3" role="status" aria-label="Loading incidents">
-                        <Skeleton className="h-20 w-full rounded-lg" />
-                        <Skeleton className="h-20 w-full rounded-lg" />
-                      </div>
-                    ) : incidents.length === 0 ? (
-                      <Empty className="border border-dashed py-6">
-                        <EmptyHeader>
-                          <EmptyMedia variant="icon">
-                            <Activity />
-                          </EmptyMedia>
-                          <EmptyTitle>No active incidents</EmptyTitle>
-                          <EmptyDescription>
-                            Validated emergencies will appear here for response tracking.
-                          </EmptyDescription>
-                        </EmptyHeader>
-                      </Empty>
-                    ) : (
-                      <div className="grid gap-3">
-                        {incidents.map((incident) => (
-                          <div
-                            key={incident.id}
-                            role="button"
-                            tabIndex={0}
-                            className={`rounded-lg border p-3 hover:border-primary cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                              selection?.kind === 'incident' && selection?.id === incident.id
-                                ? 'border-primary ring-1 ring-primary'
-                                : ''
-                            }`}
-                            onClick={() => openIncident(incident.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                openIncident(incident.id);
-                              }
-                            }}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <strong className="text-sm">{incident.incident_code}</strong>
-                              <Badge className={statusColors[incident.status]}>
-                                {incident.status}
-                              </Badge>
-                            </div>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {incident.emergency_type} &middot; {incident.report_count || 0} reports
-                            </p>
-                            <span className="mt-2 text-xs text-primary font-medium inline-block">
-                              Review details &rarr;
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <IncidentStatusPanel
+                  incidents={incidents}
+                  loading={loading}
+                  selection={normalizedSelection}
+                  openIncident={openIncident}
+                />
               </div>
             </ScrollArea>
           </ResizablePanel>
@@ -427,10 +205,10 @@ function DispatcherDashboard() {
       </main>
 
       <IncidentReviewSheet
-        selection={selection}
+        selection={normalizedSelection}
         role={session?.role}
         onSelectionChange={handleSelectionChange}
-        onCommitted={() => loadDashboard({ quiet: true })}
+        onCommitted={() => refresh()}
       />
     </div>
   );
