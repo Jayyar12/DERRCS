@@ -138,7 +138,7 @@ router.get('/config', (_req, res) => {
     success: true,
     data: {
       dbscanEpsilonMeters: Number(process.env.DBSCAN_EPSILON_METERS || 100),
-      dbscanMinPoints: Number(process.env.DBSCAN_MIN_POINTS || 2),
+      dbscanMinPoints: Number(process.env.DBSCAN_MIN_POINTS || 1),
       clusterTimeWindowHours: Number(process.env.CLUSTER_TIME_WINDOW_HOURS || 12),
       reportRateLimitPerMinute: Number(process.env.REPORT_RATE_LIMIT_PER_MINUTE || 10),
       reportedEscalationMinutes: 5,

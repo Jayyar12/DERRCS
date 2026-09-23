@@ -25,7 +25,7 @@ def haversine_distance_meters(lat1: float, lon1: float, lat2: float, lon2: float
     return r * c
 
 
-def cluster_reports(reports: list[dict], existing_candidates: list[dict] = None, epsilon_meters: float = 100.0, min_points: int = 2) -> list[dict]:
+def cluster_reports(reports: list[dict], existing_candidates: list[dict] = None, epsilon_meters: float = 100.0, min_points: int = 1) -> list[dict]:
     """
     Clusters reports by location. Matches against existing candidates first, 
     then runs DBSCAN on remaining reports grouped by emergencyType.
@@ -112,7 +112,7 @@ def handle_report_ingested(payload, publish):
     longitude = payload.get('longitude')
 
     epsilon = float(os.getenv('DBSCAN_EPSILON_METERS', 100))
-    min_pts = int(os.getenv('DBSCAN_MIN_POINTS', 2))
+    min_pts = int(os.getenv('DBSCAN_MIN_POINTS', 1))
     time_window = int(os.getenv('CLUSTER_TIME_WINDOW_HOURS', 12))
 
     print(f"[Clustering] Processing report {report_id} ({emergency_type}) at ({latitude}, {longitude})")
@@ -313,7 +313,7 @@ if __name__ == "__main__":
         {"id": "rep-2", "emergencyType": "Fire", "latitude": 8.5386, "longitude": 124.7534},  # ~15 meters away
         {"id": "rep-3", "emergencyType": "Flood", "latitude": 8.5385, "longitude": 124.7533}, # Same place, different type
     ]
-    results = cluster_reports(sample_reports, epsilon_meters=100.0, min_points=2)
+    results = cluster_reports(sample_reports, epsilon_meters=100.0, min_points=1)
     print("DBSCAN Test Results:")
     for res in results:
         print(f"Report: {res['reportId']} -> Cluster: {res['clusterId']} (Duplicate: {res['isDuplicate']})")
