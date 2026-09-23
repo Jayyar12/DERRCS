@@ -1,17 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "—");
 
 export function FieldAssessmentsList({ assessments }) {
-  if (!assessments || assessments.length === 0) return null;
+  const reports = assessments || [];
 
   return (
     <div>
       <h3 className="font-bold text-sm mb-3">
-        Pre-Hospital Field Care Reports ({assessments.length})
+        Pre-Hospital Field Care Reports ({reports.length})
       </h3>
-      <div className="flex flex-col gap-3">
-        {assessments.map((assessment) => (
+      {reports.length === 0 ? (
+        <Empty className="border border-dashed py-6">
+          <EmptyHeader>
+            <EmptyTitle>No field assessments</EmptyTitle>
+            <EmptyDescription>Responder assessments will appear here after field care is recorded.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : <div className="flex flex-col gap-3">
+        {reports.map((assessment) => (
           <Card key={assessment.id}>
             <CardContent className="p-3 flex flex-col gap-2 text-xs">
               <div className="flex justify-between font-semibold text-sm">
@@ -23,7 +31,7 @@ export function FieldAssessmentsList({ assessments }) {
               {assessment.patient_name && (
                 <p>
                   <strong>Patient:</strong> {assessment.patient_name}{" "}
-                  {assessment.approximate_age ? `(${assessment.approximate_age} yrs)` : ""}{" "}
+                  {assessment.approximate_age != null ? `(${assessment.approximate_age} yrs)` : ""}{" "}
                   {assessment.gender ? `· ${assessment.gender}` : ""}
                 </p>
               )}
@@ -34,12 +42,12 @@ export function FieldAssessmentsList({ assessments }) {
               )}
               {assessment.injuries_observed && (
                 <p>
-                  <strong>Injuries:</strong> {assessment.injuries_observed}
+                  <strong>Injuries:</strong> {Array.isArray(assessment.injuries_observed) ? assessment.injuries_observed.join(', ') : assessment.injuries_observed}
                 </p>
               )}
               {assessment.interventions_rendered && (
                 <p>
-                  <strong>Interventions:</strong> {assessment.interventions_rendered}
+                  <strong>Interventions:</strong> {Array.isArray(assessment.interventions_rendered) ? assessment.interventions_rendered.join(', ') : assessment.interventions_rendered}
                 </p>
               )}
               {assessment.destination_facility && (
@@ -55,7 +63,7 @@ export function FieldAssessmentsList({ assessments }) {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div>}
     </div>
   );
 }

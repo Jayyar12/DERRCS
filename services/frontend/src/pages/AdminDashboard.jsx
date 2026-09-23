@@ -1,9 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { api, clearSession } from '../api/client';
 import { disconnectSocket } from '../api/socket';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import {
   SidebarProvider,
   Sidebar,
@@ -55,6 +56,10 @@ function AdminDashboard() {
   const [message, setMessage] = useState('');
   const [form, setForm] = useState({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' });
   const [view, setView] = useState('analytics');
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [updatingUserId, setUpdatingUserId] = useState(null);
+  const createInFlightRef = useRef(false);
+  const updateInFlightRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -76,13 +81,38 @@ function AdminDashboard() {
 
   async function createUser(event) {
     event.preventDefault();
-    try { await api.createUser(form); setForm({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' }); setMessage('Staff account created.'); load(); }
-    catch (requestError) { setError(requestError.message); }
+    if (createInFlightRef.current) return;
+    createInFlightRef.current = true;
+    setCreatingUser(true);
+    setError('');
+    try {
+      await api.createUser(form);
+      setForm({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' });
+      setMessage('Staff account created.');
+      await load();
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to create the staff account.');
+    } finally {
+      createInFlightRef.current = false;
+      setCreatingUser(false);
+    }
   }
   
   async function toggleUser(user) {
-    try { await api.updateUser(user.id, { isActive: !user.is_active }); setMessage(`${user.full_name} is now ${user.is_active ? 'deactivated' : 'active'}.`); load(); }
-    catch (requestError) { setError(requestError.message); }
+    if (updateInFlightRef.current) return;
+    updateInFlightRef.current = true;
+    setUpdatingUserId(user.id);
+    setError('');
+    try {
+      await api.updateUser(user.id, { isActive: !user.is_active });
+      setMessage(`${user.full_name} is now ${user.is_active ? 'deactivated' : 'active'}.`);
+      await load();
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to update the staff account.');
+    } finally {
+      updateInFlightRef.current = false;
+      setUpdatingUserId(null);
+    }
   }
 
   return (
@@ -108,19 +138,19 @@ function AdminDashboard() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive={view === 'analytics'} onClick={() => setView('analytics')} tooltip="Analytics">
-                  <BarChart3 />
+                  <BarChart3 data-icon="inline-start" />
                   <span>Analytics</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive={view === 'staff'} onClick={() => setView('staff')} tooltip="Staff Accounts">
-                  <Users />
+                  <Users data-icon="inline-start" />
                   <span>Staff Accounts</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton isActive={view === 'audit'} onClick={() => setView('audit')} tooltip="Audit Activity">
-                  <ScrollText />
+                  <ScrollText data-icon="inline-start" />
                   <span>Audit Activity</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -131,8 +161,8 @@ function AdminDashboard() {
             <SidebarGroupLabel>External</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton render={<a href="/dispatcher" />} nativeButton={false} tooltip="Dispatcher View">
-                  <MonitorCog />
+                <SidebarMenuButton render={<a href="/dispatcher" />} tooltip="Dispatcher View">
+                  <MonitorCog data-icon="inline-start" />
                   <span>Dispatcher View</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -146,7 +176,7 @@ function AdminDashboard() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton tooltip="Sign Out" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
-                <LogOut />
+                <LogOut data-icon="inline-start" />
                 <span>Sign Out</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -179,40 +209,44 @@ function AdminDashboard() {
             </Alert>
           )}
 
-          <Suspense fallback={<ViewFallback />}>
-            {view === 'staff' && (
-              <StaffView
-                users={users}
-                loading={loading}
-                config={config}
-                form={form}
-                setForm={setForm}
-                onRefresh={load}
-                onCreateUser={createUser}
-                onToggleUser={toggleUser}
-              />
-            )}
+          <ErrorBoundary key={view}>
+            <Suspense fallback={<ViewFallback />}>
+              {view === 'staff' && (
+                <StaffView
+                  users={users}
+                  loading={loading}
+                  config={config}
+                  form={form}
+                  setForm={setForm}
+                  onRefresh={load}
+                  onCreateUser={createUser}
+                  onToggleUser={toggleUser}
+                  creatingUser={creatingUser}
+                  updatingUserId={updatingUserId}
+                />
+              )}
 
-            {view === 'audit' && (
-              <AuditView
-                logs={logs}
-                loading={loading}
-                onRefresh={load}
-              />
-            )}
+              {view === 'audit' && (
+                <AuditView
+                  logs={logs}
+                  loading={loading}
+                  onRefresh={load}
+                />
+              )}
 
-            {view === 'analytics' && (
-              <AnalyticsView
-                incidents={incidents}
-                reports={reports}
-                units={units}
-                logs={logs}
-                loading={loading}
-                config={config}
-                onRefresh={load}
-              />
-            )}
-          </Suspense>
+              {view === 'analytics' && (
+                <AnalyticsView
+                  incidents={incidents}
+                  reports={reports}
+                  units={units}
+                  logs={logs}
+                  loading={loading}
+                  config={config}
+                  onRefresh={load}
+                />
+              )}
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </SidebarInset>
     </SidebarProvider>

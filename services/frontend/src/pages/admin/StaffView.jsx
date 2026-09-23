@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
 
-function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onToggleUser }) {
+function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onToggleUser, creatingUser, updatingUserId }) {
   return (
     <>
 
@@ -25,7 +26,7 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
         <CardContent>
           <div className="rounded-md border border-border overflow-hidden">
             {loading ? (
-              <div className="p-4 space-y-4">
+              <div className="flex flex-col gap-4 p-4">
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-full" />
@@ -64,10 +65,12 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          disabled={user.id === localStorage.getItem('derrsc_user_id')} 
+                          disabled={user.id === localStorage.getItem('derrsc_user_id') || Boolean(updatingUserId)}
                           onClick={() => onToggleUser(user)}
                         >
-                          {user.is_active ? 'Deactivate' : 'Activate'}
+                          {updatingUserId === user.id ? (
+                            <><Spinner data-icon="inline-start" /> Updating…</>
+                          ) : user.is_active ? 'Deactivate' : 'Activate'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -108,12 +111,12 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
                   <Input id="new-password" type="password" minLength="8" autoComplete="new-password" value={form.password} onChange={(e) => setForm((c) => ({ ...c, password: e.target.value }))} required />
                 </Field>
                 <Field>
-                  <FieldLabel>Role</FieldLabel>
+                  <FieldLabel htmlFor="new-role">Role</FieldLabel>
                   <Select
                     value={form.role}
                     onValueChange={(role) => setForm((c) => ({ ...c, role }))}
                   >
-                    <SelectTrigger className="w-full bg-background h-10 px-3 text-sm">
+                    <SelectTrigger id="new-role" className="w-full bg-background h-10 px-3 text-sm">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -129,7 +132,9 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
                 </Field>
               </FieldGroup>
             </div>
-            <Button type="submit" className="self-start">Create Account</Button>
+            <Button type="submit" className="self-start" disabled={creatingUser}>
+              {creatingUser ? <><Spinner data-icon="inline-start" /> Creating…</> : 'Create Account'}
+            </Button>
           </form>
         </CardContent>
       </Card>

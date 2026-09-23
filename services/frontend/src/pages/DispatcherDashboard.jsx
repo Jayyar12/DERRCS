@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AppHeader } from '@/components/layout/AppHeader';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 import { useIncidentData } from '../hooks/useIncidentData';
 import { useIncidentReview } from '../hooks/useIncidentReview';
@@ -35,7 +36,7 @@ function DispatcherDashboard() {
   const audioManagerRef = useRef(null);
   const session = getSession();
 
-  const { candidates, incidents, rawReports, loading, error, refresh } = useIncidentData();
+  const { candidates, incidents, rawReports, loading, refreshing, error, refresh } = useIncidentData();
   const { selection, openCandidate, openIncident, clearSelection } = useIncidentReview();
 
   useSocketEvent('dispatcher:report:new', () => {
@@ -163,14 +164,16 @@ function DispatcherDashboard() {
       <main className="flex-1 overflow-hidden" id="dashboard-main">
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={70} minSize={50} className="relative h-full overflow-hidden">
-            <TagoloanMap
-              className="h-full w-full absolute inset-0"
-              markers={markers}
-              onMarkerSelect={(marker) => {
-                if (marker.candidateId) openCandidate(marker.candidateId);
-                else if (marker.incidentId) openIncident(marker.incidentId);
-              }}
-            />
+            <ErrorBoundary>
+              <TagoloanMap
+                className="h-full w-full absolute inset-0"
+                markers={markers}
+                onMarkerSelect={(marker) => {
+                  if (marker.candidateId) openCandidate(marker.candidateId);
+                  else if (marker.incidentId) openIncident(marker.incidentId);
+                }}
+              />
+            </ErrorBoundary>
           </ResizablePanel>
 
           <ResizableHandle withHandle />
@@ -178,38 +181,45 @@ function DispatcherDashboard() {
           <ResizablePanel defaultSize={30} minSize={25} className="bg-muted/30">
             <ScrollArea className="h-full">
               <div className="flex flex-col gap-6 p-4">
-                <CandidateReviewPanel
-                  candidates={candidates}
-                  loading={loading}
-                  selection={normalizedSelection}
-                  openCandidate={openCandidate}
-                  onRefresh={() => refresh()}
-                >
-                  <AudioAlertManager
-                    ref={audioManagerRef}
-                    audibleAlerts={audibleAlerts}
-                    setAudibleAlerts={setAudibleAlerts}
-                  />
-                </CandidateReviewPanel>
+                <ErrorBoundary>
+                  <CandidateReviewPanel
+                    candidates={candidates}
+                    loading={loading}
+                    refreshing={refreshing}
+                    selection={normalizedSelection}
+                    openCandidate={openCandidate}
+                    onRefresh={() => refresh()}
+                  >
+                    <AudioAlertManager
+                      ref={audioManagerRef}
+                      audibleAlerts={audibleAlerts}
+                      setAudibleAlerts={setAudibleAlerts}
+                    />
+                  </CandidateReviewPanel>
+                </ErrorBoundary>
 
-                <IncidentStatusPanel
-                  incidents={incidents}
-                  loading={loading}
-                  selection={normalizedSelection}
-                  openIncident={openIncident}
-                />
+                <ErrorBoundary>
+                  <IncidentStatusPanel
+                    incidents={incidents}
+                    loading={loading}
+                    selection={normalizedSelection}
+                    openIncident={openIncident}
+                  />
+                </ErrorBoundary>
               </div>
             </ScrollArea>
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
 
-      <IncidentReviewSheet
-        selection={normalizedSelection}
-        role={session?.role}
-        onSelectionChange={handleSelectionChange}
-        onCommitted={() => refresh()}
-      />
+      <ErrorBoundary resetKey={normalizedSelection ? `${normalizedSelection.kind}:${normalizedSelection.id}` : 'closed'}>
+        <IncidentReviewSheet
+          selection={normalizedSelection}
+          role={session?.role}
+          onSelectionChange={handleSelectionChange}
+          onCommitted={() => refresh()}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError, clearSession, getSession } from '../api/client';
-import { disconnectSocket, subscribeSocket } from '../api/socket';
+import { disconnectSocket } from '../api/socket';
+import { useSocketEvent } from '../hooks/useSocketEvent';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,40 +23,71 @@ function ResponderPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [assessmentError, setAssessmentError] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [form, setForm] = useState({ patientName: '', approximateAge: '', gender: '', consciousnessLevel: '', injuriesObserved: [], interventionsRendered: [], disposition: '', destinationFacility: '', notes: '' });
+  const savingRef = useRef(false);
+  const loadControllerRef = useRef(null);
   const session = getSession();
 
-  async function loadAssignment({ quiet = false } = {}) {
+  const loadAssignment = useCallback(async ({ quiet = false } = {}) => {
+    loadControllerRef.current?.abort();
+    const controller = new AbortController();
+    loadControllerRef.current = controller;
     if (!quiet) setLoading(true);
-    try { setAssignment(await api.currentAssignment()); setError(''); }
-    catch (requestError) { setError(requestError instanceof ApiError ? requestError.message : 'Unable to load the current dispatch.'); }
-    finally { if (!quiet) setLoading(false); }
-  }
+    try {
+      const current = await api.currentAssignment({ signal: controller.signal });
+      if (controller.signal.aborted) return;
+      setAssignment(current);
+      setError('');
+    } catch (requestError) {
+      if (!controller.signal.aborted) {
+        setError(requestError instanceof ApiError ? requestError.message : 'Unable to load the current dispatch.');
+      }
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+      if (loadControllerRef.current === controller) loadControllerRef.current = null;
+    }
+  }, []);
 
-  useEffect(() => { loadAssignment(); }, []);
-  useEffect(() => subscribeSocket('unit:dispatch:alert', () => { toast('A dispatch update was received.'); loadAssignment({ quiet: true }); }), []);
+  useEffect(() => {
+    loadAssignment();
+    return () => loadControllerRef.current?.abort();
+  }, [loadAssignment]);
+  useSocketEvent('unit:dispatch:alert', () => {
+    toast('A dispatch update was received.');
+    loadAssignment({ quiet: true });
+  });
 
   async function updateStatus(status) {
-    if (!assignment) return;
+    const allowed = status === 'EnRoute'
+      ? ['Dispatched', 'Acknowledged']
+      : status === 'OnScene'
+        ? ['Dispatched', 'Acknowledged', 'EnRoute']
+        : [];
+    if (savingRef.current || !assignment || !allowed.includes(assignment.assignment_status)) return;
+    savingRef.current = true;
     setSaving(true); setError('');
     try {
       await api.updateAssignmentStatus(assignment.assignment_id, status);
       toast.success(status === 'EnRoute' ? 'Unit marked En Route.' : 'Arrival recorded. You may now submit the field assessment.');
       await loadAssignment({ quiet: true });
     } catch (requestError) { setError(requestError.message); }
-    finally { setSaving(false); }
+    finally { savingRef.current = false; setSaving(false); }
   }
 
   async function submitAssessment(event) {
     event.preventDefault();
-    if (!assignment) return;
+    if (savingRef.current || assignment?.incident_status !== 'Active' || assignment?.assignment_status !== 'OnScene') return;
     if (!form.disposition) {
-      toast.error('A disposition must be selected to complete the casualty assessment.');
+      const message = 'A disposition must be selected to complete the casualty assessment.';
+      setAssessmentError(message);
+      toast.error(message);
       return;
     }
 
-    setSaving(true); setError('');
+    savingRef.current = true;
+    setSaving(true); setError(''); setAssessmentError('');
     try {
       await api.submitAssessment(assignment.incident_id, { ...form, approximateAge: form.approximateAge ? Number(form.approximateAge) : null, assignmentId: assignment.assignment_id });
       toast.success('Field assessment saved. The incident is now resolved.');
@@ -62,8 +95,8 @@ function ResponderPortal() {
       // Reset form
       setForm({ patientName: '', approximateAge: '', gender: '', consciousnessLevel: '', injuriesObserved: [], interventionsRendered: [], disposition: '', destinationFacility: '', notes: '' });
       await loadAssignment({ quiet: true });
-    } catch (requestError) { setError(requestError.message); }
-    finally { setSaving(false); }
+    } catch (requestError) { setAssessmentError(requestError instanceof ApiError ? requestError.message : 'Unable to save the field assessment.'); }
+    finally { savingRef.current = false; setSaving(false); }
   }
 
   const location = assignment?.location?.coordinates;
@@ -127,6 +160,7 @@ function ResponderPortal() {
                   setForm={setForm}
                   submitAssessment={submitAssessment}
                   saving={saving}
+                  error={assessmentError}
                 />
               )}
             </ActiveDispatchCard>
@@ -141,7 +175,9 @@ function ResponderPortal() {
                 </p>
                 {location && (
                   <div className="h-80 overflow-hidden rounded-xl border">
-                    <TagoloanMap selectedPoint={{ latitude: location[1], longitude: location[0] }} />
+                    <ErrorBoundary>
+                      <TagoloanMap selectedPoint={{ latitude: location[1], longitude: location[0] }} />
+                    </ErrorBoundary>
                   </div>
                 )}
               </CardContent>

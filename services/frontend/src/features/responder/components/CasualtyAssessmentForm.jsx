@@ -27,9 +27,9 @@ export function CasualtyAssessmentForm({ form, setForm, submitAssessment, saving
         </FieldGroup>
         <FieldGroup>
           <Field>
-            <FieldLabel>Gender</FieldLabel>
+            <FieldLabel htmlFor="patient-gender">Gender</FieldLabel>
             <Select value={form.gender || 'none'} onValueChange={(val) => setForm({ ...form, gender: val === 'none' ? '' : val })}>
-              <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
+              <SelectTrigger id="patient-gender" className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="none">Not recorded</SelectItem>
@@ -41,9 +41,9 @@ export function CasualtyAssessmentForm({ form, setForm, submitAssessment, saving
             </Select>
           </Field>
           <Field>
-            <FieldLabel>Consciousness (AVPU)</FieldLabel>
+            <FieldLabel htmlFor="patient-consciousness">Consciousness (AVPU)</FieldLabel>
             <Select value={form.consciousnessLevel || 'none'} onValueChange={(val) => setForm({ ...form, consciousnessLevel: val === 'none' ? '' : val })}>
-              <SelectTrigger className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
+              <SelectTrigger id="patient-consciousness" className="bg-background"><SelectValue placeholder="Not recorded" /></SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="none">Not recorded</SelectItem>
@@ -61,9 +61,9 @@ export function CasualtyAssessmentForm({ form, setForm, submitAssessment, saving
       <div className="mt-6 grid gap-6 sm:grid-cols-2">
         <FieldGroup>
           <Field>
-            <FieldLabel>Disposition *</FieldLabel>
+            <FieldLabel htmlFor="patient-disposition">Disposition *</FieldLabel>
             <Select value={form.disposition} onValueChange={(val) => setForm({ ...form, disposition: val })} required>
-              <SelectTrigger className="bg-background"><SelectValue placeholder="Select disposition" /></SelectTrigger>
+              <SelectTrigger id="patient-disposition" className="bg-background"><SelectValue placeholder="Select disposition" /></SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   {dispositions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}

@@ -9,21 +9,29 @@ export function useIncidentReview() {
   let selection = null;
   if (reviewParam) {
     const [type, id] = reviewParam.split(":");
-    if (type && id) {
+    if ((type === "candidate" || type === "incident") && id) {
       selection = { type, id };
     }
   }
 
   const openCandidate = useCallback(
     (id) => {
-      setSearchParams({ review: `candidate:${id}` });
+      setSearchParams((previous) => {
+        const next = new URLSearchParams(previous);
+        next.set("review", `candidate:${id}`);
+        return next;
+      });
     },
     [setSearchParams]
   );
 
   const openIncident = useCallback(
     (id) => {
-      setSearchParams({ review: `incident:${id}` });
+      setSearchParams((previous) => {
+        const next = new URLSearchParams(previous);
+        next.set("review", `incident:${id}`);
+        return next;
+      });
     },
     [setSearchParams]
   );

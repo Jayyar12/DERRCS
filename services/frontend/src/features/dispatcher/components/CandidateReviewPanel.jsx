@@ -3,12 +3,14 @@ import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from "@/
 import { Users } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : '—');
 
 export function CandidateReviewPanel({
   candidates,
   loading,
+  refreshing,
   selection,
   openCandidate,
   onRefresh,
@@ -18,8 +20,9 @@ export function CandidateReviewPanel({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg">Candidate Review</CardTitle>
-        <Button variant="link" size="sm" onClick={onRefresh}>
-          Refresh
+        <Button variant="link" size="sm" onClick={onRefresh} disabled={loading || refreshing}>
+          {refreshing && <Spinner data-icon="inline-start" />}
+          {refreshing ? 'Refreshing…' : 'Refresh'}
         </Button>
       </CardHeader>
       <CardContent>

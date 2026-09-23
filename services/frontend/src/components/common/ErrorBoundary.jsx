@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, resetKey: props.resetKey };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.resetKey !== state.resetKey) {
+      return { hasError: false, error: null, resetKey: props.resetKey };
+    }
+    return null;
   }
 
   static getDerivedStateFromError(error) {
@@ -19,19 +26,18 @@ export class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-4 flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="flex h-full min-h-48 flex-col items-center justify-center p-4">
           <Alert variant="destructive" className="max-w-md w-full">
             <AlertTitle>Something went wrong</AlertTitle>
             <AlertDescription className="mt-2 text-sm flex flex-col gap-4">
               <p>
-                {this.state.error?.message || "An unexpected error occurred."}
+                This section could not be displayed.
               </p>
               <Button
                 variant="outline"
                 className="self-start"
                 onClick={() => {
                   this.setState({ hasError: false, error: null });
-                  window.location.reload();
                 }}
               >
                 Try again

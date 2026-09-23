@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import AdminDashboard from './AdminDashboard';
 import { api } from '../api/client';
@@ -47,6 +47,7 @@ global.ResizeObserver = class ResizeObserver {
 describe('AdminDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
   const mockBasicResponses = () => {
@@ -79,10 +80,10 @@ describe('AdminDashboard', () => {
       expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
     });
 
+    expect(screen.getByRole('link', { name: 'Dispatcher View' })).toHaveAttribute('href', '/dispatcher');
+
     // It should render Analytics by default
-    await waitFor(() => {
-      expect(screen.getByText('Report Volume Trend')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Report Volume Trend', {}, { timeout: 5000 })).toBeInTheDocument();
     
     // Stats
     expect(screen.getByText('Active Incidents')).toBeInTheDocument();
@@ -144,5 +145,124 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('Failed to fetch admin users')).toBeInTheDocument();
     });
+  });
+
+  it('shows staff loading and empty states without treating pending data as empty', async () => {
+    mockBasicResponses();
+    let resolveUsers;
+    api.adminUsers.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveUsers = resolve;
+    }));
+
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+    expect(screen.queryByText('No staff accounts')).not.toBeInTheDocument();
+
+    await act(async () => resolveUsers([]));
+    expect(screen.getByText('No staff accounts')).toBeInTheDocument();
+  });
+
+  it('requires staff details before submitting a new account', async () => {
+    mockBasicResponses();
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create Account' }));
+    expect(api.createUser).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Full Name')).toBeInvalid();
+  });
+
+  it('creates a staff account with the entered details and resets the form', async () => {
+    mockBasicResponses();
+    api.createUser.mockResolvedValueOnce({ id: 'u-new' });
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Full Name'), { target: { value: 'Maria Reyes' } });
+    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'mreyes' } });
+    fireEvent.change(screen.getByLabelText('Phone (Optional)'), { target: { value: '09171234567' } });
+    fireEvent.change(screen.getByLabelText('Temporary Password'), { target: { value: 'securepass123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create Account' }));
+
+    await waitFor(() => expect(api.createUser).toHaveBeenCalledWith({
+      fullName: 'Maria Reyes',
+      username: 'mreyes',
+      phoneNumber: '09171234567',
+      password: 'securepass123',
+      role: 'Dispatcher',
+    }));
+    expect(await screen.findByText('Staff account created.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Full Name')).toHaveValue('');
+    expect(screen.getByLabelText('Username')).toHaveValue('');
+  });
+
+  it('disables staff creation while saving and ignores a second submit', async () => {
+    mockBasicResponses();
+    let resolveCreate;
+    api.createUser.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveCreate = resolve;
+    }));
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Full Name'), { target: { value: 'Maria Reyes' } });
+    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'mreyes' } });
+    fireEvent.change(screen.getByLabelText('Temporary Password'), { target: { value: 'securepass123' } });
+    const createButton = screen.getByRole('button', { name: 'Create Account' });
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(api.createUser).toHaveBeenCalledTimes(1));
+    expect(createButton).toBeDisabled();
+    fireEvent.submit(createButton.closest('form'));
+    expect(api.createUser).toHaveBeenCalledTimes(1);
+
+    await act(async () => resolveCreate({ id: 'u-new' }));
+    expect(screen.getByText('Staff account created.')).toBeInTheDocument();
+    expect(createButton).toBeEnabled();
+  });
+
+  it('deactivates staff and reports a failed deactivation', async () => {
+    mockBasicResponses();
+    api.updateUser.mockRejectedValueOnce(new Error('Unable to deactivate account'));
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Admin One')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+    await waitFor(() => expect(api.updateUser).toHaveBeenCalledWith('u1', { isActive: false }));
+    expect(await screen.findByText('Unable to deactivate account')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Deactivate' })).toBeEnabled();
+  });
+
+  it('successfully deactivates an active staff account', async () => {
+    mockBasicResponses();
+    api.updateUser.mockResolvedValueOnce({});
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Admin One')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Deactivate' }));
+    await waitFor(() => expect(api.updateUser).toHaveBeenCalledWith('u1', { isActive: false }));
+    expect(await screen.findByText('Admin One is now deactivated.')).toBeInTheDocument();
+  });
+
+  it('shows an API error when staff creation fails and keeps the form values', async () => {
+    mockBasicResponses();
+    api.createUser.mockRejectedValueOnce(new Error('Username is already in use'));
+    renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: /staff accounts/i }));
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Full Name'), { target: { value: 'Maria Reyes' } });
+    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'mreyes' } });
+    fireEvent.change(screen.getByLabelText('Temporary Password'), { target: { value: 'securepass123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create Account' }));
+
+    expect(await screen.findByText('Username is already in use')).toBeInTheDocument();
+    expect(screen.getByLabelText('Username')).toHaveValue('mreyes');
   });
 });

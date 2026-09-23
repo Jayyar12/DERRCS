@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import ResponderPortal from './ResponderPortal';
-import { api } from '../api/client';
+import { api, ApiError } from '../api/client';
 
 vi.mock('../api/client', () => ({
   api: {
@@ -23,10 +23,7 @@ vi.mock('../api/socket', () => ({
 }));
 
 vi.mock('sonner', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
+  toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
 }));
 
 vi.mock('../components/map/TagoloanMap', () => ({
@@ -168,5 +165,156 @@ describe('ResponderPortal', () => {
     await waitFor(() => {
       expect(api.submitAssessment).toHaveBeenCalled();
     });
+  });
+
+  it('shows loading and an empty state when there is no active assignment', async () => {
+    let resolveAssignment;
+    api.currentAssignment.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveAssignment = resolve;
+    }));
+
+    renderComponent();
+    expect(screen.getByRole('status', { name: 'Loading dispatch' })).toBeInTheDocument();
+
+    await act(async () => resolveAssignment(null));
+    expect(screen.getByText('No active dispatch')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Check again' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /mark en route|arrived on scene|complete field assessment/i })).not.toBeInTheDocument();
+  });
+
+  it('does not offer status changes or assessment for a completed assignment', async () => {
+    api.currentAssignment.mockResolvedValueOnce({
+      assignment_id: 'asg-complete',
+      incident_id: 'inc-complete',
+      incident_code: 'INC-COMPLETE',
+      incident_status: 'Resolved',
+      assignment_status: 'Completed',
+    });
+
+    renderComponent();
+    expect(await screen.findByText('INC-COMPLETE')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /mark en route|arrived on scene|complete field assessment/i })).not.toBeInTheDocument();
+    expect(api.updateAssignmentStatus).not.toHaveBeenCalled();
+    expect(api.submitAssessment).not.toHaveBeenCalled();
+  });
+
+  it('keeps the current action available after a status update fails', async () => {
+    api.currentAssignment.mockResolvedValueOnce({
+      assignment_id: 'asg-error',
+      incident_id: 'inc-error',
+      incident_code: 'INC-ERROR',
+      incident_status: 'Dispatched',
+      assignment_status: 'Dispatched',
+    });
+    api.updateAssignmentStatus.mockRejectedValueOnce(new Error('Dispatch update failed'));
+
+    renderComponent();
+    const enRouteButton = await screen.findByRole('button', { name: /mark en route/i });
+    fireEvent.click(enRouteButton);
+
+    expect(await screen.findByText('Dispatch update failed')).toBeInTheDocument();
+    expect(api.updateAssignmentStatus).toHaveBeenCalledWith('asg-error', 'EnRoute');
+    expect(screen.getByRole('button', { name: /mark en route/i })).toBeEnabled();
+  });
+
+  it('submits the casualty assessment once with normalized age and a saving state', async () => {
+    api.currentAssignment.mockResolvedValueOnce({
+      assignment_id: 'asg-assess',
+      incident_id: 'inc-assess',
+      incident_code: 'INC-ASSESS',
+      incident_status: 'Active',
+      assignment_status: 'OnScene',
+    });
+    let resolveAssessment;
+    api.submitAssessment.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveAssessment = resolve;
+    }));
+
+    renderComponent();
+    fireEvent.click(await screen.findByRole('button', { name: /complete field assessment/i }));
+    const drawer = await screen.findByRole('dialog');
+    fireEvent.change(within(drawer).getByLabelText('Patient name or identity'), { target: { value: 'Ana Cruz' } });
+    fireEvent.change(within(drawer).getByLabelText('Approximate age'), { target: { value: '34' } });
+    fireEvent.change(within(drawer).getByLabelText('Notes'), { target: { value: 'Patient stable' } });
+    fireEvent.change(within(drawer).getAllByTestId('mock-select')[2], { target: { value: 'TreatedOnScene' } });
+
+    const submitButton = within(drawer).getByRole('button', { name: /submit assessment and resolve/i });
+    fireEvent.submit(submitButton.closest('form'));
+
+    await waitFor(() => expect(api.submitAssessment).toHaveBeenCalledWith('inc-assess', expect.objectContaining({
+      assignmentId: 'asg-assess',
+      patientName: 'Ana Cruz',
+      approximateAge: 34,
+      disposition: 'TreatedOnScene',
+      notes: 'Patient stable',
+    })));
+    expect(api.submitAssessment).toHaveBeenCalledTimes(1);
+    expect(within(drawer).getByRole('button', { name: /saving assessment/i })).toBeDisabled();
+    fireEvent.submit(submitButton.closest('form'));
+    expect(api.submitAssessment).toHaveBeenCalledTimes(1);
+
+    api.currentAssignment.mockResolvedValueOnce(null);
+    await act(async () => resolveAssessment({}));
+    expect(toast.success).toHaveBeenCalledWith('Field assessment saved. The incident is now resolved.');
+    expect(screen.getByText('No active dispatch')).toBeInTheDocument();
+  });
+
+  it('keeps the assessment drawer open and shows a save failure in the drawer', async () => {
+    api.currentAssignment.mockResolvedValueOnce({
+      assignment_id: 'asg-save-error',
+      incident_id: 'inc-save-error',
+      incident_code: 'INC-SAVE-ERROR',
+      incident_status: 'Active',
+      assignment_status: 'OnScene',
+    });
+    api.submitAssessment.mockRejectedValueOnce(new ApiError('Assessment could not be saved'));
+
+    renderComponent();
+    fireEvent.click(await screen.findByRole('button', { name: /complete field assessment/i }));
+    const drawer = await screen.findByRole('dialog');
+    fireEvent.change(within(drawer).getAllByTestId('mock-select')[2], { target: { value: 'TreatedOnScene' } });
+    fireEvent.submit(within(drawer).getByRole('button', { name: /submit assessment and resolve/i }).closest('form'));
+
+    expect(await within(drawer).findByText('Assessment could not be saved')).toBeInTheDocument();
+    expect(within(drawer).getByRole('button', { name: /submit assessment and resolve/i })).toBeEnabled();
+    expect(api.submitAssessment).toHaveBeenCalledTimes(1);
+  });
+
+  it('finishes loading when a socket alert replaces the initial assignment request', async () => {
+    let resolveInitial;
+    api.currentAssignment
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveInitial = resolve; }))
+      .mockResolvedValueOnce({
+        assignment_id: 'asg-fresh',
+        incident_id: 'inc-fresh',
+        incident_code: 'INC-FRESH',
+        incident_status: 'Dispatched',
+        assignment_status: 'Dispatched',
+      });
+    const { subscribeSocket } = await import('../api/socket');
+    let alertHandler;
+    vi.mocked(subscribeSocket).mockImplementationOnce((event, handler) => {
+      expect(event).toBe('unit:dispatch:alert');
+      alertHandler = handler;
+      return () => {};
+    });
+
+    renderComponent();
+    expect(screen.getByRole('status', { name: 'Loading dispatch' })).toBeInTheDocument();
+    expect(alertHandler).toBeTypeOf('function');
+    act(() => alertHandler());
+
+    expect(await screen.findByText('INC-FRESH')).toBeInTheDocument();
+    expect(screen.queryByRole('status', { name: 'Loading dispatch' })).not.toBeInTheDocument();
+    expect(api.currentAssignment).toHaveBeenCalledTimes(2);
+    await act(async () => resolveInitial({
+      assignment_id: 'asg-stale',
+      incident_id: 'inc-stale',
+      incident_code: 'INC-STALE',
+      incident_status: 'Dispatched',
+      assignment_status: 'Dispatched',
+    }));
+    expect(screen.getByText('INC-FRESH')).toBeInTheDocument();
+    expect(screen.queryByText('INC-STALE')).not.toBeInTheDocument();
   });
 });

@@ -1,9 +1,10 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from 'cn';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { api, ApiError } from '../api/client';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel, FieldSet, FieldLegend } from '@/components/ui/field';
@@ -34,6 +35,17 @@ const questionSets = {
   Rescue: [['rescueType', 'Type of rescue needed', ['Water rescue', 'Confined space', 'Collapsed structure', 'Missing person', 'Other']], ['peopleTrapped', 'Is anyone trapped?', ['Yes', 'No', 'Unknown']]],
 };
 
+// Matches the operational boundary seeded in seeds/02-initial-seeds.sql.
+const operationalBounds = { minLatitude: 8.48, maxLatitude: 8.58, minLongitude: 124.7, maxLongitude: 124.81 };
+
+function isOperationalLocation(coordinates) {
+  if (!coordinates) return false;
+  const { latitude, longitude } = coordinates;
+  return Number.isFinite(latitude) && Number.isFinite(longitude)
+    && latitude >= operationalBounds.minLatitude && latitude <= operationalBounds.maxLatitude
+    && longitude >= operationalBounds.minLongitude && longitude <= operationalBounds.maxLongitude;
+}
+
 function createSessionId() {
   const key = 'derrsc_citizen_session';
   const saved = sessionStorage.getItem(key);
@@ -48,32 +60,76 @@ function CitizenReport() {
   const [form, setForm] = useState({ emergencyType: '', description: '', answers: {} });
   const [emergencyCoordinates, setEmergencyCoordinates] = useState(null);
   const [reporterCoordinates, setReporterCoordinates] = useState(null);
+  const [manualCoordinates, setManualCoordinates] = useState({ latitude: '', longitude: '' });
   const [locationMessage, setLocationMessage] = useState('');
   const [photo, setPhoto] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
+  const submitInFlight = useRef(false);
+  const locationChoiceId = useRef(0);
 
   const questions = useMemo(() => questionSets[form.emergencyType] || [], [form.emergencyType]);
 
   const updateForm = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const updateAnswer = (key, value) => setForm((prev) => ({ ...prev, answers: { ...prev.answers, [key]: value } }));
 
-  const { coordinates: geoCoords, loading: geoLoading, error: geoError, requestLocation } = useGeolocation();
+  const { loading: geoLoading, error: geoError, requestLocation, clearLocation } = useGeolocation();
+  const locationFeedback = geoLoading ? 'Getting location...' : geoError || locationMessage;
 
-  // Watch for geoCoords and apply them
-  useEffect(() => {
-    if (geoCoords) {
-      const coords = { latitude: geoCoords.lat, longitude: geoCoords.lng };
+  async function handleGpsRequest() {
+    const choiceId = ++locationChoiceId.current;
+    setLocationMessage('');
+    const gpsCoordinates = await requestLocation();
+    if (!gpsCoordinates || choiceId !== locationChoiceId.current) return;
+    const coords = { latitude: gpsCoordinates.lat, longitude: gpsCoordinates.lng };
+    setReporterCoordinates(coords);
+    if (isOperationalLocation(coords)) {
       setEmergencyCoordinates(coords);
-      setReporterCoordinates(coords);
+      setManualCoordinates({ latitude: String(coords.latitude), longitude: String(coords.longitude) });
       setLocationMessage('Location attached from GPS.');
-    } else if (geoError) {
-      setLocationMessage('Unable to access GPS location.');
-    } else if (geoLoading) {
-      setLocationMessage('Getting location...');
+      setError('');
+    } else {
+      setEmergencyCoordinates(null);
+      setManualCoordinates({ latitude: '', longitude: '' });
+      setLocationMessage('GPS is outside Tagoloan operational bounds. Select the emergency location on the map or enter its coordinates.');
     }
-  }, [geoCoords, geoLoading, geoError]);
+  }
+
+  function selectEmergencyLocation(coordinates, source) {
+    // A map or manual choice takes precedence over any GPS request still in flight.
+    locationChoiceId.current += 1;
+    clearLocation?.();
+    if (!isOperationalLocation(coordinates)) {
+      setEmergencyCoordinates(null);
+      setLocationMessage('Emergency location must be within Tagoloan operational bounds.');
+      setError('Emergency location must be within Tagoloan operational bounds.');
+      return;
+    }
+    setEmergencyCoordinates(coordinates);
+    setManualCoordinates({ latitude: String(coordinates.latitude), longitude: String(coordinates.longitude) });
+    setLocationMessage(source === 'map' ? 'Emergency location selected on the map.' : 'Entered emergency coordinates attached.');
+    setError('');
+  }
+
+  function applyManualCoordinates() {
+    const latitude = Number(manualCoordinates.latitude);
+    const longitude = Number(manualCoordinates.longitude);
+    if (!manualCoordinates.latitude.trim() || !manualCoordinates.longitude.trim()) {
+      setError('Enter both latitude and longitude.');
+      return;
+    }
+    selectEmergencyLocation({ latitude, longitude }, 'manual');
+  }
+
+  function updateManualCoordinate(key, value) {
+    locationChoiceId.current += 1;
+    clearLocation?.();
+    setManualCoordinates((current) => ({ ...current, [key]: value }));
+    setEmergencyCoordinates(null);
+    setLocationMessage('Apply both coordinates to set the emergency location.');
+    setError('');
+  }
 
   function nextStep() {
     setError('');
@@ -92,20 +148,30 @@ function CitizenReport() {
         return;
       }
     }
+    if (step === 3 && !isOperationalLocation(emergencyCoordinates)) {
+      setError('Select an emergency location within Tagoloan operational bounds.');
+      return;
+    }
     setStep((current) => current + 1);
   }
 
   async function submit(event) {
     event.preventDefault();
+    if (submitInFlight.current || confirmation) return;
+    if (step !== 4 || questions.some(([key]) => !form.answers[key])) {
+      setError('Complete each reporting step before submitting.');
+      return;
+    }
     if (!form.emergencyType || !form.description.trim()) {
       setError('Emergency type and description are required.');
       return;
     }
-    if (!emergencyCoordinates) {
-      setError('Please select an emergency location on the map.');
+    if (!isOperationalLocation(emergencyCoordinates)) {
+      setError('Select an emergency location within Tagoloan operational bounds.');
       return;
     }
 
+    submitInFlight.current = true;
     setError('');
     setSubmitting(true);
     try {
@@ -123,6 +189,7 @@ function CitizenReport() {
     } catch (requestError) {
       setError(requestError instanceof ApiError ? requestError.message : 'Unable to submit the report. Please try again.');
     } finally {
+      submitInFlight.current = false;
       setSubmitting(false);
     }
   }
@@ -167,7 +234,7 @@ function CitizenReport() {
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-sm font-semibold text-primary shrink-0">Step {step} of 4</span>
-              <Progress value={step * 25} className="flex-1" />
+              <Progress value={step * 25} aria-label="Report progress" className="flex-1" />
             </div>
             <CardTitle className="text-lg font-bold">Report an Emergency</CardTitle>
             <CardDescription className="text-sm">Move to safety first. This form alerts nearby dispatchers.</CardDescription>
@@ -236,12 +303,12 @@ function CitizenReport() {
                   <FieldGroup className="gap-6">
                     {questions.map(([key, label, options]) => (
                       <Field key={key}>
-                        <FieldLabel>{label}</FieldLabel>
+                        <FieldLabel htmlFor={`question-${key}`}>{label}</FieldLabel>
                         <Select
                           value={form.answers[key] || ''}
                           onValueChange={(val) => updateAnswer(key, val)}
                         >
-                          <SelectTrigger className="w-full bg-background h-10 px-3 text-sm">
+                          <SelectTrigger id={`question-${key}`} className="w-full bg-background h-10 px-3 text-sm">
                             <SelectValue placeholder="Select an answer" />
                           </SelectTrigger>
                           <SelectContent>
@@ -265,18 +332,44 @@ function CitizenReport() {
                   <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
                     <Map className="size-5 text-primary" /> Emergency Location
                   </h3>
-                  <p className="text-sm text-muted-foreground">Tap the map to set the exact location.</p>
+                  <p className="text-sm text-muted-foreground">Select the emergency location on the map, use GPS, or enter coordinates below.</p>
                   
                   <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                    <Button type="button" variant="secondary" onClick={requestLocation}>
-                      <MapPin data-icon="inline-start" /> Use my GPS location
+                    <Button type="button" variant="secondary" onClick={handleGpsRequest} disabled={geoLoading}>
+                      {geoLoading ? <Spinner data-icon="inline-start" /> : <MapPin data-icon="inline-start" />} Use my GPS location
                     </Button>
-                    {locationMessage && <span className="text-sm text-muted-foreground">{locationMessage}</span>}
+                    {locationFeedback && <span role="status" className="text-sm text-muted-foreground">{locationFeedback}</span>}
                   </div>
                   
                   <div className="h-[300px] w-full rounded-xl overflow-hidden border border-border [&_.leaflet-layer]:filter [&_.leaflet-layer]:invert [&_.leaflet-layer]:hue-rotate-180 [&_.leaflet-layer]:brightness-75 [&_.leaflet-layer]:contrast-125">
-                    <TagoloanMap interactive selectedPoint={emergencyCoordinates} onLocationChange={setEmergencyCoordinates} />
+                    <ErrorBoundary>
+                      <TagoloanMap interactive selectedPoint={emergencyCoordinates} onLocationChange={(coords) => selectEmergencyLocation(coords, 'map')} />
+                    </ErrorBoundary>
                   </div>
+
+                  <FieldGroup className="grid gap-3 sm:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="emergency-latitude">Latitude (manual option)</FieldLabel>
+                      <Input
+                        id="emergency-latitude"
+                        name="emergency-latitude"
+                        inputMode="decimal"
+                        value={manualCoordinates.latitude}
+                        onChange={(event) => updateManualCoordinate('latitude', event.target.value)}
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="emergency-longitude">Longitude (manual option)</FieldLabel>
+                      <Input
+                        id="emergency-longitude"
+                        name="emergency-longitude"
+                        inputMode="decimal"
+                        value={manualCoordinates.longitude}
+                        onChange={(event) => updateManualCoordinate('longitude', event.target.value)}
+                      />
+                    </Field>
+                  </FieldGroup>
+                  <Button type="button" variant="outline" onClick={applyManualCoordinates}>Use entered coordinates</Button>
                   
                   <FieldGroup>
                     <Field>
@@ -327,7 +420,7 @@ function CitizenReport() {
             ) : <div />}
             
             {step < 4 ? (
-              <Button type="button" onClick={nextStep}>Continue</Button>
+              <Button type="button" onClick={nextStep} disabled={step === 3 && geoLoading}>Continue</Button>
             ) : (
               <Button type="submit" form="report-form" disabled={submitting}>
                 {submitting ? (

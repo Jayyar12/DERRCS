@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { api, ApiError } from '../../api/client';
 import { useSocketEvent } from '../../hooks/useSocketEvent';
 
@@ -38,6 +38,15 @@ export function IncidentReviewSheet({
 
   const abortControllerRef = useRef(null);
   const activeRefreshPromiseRef = useRef(null);
+  const activeRefreshKeyRef = useRef(null);
+  const selectionKind = selection?.kind;
+  const selectionId = selection?.id;
+  const selectionKey = `${selectionKind}:${selectionId}`;
+  const currentSelectionKeyRef = useRef(selectionKey);
+
+  useEffect(() => {
+    currentSelectionKeyRef.current = selectionKey;
+  }, [selectionKey]);
 
   useSocketEvent('dispatcher:assignment:recommended', (payload) => {
     if (payload?.incidentId) {
@@ -47,7 +56,7 @@ export function IncidentReviewSheet({
 
   const loadRecord = useCallback(
     async ({ signal, clearError = true } = {}) => {
-      if (!selection || !selection.id) {
+      if (!selectionId) {
         setData(null);
         if (clearError) setError(null);
         setLoading(false);
@@ -58,10 +67,11 @@ export function IncidentReviewSheet({
       if (clearError) setError(null);
 
       try {
-        if (selection.kind === 'candidate') {
-          const candidateData = await api.candidate(selection.id, { signal });
+        if (selectionKind === 'candidate') {
+          const candidateData = await api.candidate(selectionId, { signal });
           if (signal?.aborted) return;
           setData({
+            selectionKey,
             kind: 'candidate',
             raw: candidateData,
             id: candidateData.id,
@@ -83,19 +93,22 @@ export function IncidentReviewSheet({
           });
 
           if (candidateData.incident_status === 'Validated' || candidateData.status === 'Validated') {
-            const availableUnits = await api.units({ signal }).catch(() => []);
+            const availableUnits = await api.units({ signal });
+            if (signal?.aborted) return;
             setUnits(availableUnits);
           }
-        } else if (selection.kind === 'incident') {
-          const incidentData = await api.incident(selection.id, { signal });
+        } else if (selectionKind === 'incident') {
+          const incidentData = await api.incident(selectionId, { signal });
           let candidateSummary = null;
           let summaryFallback = false;
+          let candidateReportLocations = new Map();
 
           if (incidentData.candidate_id) {
             try {
               const candidateRes = await api.candidate(incidentData.candidate_id, { signal });
               candidateSummary = candidateRes.latest_summary;
               summaryFallback = candidateRes.summary_is_fallback;
+              candidateReportLocations = new Map((candidateRes.reports || []).map((report) => [report.id, report.emergency_location]));
             } catch {
               // Ignore if candidate detail read fails
             }
@@ -104,6 +117,7 @@ export function IncidentReviewSheet({
           if (signal?.aborted) return;
 
           setData({
+            selectionKey,
             kind: 'incident',
             raw: incidentData,
             id: incidentData.id,
@@ -122,7 +136,10 @@ export function IncidentReviewSheet({
             closedAt: incidentData.closed_at,
             latestSummary: candidateSummary,
             summaryIsFallback: summaryFallback,
-            reports: incidentData.reports || [],
+            reports: (incidentData.reports || []).map((report) => ({
+              ...report,
+              emergency_location: candidateReportLocations.get(report.id) || report.emergency_location,
+            })),
             assignments: incidentData.assignments || [],
             assessments: incidentData.assessments || [],
             handoverSummary: incidentData.handover_summary,
@@ -130,7 +147,8 @@ export function IncidentReviewSheet({
           });
 
           if (incidentData.status === 'Validated') {
-            const availableUnits = await api.units({ signal }).catch(() => []);
+            const availableUnits = await api.units({ signal });
+            if (signal?.aborted) return;
             setUnits(availableUnits);
           }
         } else {
@@ -147,32 +165,41 @@ export function IncidentReviewSheet({
         }
       }
     },
-    [selection]
+    [selectionId, selectionKind, selectionKey]
   );
 
   const triggerRefresh = useCallback(
     ({ preserveError = false } = {}) => {
-      if (activeRefreshPromiseRef.current) {
+      if (activeRefreshPromiseRef.current && activeRefreshKeyRef.current === selectionKey) {
         return activeRefreshPromiseRef.current;
       }
+      abortControllerRef.current?.abort();
       const controller = new AbortController();
       abortControllerRef.current = controller;
+      activeRefreshKeyRef.current = selectionKey;
       const promise = loadRecord({ signal: controller.signal, clearError: !preserveError }).finally(() => {
-        activeRefreshPromiseRef.current = null;
+        if (activeRefreshPromiseRef.current === promise) {
+          activeRefreshPromiseRef.current = null;
+          activeRefreshKeyRef.current = null;
+        }
       });
       activeRefreshPromiseRef.current = promise;
       return promise;
     },
-    [loadRecord]
+    [loadRecord, selectionKey]
   );
 
   useEffect(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
+    activeRefreshPromiseRef.current = null;
+    activeRefreshKeyRef.current = null;
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    setData(null);
+    setUnits([]);
     setSelectedUnitId('');
     setNotes('');
     setActionSuccessMessage('');
@@ -182,9 +209,9 @@ export function IncidentReviewSheet({
     return () => {
       controller.abort();
     };
-  }, [selection?.kind, selection?.id, loadRecord]);
+  }, [selectionKind, selectionId, loadRecord]);
 
-  const availableUnitsList = units.filter((u) => u.current_status === 'Available');
+  const availableUnitsList = useMemo(() => units.filter((u) => u.current_status === 'Available'), [units]);
 
   useEffect(() => {
     if (selectedUnitId && !availableUnitsList.some((u) => u.id === selectedUnitId)) {
@@ -199,14 +226,14 @@ export function IncidentReviewSheet({
   };
 
   const handleValidate = async () => {
-    if (submitting || !data?.id) return;
+    if (submitting || !canValidate || !visibleData?.id) return;
     setSubmitting(true);
     setError(null);
     setActionSuccessMessage('');
     try {
-      const result = await api.confirmCandidate(data.id);
+      const result = await api.confirmCandidate(visibleData.id);
       const successText = `${result.incidentCode || 'Incident'} was validated. Await the live allocation recommendation or choose an available unit.`;
-      setActionSuccessMessage(successText);
+      if (currentSelectionKeyRef.current === selectionKey) setActionSuccessMessage(successText);
       toast.success(successText);
       if (onSelectionChange) {
         onSelectionChange({ kind: 'incident', id: result.incidentId });
@@ -214,10 +241,12 @@ export function IncidentReviewSheet({
       if (onCommitted) {
         onCommitted({ action: 'validate', incidentId: result.incidentId });
       }
-      triggerRefresh();
+      if (!onSelectionChange && currentSelectionKeyRef.current === selectionKey) triggerRefresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to validate incident.');
-      triggerRefresh({ preserveError: true });
+      if (currentSelectionKeyRef.current === selectionKey) {
+        setError(err instanceof ApiError ? err.message : 'Failed to validate incident.');
+        triggerRefresh({ preserveError: true });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -225,62 +254,67 @@ export function IncidentReviewSheet({
 
   const handleDispatch = async (e) => {
     e.preventDefault();
-    const incidentTargetId = data?.incidentId || data?.id;
-    if (submitting || !incidentTargetId || !selectedUnitId) return;
+    const incidentTargetId = visibleData?.incidentId || visibleData?.id;
+    if (submitting || !canDispatch || !incidentTargetId || !availableUnitsList.some((unit) => unit.id === selectedUnitId)) return;
     setSubmitting(true);
     setError(null);
     setActionSuccessMessage('');
     try {
       await api.assign(incidentTargetId, selectedUnitId, notes);
       const successText = 'Response unit dispatched and notified.';
-      setActionSuccessMessage(successText);
+      if (currentSelectionKeyRef.current === selectionKey) setActionSuccessMessage(successText);
       toast.success(successText);
       setSelectedUnitId('');
       setNotes('');
       if (onCommitted) {
         onCommitted({ action: 'dispatch', incidentId: incidentTargetId });
       }
-      triggerRefresh();
+      if (currentSelectionKeyRef.current === selectionKey) triggerRefresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to assign unit.');
-      triggerRefresh({ preserveError: true });
+      if (currentSelectionKeyRef.current === selectionKey) {
+        setError(err instanceof ApiError ? err.message : 'Failed to assign unit.');
+        triggerRefresh({ preserveError: true });
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleCloseIncident = async () => {
-    const incidentTargetId = data?.incidentId || data?.id;
-    if (submitting || !incidentTargetId) return;
+    const incidentTargetId = visibleData?.incidentId || visibleData?.id;
+    if (submitting || !canClose || !incidentTargetId) return;
     setSubmitting(true);
     setError(null);
     setActionSuccessMessage('');
     try {
       await api.closeIncident(incidentTargetId);
       const successText = 'Incident closed after review.';
-      setActionSuccessMessage(successText);
+      if (currentSelectionKeyRef.current === selectionKey) setActionSuccessMessage(successText);
       toast.success(successText);
       if (onCommitted) {
         onCommitted({ action: 'close', incidentId: incidentTargetId });
       }
-      triggerRefresh();
+      if (currentSelectionKeyRef.current === selectionKey) triggerRefresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to close incident.');
-      triggerRefresh({ preserveError: true });
+      if (currentSelectionKeyRef.current === selectionKey) {
+        setError(err instanceof ApiError ? err.message : 'Failed to close incident.');
+        triggerRefresh({ preserveError: true });
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  const isOpen = Boolean(selection?.id);
-  const activeIncidentId = data?.incidentId || data?.id;
+  const isOpen = Boolean(selectionId);
+  const visibleData = data?.selectionKey === selectionKey ? data : null;
+  const activeIncidentId = visibleData?.incidentId || visibleData?.id;
   const recommendation = activeIncidentId ? recommendations[activeIncidentId] : null;
 
-  const effectiveStatus = data?.status || data?.incidentStatus;
-  const isPendingCandidate = data?.kind === 'candidate' && data?.status === 'Pending';
-  const isValidatedIncident = effectiveStatus === 'Validated' || data?.incidentStatus === 'Validated';
-  const isResolvedIncident = effectiveStatus === 'Resolved' || data?.incidentStatus === 'Resolved';
-  const isClosedIncident = effectiveStatus === 'Closed' || data?.incidentStatus === 'Closed';
+  const effectiveStatus = visibleData?.status || visibleData?.incidentStatus;
+  const isPendingCandidate = visibleData?.kind === 'candidate' && visibleData?.status === 'Pending';
+  const isValidatedIncident = effectiveStatus === 'Validated' || visibleData?.incidentStatus === 'Validated';
+  const isResolvedIncident = effectiveStatus === 'Resolved' || visibleData?.incidentStatus === 'Resolved';
+  const isClosedIncident = effectiveStatus === 'Closed' || visibleData?.incidentStatus === 'Closed';
 
   const canValidate = isPendingCandidate && role === 'Dispatcher';
   const canDispatch = isValidatedIncident && role === 'Dispatcher';
@@ -289,9 +323,9 @@ export function IncidentReviewSheet({
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
-        <ReviewHeader data={data} loading={loading} effectiveStatus={effectiveStatus} />
+        <ReviewHeader data={visibleData} loading={loading} effectiveStatus={effectiveStatus} />
 
-        {loading && !data && (
+        {loading && !visibleData && (
           <div className="p-4 text-sm text-muted-foreground" role="status">
             Loading record details…
           </div>
@@ -315,10 +349,10 @@ export function IncidentReviewSheet({
           </Alert>
         )}
 
-        {data && (
+        {visibleData && (
           <div className="flex flex-col gap-6">
-            <IntakeSummarySection data={data} />
-            <HandoverDebriefSection data={data} isResolvedIncident={isResolvedIncident} isClosedIncident={isClosedIncident} />
+            <IntakeSummarySection data={visibleData} />
+            <HandoverDebriefSection data={visibleData} isResolvedIncident={isResolvedIncident} isClosedIncident={isClosedIncident} />
             
             <ValidationAction
               canValidate={canValidate}
@@ -345,9 +379,9 @@ export function IncidentReviewSheet({
               submitting={submitting}
             />
 
-            <AssignmentHistoryList assignments={data.assignments} />
-            <FieldAssessmentsList assessments={data.assessments} />
-            <CitizenReportsList reports={data.reports} />
+            <AssignmentHistoryList assignments={visibleData.assignments} />
+            <FieldAssessmentsList assessments={visibleData.assessments} />
+            <CitizenReportsList reports={visibleData.reports} />
           </div>
         )}
       </SheetContent>

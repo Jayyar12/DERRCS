@@ -1,16 +1,24 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "—");
 
 export function AssignmentHistoryList({ assignments }) {
-  if (!assignments || assignments.length === 0) return null;
+  const history = assignments || [];
 
   return (
     <div>
-      <h3 className="font-bold text-sm mb-3">Unit Assignments ({assignments.length})</h3>
-      <div className="flex flex-col gap-3">
-        {assignments.map((assignment) => (
+      <h3 className="font-bold text-sm mb-3">Unit Assignments ({history.length})</h3>
+      {history.length === 0 ? (
+        <Empty className="border border-dashed py-6">
+          <EmptyHeader>
+            <EmptyTitle>No unit assignments</EmptyTitle>
+            <EmptyDescription>Dispatch history will appear here.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : <div className="flex flex-col gap-3">
+        {history.map((assignment) => (
           <Card key={assignment.id}>
             <CardContent className="p-3 flex flex-col gap-1">
               <div className="flex justify-between items-center">
@@ -34,7 +42,7 @@ export function AssignmentHistoryList({ assignments }) {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div>}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -225,16 +226,22 @@ function AnalyticsView({ incidents, reports, units, logs, loading, config, onRef
               ))}
             </ToggleGroup>
             {/* Search */}
-            <InputGroup className="mt-2 h-9">
-              <InputGroupAddon align="inline-start">
-                <Search />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search activities"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </InputGroup>
+            <Field className="mt-2">
+              <FieldLabel htmlFor="activity-search">Search activities</FieldLabel>
+              <InputGroup className="h-9">
+                <InputGroupAddon align="inline-start">
+                  <Search />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="activity-search"
+                  name="activitySearch"
+                  type="search"
+                  placeholder="Search activities"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </InputGroup>
+            </Field>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto max-h-[400px]">
             <p className="text-xs text-muted-foreground mb-3">

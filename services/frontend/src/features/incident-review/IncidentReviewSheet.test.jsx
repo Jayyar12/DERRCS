@@ -116,7 +116,7 @@ describe('IncidentReviewSheet', () => {
     });
 
     const validateButton = screen.getByRole('button', { name: /validate incident/i });
-    validateButton.click();
+    fireEvent.click(validateButton);
 
     await waitFor(() => {
       expect(api.confirmCandidate).toHaveBeenCalledWith('cand-456');
@@ -452,6 +452,38 @@ describe('IncidentReviewSheet', () => {
       expect(screen.getByText('Template fallback summary in use.')).toBeInTheDocument();
       expect(screen.getByText('Template fallback handover debrief in use.')).toBeInTheDocument();
     });
+  });
+
+  it('shows a linked report location from candidate detail without changing the incident API', async () => {
+    api.incident.mockResolvedValueOnce({
+      id: 'inc-location',
+      incident_code: 'INC-LOCATION',
+      emergency_type: 'Flood',
+      status: 'Reported',
+      candidate_id: 'cand-location',
+      reports: [{ id: 'report-location', description: 'Flooding near the bridge' }],
+      assignments: [],
+      assessments: [],
+    });
+    api.candidate.mockResolvedValueOnce({
+      id: 'cand-location',
+      reports: [{
+        id: 'report-location',
+        emergency_location: { coordinates: [124.75, 8.54] },
+      }],
+    });
+
+    render(
+      <IncidentReviewSheet
+        selection={{ kind: 'incident', id: 'inc-location' }}
+        role="Dispatcher"
+        onSelectionChange={vi.fn()}
+        onCommitted={vi.fn()}
+      />
+    );
+
+    expect(await screen.findByText(/Emergency location: 8.54, 124.75/)).toBeInTheDocument();
+    expect(api.candidate).toHaveBeenCalledWith('cand-location', expect.any(Object));
   });
 
   it('aborts superseded reads and ignores slow out-of-order responses when switching selection', async () => {

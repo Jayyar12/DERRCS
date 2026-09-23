@@ -3,20 +3,34 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export const AudioAlertManager = forwardRef(({ audibleAlerts, setAudibleAlerts }, ref) => {
   const audioContextRef = useRef(null);
+  const enabledRef = useRef(audibleAlerts);
 
   function enableAudibleAlerts(enabled) {
-    if (enabled && !audioContextRef.current) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) audioContextRef.current = new AudioContext();
+    enabledRef.current = enabled;
+    if (!enabled) {
+      setAudibleAlerts(false);
+      audioContextRef.current?.suspend().catch(() => {});
+      return;
     }
-    audioContextRef.current?.resume();
-    setAudibleAlerts(enabled);
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) {
+      enabledRef.current = false;
+      setAudibleAlerts(false);
+      return;
+    }
+    if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+    setAudibleAlerts(true);
+    audioContextRef.current.resume().catch(() => {
+      enabledRef.current = false;
+      setAudibleAlerts(false);
+    });
   }
 
   useImperativeHandle(ref, () => ({
     playEscalationTone: () => {
       const context = audioContextRef.current;
-      if (!context || context.state !== 'running') return;
+      if (!enabledRef.current || !context || context.state !== 'running') return;
       const oscillator = context.createOscillator();
       const gain = context.createGain();
       oscillator.frequency.value = 880;
