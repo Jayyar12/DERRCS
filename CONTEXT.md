@@ -85,7 +85,7 @@ $$\text{Reported} \longrightarrow \text{Validated} \longrightarrow \text{Dispatc
 * **Goal:** Group incoming reports that describe the same physical event within 100 milliseconds.
 * **Parameters:**
   * $\epsilon$ (Epsilon): Maximum distance radius between reports (default: 100 meters).
-  * $minPts$: Minimum reports required to mark an incident cluster (default: 2 reports).
+  * $minPts$: Minimum reports required to mark an incident cluster (default: 1 report).
   * **Time Window:** Maximum time delta between reports to be considered the same event (default: 12 hours).
 * **Behavior:** Points that do not meet $minPts$ remain as single-report candidates. Points meeting criteria attach to existing candidate clusters. Only reports within the 12-hour time window are evaluated.
 

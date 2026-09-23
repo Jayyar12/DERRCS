@@ -56,8 +56,8 @@ class TestFixVerifications(unittest.TestCase):
         ]
         results = cluster_reports(incoming_report, existing_candidates=existing_candidates, epsilon_meters=100.0)
         self.assertEqual(len(results), 1)
-        self.assertFalse(results[0]["isDuplicate"])
-        self.assertEqual(results[0]["clusterId"], -1)
+        self.assertTrue(results[0]["isDuplicate"])
+        self.assertEqual(results[0]["clusterId"], 0)
 
 
 if __name__ == "__main__":
