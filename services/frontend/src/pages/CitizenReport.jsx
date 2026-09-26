@@ -6,7 +6,7 @@ import { api, ApiError } from '../api/client';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel, FieldSet, FieldLegend } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,9 +15,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
-import { PublicPageHeader } from '@/components/layout/PublicPageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { SectionHeader } from '@/components/common/SectionHeader';
 import { OrganizationHero } from '@/components/branding/OrganizationBrand';
-import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, ClipboardList, Map, Eye, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Flame, Droplets, Activity, Car, LifeBuoy, MapPin, ClipboardList, Map, Eye, AlertTriangle, X } from 'lucide-react';
 
 const emergencyTypes = [
   { name: 'Fire', icon: Flame, color: 'text-warning' },
@@ -63,11 +64,13 @@ function CitizenReport() {
   const [manualCoordinates, setManualCoordinates] = useState({ latitude: '', longitude: '' });
   const [locationMessage, setLocationMessage] = useState('');
   const [photo, setPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const submitInFlight = useRef(false);
   const locationChoiceId = useRef(0);
+  const photoInputRef = useRef(null);
 
   const questions = useMemo(() => questionSets[form.emergencyType] || [], [form.emergencyType]);
 
@@ -97,7 +100,6 @@ function CitizenReport() {
   }
 
   function selectEmergencyLocation(coordinates, source) {
-    // A map or manual choice takes precedence over any GPS request still in flight.
     locationChoiceId.current += 1;
     clearLocation?.();
     if (!isOperationalLocation(coordinates)) {
@@ -129,6 +131,46 @@ function CitizenReport() {
     setEmergencyCoordinates(null);
     setLocationMessage('Apply both coordinates to set the emergency location.');
     setError('');
+  }
+
+  function handlePhotoChange(event) {
+    const file = event.target.files?.[0] || null;
+    if (!file) {
+      setPhoto(null);
+      setPhotoPreview(null);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Photo must be less than 10MB.');
+      if (photoInputRef.current) photoInputRef.current.value = '';
+      setPhoto(null);
+      setPhotoPreview(null);
+      return;
+    }
+    setError('');
+    setPhoto(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setPhotoPreview(e.target?.result || null);
+    reader.readAsDataURL(file);
+  }
+
+  function removePhoto() {
+    setPhoto(null);
+    setPhotoPreview(null);
+    if (photoInputRef.current) photoInputRef.current.value = '';
+  }
+
+  function resetReport() {
+    setStep(1);
+    setForm({ emergencyType: '', description: '', answers: {} });
+    setEmergencyCoordinates(null);
+    setReporterCoordinates(null);
+    setManualCoordinates({ latitude: '', longitude: '' });
+    setLocationMessage('');
+    setPhoto(null);
+    setPhotoPreview(null);
+    setError('');
+    setConfirmation(null);
   }
 
   function nextStep() {
@@ -215,7 +257,18 @@ function CitizenReport() {
               </div>
             </div>
             
-            <Button className="w-full text-base" size="lg" onClick={() => window.location.reload()}>Submit Another Report</Button>
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <Button className="flex-1 text-base" size="lg" onClick={resetReport}>
+                Submit Another Report
+              </Button>
+              <Link
+                to="/"
+                onClick={resetReport}
+                className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'flex-1 text-base')}
+              >
+                Back to Home
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </main>
@@ -224,7 +277,8 @@ function CitizenReport() {
 
   return (
     <div className="min-h-svh bg-background text-foreground pb-20">
-      <PublicPageHeader
+      <PageHeader
+        variant="public"
         title="Emergency Report"
         actions={<Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">Agency Login</Link>}
       />
@@ -297,9 +351,9 @@ function CitizenReport() {
               
               {step === 2 && (
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
-                    <ClipboardList className="size-5 text-primary" /> Operational Details
-                  </h3>
+                  <SectionHeader icon={ClipboardList}>
+                    Operational Details
+                  </SectionHeader>
                   <FieldGroup className="gap-6">
                     {questions.map(([key, label, options]) => (
                       <Field key={key}>
@@ -329,9 +383,9 @@ function CitizenReport() {
               
               {step === 3 && (
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
-                    <Map className="size-5 text-primary" /> Emergency Location
-                  </h3>
+                  <SectionHeader icon={Map}>
+                    Emergency Location
+                  </SectionHeader>
                   <p className="text-sm text-muted-foreground">Select the emergency location on the map, use GPS, or enter coordinates below.</p>
                   
                   <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
@@ -341,7 +395,7 @@ function CitizenReport() {
                     {locationFeedback && <span role="status" className="text-sm text-muted-foreground">{locationFeedback}</span>}
                   </div>
                   
-                  <div className="h-[300px] w-full rounded-xl overflow-hidden border border-border [&_.leaflet-layer]:filter [&_.leaflet-layer]:invert [&_.leaflet-layer]:hue-rotate-180 [&_.leaflet-layer]:brightness-75 [&_.leaflet-layer]:contrast-125">
+                  <div className="h-[300px] md:h-[400px] w-full rounded-xl overflow-hidden border border-border [&_.leaflet-layer]:filter [&_.leaflet-layer]:invert [&_.leaflet-layer]:hue-rotate-180 [&_.leaflet-layer]:brightness-75 [&_.leaflet-layer]:contrast-125">
                     <ErrorBoundary>
                       <TagoloanMap interactive selectedPoint={emergencyCoordinates} onLocationChange={(coords) => selectEmergencyLocation(coords, 'map')} />
                     </ErrorBoundary>
@@ -356,6 +410,7 @@ function CitizenReport() {
                         inputMode="decimal"
                         value={manualCoordinates.latitude}
                         onChange={(event) => updateManualCoordinate('latitude', event.target.value)}
+                        onBlur={applyManualCoordinates}
                       />
                     </Field>
                     <Field>
@@ -366,6 +421,7 @@ function CitizenReport() {
                         inputMode="decimal"
                         value={manualCoordinates.longitude}
                         onChange={(event) => updateManualCoordinate('longitude', event.target.value)}
+                        onBlur={applyManualCoordinates}
                       />
                     </Field>
                   </FieldGroup>
@@ -374,15 +430,33 @@ function CitizenReport() {
                   <FieldGroup>
                     <Field>
                       <FieldLabel htmlFor="photo">Attach Photo (Optional)</FieldLabel>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-2">
                         <Input 
                           id="photo" 
+                          ref={photoInputRef}
                           type="file" 
                           accept="image/jpeg,image/png,image/webp" 
                           capture="environment" 
-                          onChange={(event) => setPhoto(event.target.files?.[0] || null)} 
+                          onChange={handlePhotoChange}
                           className="file:text-foreground file:bg-secondary file:px-3 file:py-1 file:rounded-md file:border-none file:mr-4 file:cursor-pointer"
                         />
+                        {photoPreview && (
+                          <div className="relative mt-2 w-fit">
+                            <img
+                              src={photoPreview}
+                              alt="Emergency preview"
+                              className="h-28 w-28 object-cover rounded-lg border border-border shadow-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={removePhoto}
+                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow hover:bg-destructive/80 transition-colors"
+                              aria-label="Remove photo"
+                            >
+                              <X className="size-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </Field>
                   </FieldGroup>
@@ -391,9 +465,9 @@ function CitizenReport() {
               
               {step === 4 && (
                 <div className="flex flex-col gap-6">
-                  <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
-                    <Eye className="size-5 text-primary" /> Review Summary
-                  </h3>
+                  <SectionHeader icon={Eye}>
+                    Review Summary
+                  </SectionHeader>
                   <div className="grid gap-4 bg-secondary/30 rounded-xl p-5 border border-border">
                     <div>
                       <p className="text-sm font-semibold text-muted-foreground">Type</p>
@@ -407,6 +481,12 @@ function CitizenReport() {
                       <p className="text-sm font-semibold text-muted-foreground">Coordinates</p>
                       <p className="font-mono text-sm">{emergencyCoordinates ? `${emergencyCoordinates.latitude.toFixed(5)}, ${emergencyCoordinates.longitude.toFixed(5)}` : 'Not set'}</p>
                     </div>
+                    {photo && (
+                      <div>
+                        <p className="text-sm font-semibold text-muted-foreground">Attached Photo</p>
+                        <p className="text-sm text-foreground">{photo.name}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

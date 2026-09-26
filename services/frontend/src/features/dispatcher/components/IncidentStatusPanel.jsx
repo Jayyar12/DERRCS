@@ -2,16 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
 import { Activity } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-const statusColors = {
-  Reported: 'bg-warning text-warning-foreground',
-  Validated: 'bg-primary text-primary-foreground',
-  Dispatched: 'bg-secondary text-secondary-foreground',
-  Active: 'bg-destructive text-destructive-foreground',
-  Resolved: 'bg-success text-success-foreground',
-  Closed: 'bg-muted text-muted-foreground',
-};
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 export function IncidentStatusPanel({
   incidents,
@@ -64,9 +55,7 @@ export function IncidentStatusPanel({
               >
                 <div className="flex items-start justify-between gap-2">
                   <strong className="text-sm">{incident.incident_code}</strong>
-                  <Badge className={statusColors[incident.status]}>
-                    {incident.status}
-                  </Badge>
+                  <StatusBadge status={incident.status} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {incident.emergency_type} &middot; {incident.report_count || 0} reports
@@ -82,3 +71,5 @@ export function IncidentStatusPanel({
     </Card>
   );
 }
+
+export default IncidentStatusPanel;

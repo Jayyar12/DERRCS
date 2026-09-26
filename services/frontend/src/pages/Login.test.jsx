@@ -32,7 +32,7 @@ describe('Login Page', () => {
     );
 
     expect(screen.getByRole('heading', { name: 'Agency Login' })).toBeInTheDocument();
-    expect(screen.getByText('TAGOLOAN MDRRMO')).toBeInTheDocument();
+    expect(screen.getAllByText('TAGOLOAN MDRRMO').length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /public portal/i })).toHaveAttribute('href', '/');
     expect(screen.getByLabelText(/badge id \/ username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
@@ -122,5 +122,50 @@ describe('Login Page', () => {
     );
 
     expect(screen.getByText('Responder Portal Home')).toBeInTheDocument();
+  });
+
+  it('toggles password visibility when the visibility button is clicked', () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    const toggleButton = screen.getByRole('button', { name: /show password/i });
+    fireEvent.click(toggleButton);
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    fireEvent.click(screen.getByRole('button', { name: /hide password/i }));
+    expect(passwordInput).toHaveAttribute('type', 'password');
+  });
+
+  it('clears error alert when user modifies username or password', async () => {
+    client.api.login.mockRejectedValueOnce(
+      new client.ApiError('Invalid credentials', 401)
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/badge id \/ username/i), { target: { value: 'bad' } });
+    fireEvent.change(screen.getByLabelText(/^password$/i), { target: { value: 'pass' } });
+    fireEvent.click(screen.getByRole('button', { name: /sign in securely/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText(/badge id \/ username/i), { target: { value: 'bad2' } });
+    expect(screen.queryByText('Invalid credentials')).not.toBeInTheDocument();
   });
 });

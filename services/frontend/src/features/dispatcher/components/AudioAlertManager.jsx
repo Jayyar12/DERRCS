@@ -47,7 +47,7 @@ export const AudioAlertManager = forwardRef(({ audibleAlerts, setAudibleAlerts }
   }, []);
 
   return (
-    <div className="flex items-center gap-2 mb-4">
+    <div className="flex items-center gap-2">
       <Checkbox
         id="audible"
         checked={audibleAlerts}

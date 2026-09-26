@@ -12,7 +12,6 @@ tools:
     - write_to_file
     - run_command
     - manage_task
-    - call_mcp_tool
 inheritCustomizations: true
 inheritMcp: true
 ---

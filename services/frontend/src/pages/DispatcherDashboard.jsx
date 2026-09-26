@@ -1,4 +1,5 @@
-import { useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import TagoloanMap from '../components/map/TagoloanMap';
 import { clearSession, getSession } from '../api/client';
 import { disconnectSocket } from '../api/socket';
@@ -9,29 +10,42 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AppHeader } from '@/components/layout/AppHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 import { useIncidentData } from '../hooks/useIncidentData';
 import { useIncidentReview } from '../hooks/useIncidentReview';
 import { useSocketEvent } from '../hooks/useSocketEvent';
+import { useMapMarkers } from '../hooks/useMapMarkers';
 
 import { AudioAlertManager } from '../features/dispatcher/components/AudioAlertManager';
 import { CandidateReviewPanel } from '../features/dispatcher/components/CandidateReviewPanel';
 import { IncidentStatusPanel } from '../features/dispatcher/components/IncidentStatusPanel';
+import { MobileTabBar } from '../features/dispatcher/components/MobileTabBar';
 
-const statusColors = {
-  Reported: 'bg-warning text-warning-foreground',
-  Validated: 'bg-primary text-primary-foreground',
-  Dispatched: 'bg-secondary text-secondary-foreground',
-  Active: 'bg-destructive text-destructive-foreground',
-  Resolved: 'bg-success text-success-foreground',
-  Closed: 'bg-muted text-muted-foreground',
-};
+function useDashboardViewport() {
+  const [width, setWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1280));
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return {
+    isMobile: width < 768,
+    isTablet: width >= 768 && width < 1024,
+    isDesktop: width >= 1024,
+  };
+}
 
 function DispatcherDashboard() {
   const [alertMsg, setAlertMsg] = useState('');
   const [audibleAlerts, setAudibleAlerts] = useState(false);
+  const [activeTab, setActiveTab] = useState('map');
+  const [tabletSidebarOpen, setTabletSidebarOpen] = useState(false);
+  const { isMobile, isTablet } = useDashboardViewport();
   
   const audioManagerRef = useRef(null);
   const session = getSession();
@@ -71,70 +85,37 @@ function DispatcherDashboard() {
     }
   };
 
-  const markers = useMemo(() => [
-    ...rawReports
-      .filter((r) => r.latitude && r.longitude)
-      .map((report) => ({
-        id: `report-${report.id}`,
-        latitude: report.latitude,
-        longitude: report.longitude,
-        title: 'Unverified Report',
-        description: report.emergency_type,
-        color: '#9ca3af',
-        reportId: report.id,
-      })),
-    ...candidates
-      .filter((c) => c.center_location?.coordinates?.length >= 2)
-      .map((candidate) => ({
-        id: `candidate-${candidate.id}`,
-        latitude: candidate.center_location.coordinates[1],
-        longitude: candidate.center_location.coordinates[0],
-        title: `${candidate.emergency_type} candidate`,
-        description: `${candidate.report_count} reports — Pending review`,
-        color: '#f59e0b',
-        selected: selection?.type === 'candidate' && selection?.id === candidate.id,
-        candidateId: candidate.id,
-      })),
-    ...incidents
-      .filter((i) => i.location?.coordinates?.length >= 2)
-      .map((incident) => ({
-        id: `incident-${incident.id}`,
-        latitude: incident.location.coordinates[1],
-        longitude: incident.location.coordinates[0],
-        title: incident.incident_code,
-        description: `${incident.emergency_type} — ${incident.status}`,
-        color: statusColors[incident.status]?.includes('primary')
-          ? '#2563eb'
-          : statusColors[incident.status]?.includes('warning')
-          ? '#f59e0b'
-          : '#dc2626',
-        selected: selection?.type === 'incident' && selection?.id === incident.id,
-        incidentId: incident.id,
-      })),
-  ], [rawReports, candidates, incidents, selection]);
+  const markers = useMapMarkers({
+    rawReports,
+    candidates,
+    incidents,
+    selection,
+  });
 
   // Adjust selection object to match what IncidentReviewSheet expects (kind instead of type)
   const normalizedSelection = selection ? { kind: selection.type, id: selection.id } : null;
 
+  function handleSignOut() {
+    disconnectSocket();
+    clearSession();
+    window.location.assign('/login');
+  }
+
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <AppHeader
+    <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
+      <PageHeader
         title="Dispatcher Command Dashboard"
         actions={(
           <>
             {session?.role === 'Admin' && (
-              <a className="text-sm underline text-muted-foreground" href="/admin">
+              <Link className="text-sm underline text-muted-foreground hover:text-foreground" to="/admin">
                 Admin panel
-              </a>
+              </Link>
             )}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                disconnectSocket();
-                clearSession();
-                window.location.assign('/login');
-              }}
+              onClick={handleSignOut}
             >
               Sign out
             </Button>
@@ -142,11 +123,19 @@ function DispatcherDashboard() {
         )}
       />
 
+      <div className="shrink-0 border-b border-border bg-card px-4 py-2 sm:px-6">
+        <AudioAlertManager
+          ref={audioManagerRef}
+          audibleAlerts={audibleAlerts}
+          setAudibleAlerts={setAudibleAlerts}
+        />
+      </div>
+
       {alertMsg && (
-        <Alert variant="destructive" className="rounded-none border-x-0 border-t-0">
+        <Alert variant="destructive" className="rounded-none border-x-0 border-t-0 shrink-0">
           <AlertTitle>Escalation alert</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
-            {alertMsg}
+            <span>{alertMsg}</span>
             <Button variant="outline" size="sm" onClick={() => setAlertMsg('')}>
               Dismiss
             </Button>
@@ -155,15 +144,68 @@ function DispatcherDashboard() {
       )}
 
       {error && (
-        <Alert variant="destructive" className="m-4">
+        <Alert variant="destructive" className="m-4 shrink-0">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error.message || error}</AlertDescription>
         </Alert>
       )}
 
-      <main className="flex-1 overflow-hidden" id="dashboard-main">
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={70} minSize={50} className="relative h-full overflow-hidden">
+      {/* Responsive layout: Desktop (ResizablePanelGroup) vs Mobile (Tabbed flow) */}
+      <main className="flex-1 overflow-hidden relative" id="main-content" tabIndex={-1}>
+        {isMobile ? (
+          <div className="h-full flex flex-col pb-16">
+            {activeTab === 'map' && (
+              <div className="relative flex-1 w-full h-full overflow-hidden">
+                <ErrorBoundary>
+                  <TagoloanMap
+                    className="h-full w-full absolute inset-0"
+                    markers={markers}
+                    onMarkerSelect={(marker) => {
+                      if (marker.candidateId) openCandidate(marker.candidateId);
+                      else if (marker.incidentId) openIncident(marker.incidentId);
+                    }}
+                  />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            {activeTab === 'reports' && (
+              <div className="flex-1 overflow-y-auto p-4 bg-muted/30">
+                <ErrorBoundary>
+                  <CandidateReviewPanel
+                    candidates={candidates}
+                    loading={loading}
+                    refreshing={refreshing}
+                    selection={normalizedSelection}
+                    openCandidate={openCandidate}
+                    onRefresh={() => refresh()}
+                  />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            {activeTab === 'incidents' && (
+              <div className="flex-1 overflow-y-auto p-4 bg-muted/30">
+                <ErrorBoundary>
+                  <IncidentStatusPanel
+                    incidents={incidents}
+                    loading={loading}
+                    selection={normalizedSelection}
+                    openIncident={openIncident}
+                  />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            <MobileTabBar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              candidateCount={candidates.length}
+              incidentCount={incidents.length}
+            />
+          </div>
+        ) : isTablet ? (
+          <div className="relative h-full w-full overflow-hidden">
             <ErrorBoundary>
               <TagoloanMap
                 className="h-full w-full absolute inset-0"
@@ -174,42 +216,89 @@ function DispatcherDashboard() {
                 }}
               />
             </ErrorBoundary>
-          </ResizablePanel>
 
-          <ResizableHandle withHandle />
+            <Button
+              variant="secondary"
+              size="sm"
+              className="absolute top-4 right-4 z-10 shadow-md bg-card/90 backdrop-blur"
+              onClick={() => setTabletSidebarOpen(true)}
+            >
+              Open reports and incidents
+            </Button>
 
-          <ResizablePanel defaultSize={30} minSize={25} className="bg-muted/30">
-            <ScrollArea className="h-full">
-              <div className="flex flex-col gap-6 p-4">
-                <ErrorBoundary>
-                  <CandidateReviewPanel
-                    candidates={candidates}
-                    loading={loading}
-                    refreshing={refreshing}
-                    selection={normalizedSelection}
-                    openCandidate={openCandidate}
-                    onRefresh={() => refresh()}
-                  >
-                    <AudioAlertManager
-                      ref={audioManagerRef}
-                      audibleAlerts={audibleAlerts}
-                      setAudibleAlerts={setAudibleAlerts}
+            <Sheet open={tabletSidebarOpen} onOpenChange={setTabletSidebarOpen}>
+              <SheetContent aria-label="Reports and incidents" className="w-[420px] sm:max-w-md overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Reports and incidents</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-6 p-4">
+                  <ErrorBoundary>
+                    <CandidateReviewPanel
+                      candidates={candidates}
+                      loading={loading}
+                      refreshing={refreshing}
+                      selection={normalizedSelection}
+                      openCandidate={openCandidate}
+                      onRefresh={() => refresh()}
                     />
-                  </CandidateReviewPanel>
-                </ErrorBoundary>
+                  </ErrorBoundary>
 
-                <ErrorBoundary>
-                  <IncidentStatusPanel
-                    incidents={incidents}
-                    loading={loading}
-                    selection={normalizedSelection}
-                    openIncident={openIncident}
-                  />
-                </ErrorBoundary>
-              </div>
-            </ScrollArea>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+                  <ErrorBoundary>
+                    <IncidentStatusPanel
+                      incidents={incidents}
+                      loading={loading}
+                      selection={normalizedSelection}
+                      openIncident={openIncident}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        ) : (
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize={70} minSize={50} className="relative h-full overflow-hidden">
+              <ErrorBoundary>
+                <TagoloanMap
+                  className="h-full w-full absolute inset-0"
+                  markers={markers}
+                  onMarkerSelect={(marker) => {
+                    if (marker.candidateId) openCandidate(marker.candidateId);
+                    else if (marker.incidentId) openIncident(marker.incidentId);
+                  }}
+                />
+              </ErrorBoundary>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            <ResizablePanel defaultSize={30} minSize={25} className="bg-muted/30">
+              <ScrollArea className="h-full">
+                <div className="flex flex-col gap-6 p-4">
+                  <ErrorBoundary>
+                    <CandidateReviewPanel
+                      candidates={candidates}
+                      loading={loading}
+                      refreshing={refreshing}
+                      selection={normalizedSelection}
+                      openCandidate={openCandidate}
+                      onRefresh={() => refresh()}
+                    />
+                  </ErrorBoundary>
+
+                  <ErrorBoundary>
+                    <IncidentStatusPanel
+                      incidents={incidents}
+                      loading={loading}
+                      selection={normalizedSelection}
+                      openIncident={openIncident}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </ScrollArea>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </main>
 
       <ErrorBoundary resetKey={normalizedSelection ? `${normalizedSelection.kind}:${normalizedSelection.id}` : 'closed'}>

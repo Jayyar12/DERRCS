@@ -8,12 +8,21 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectI
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
+import { DataTable } from '@/components/common/DataTable';
 
-function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onToggleUser, creatingUser, updatingUserId }) {
+function StaffView({
+  users,
+  loading,
+  form,
+  setForm,
+  onRefresh,
+  onCreateUser,
+  onToggleUser,
+  creatingUser,
+  updatingUserId,
+}) {
   return (
     <>
-
-
       {/* Staff table */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -24,21 +33,21 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
           <Button variant="outline" size="sm" onClick={onRefresh}>Refresh</Button>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-border overflow-hidden">
-            {loading ? (
-              <div className="flex flex-col gap-4 p-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : users.length === 0 ? (
-              <Empty className="py-8">
-                <EmptyHeader>
-                  <EmptyTitle>No staff accounts</EmptyTitle>
-                  <EmptyDescription>There are no staff accounts configured.</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
+          {loading ? (
+            <div className="flex flex-col gap-4 p-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : users.length === 0 ? (
+            <Empty className="py-8">
+              <EmptyHeader>
+                <EmptyTitle>No staff accounts</EmptyTitle>
+                <EmptyDescription>There are no staff accounts configured.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <DataTable>
               <Table>
                 <TableHeader className="bg-secondary/30">
                   <TableRow>
@@ -77,8 +86,8 @@ function StaffView({ users, loading, form, setForm, onRefresh, onCreateUser, onT
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </div>
+            </DataTable>
+          )}
         </CardContent>
       </Card>
 

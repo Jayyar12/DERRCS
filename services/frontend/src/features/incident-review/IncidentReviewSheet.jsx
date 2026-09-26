@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 import { ReviewHeader } from './components/ReviewHeader';
@@ -322,12 +323,14 @@ export function IncidentReviewSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-xl lg:max-w-2xl overflow-y-auto">
         <ReviewHeader data={visibleData} loading={loading} effectiveStatus={effectiveStatus} />
 
         {loading && !visibleData && (
-          <div className="p-4 text-sm text-muted-foreground" role="status">
-            Loading record details…
+          <div className="p-4 flex flex-col gap-4 animate-pulse" role="status" aria-label="Loading record details">
+            <Skeleton className="h-6 w-48 rounded" />
+            <Skeleton className="h-28 w-full rounded-xl" />
+            <Skeleton className="h-36 w-full rounded-xl" />
           </div>
         )}
 
@@ -352,7 +355,7 @@ export function IncidentReviewSheet({
         {visibleData && (
           <div className="flex flex-col gap-6">
             <IntakeSummarySection data={visibleData} />
-            <HandoverDebriefSection data={visibleData} isResolvedIncident={isResolvedIncident} isClosedIncident={isClosedIncident} />
+            <CitizenReportsList reports={visibleData.reports} />
             
             <ValidationAction
               canValidate={canValidate}
@@ -381,7 +384,7 @@ export function IncidentReviewSheet({
 
             <AssignmentHistoryList assignments={visibleData.assignments} />
             <FieldAssessmentsList assessments={visibleData.assessments} />
-            <CitizenReportsList reports={visibleData.reports} />
+            <HandoverDebriefSection data={visibleData} isResolvedIncident={isResolvedIncident} isClosedIncident={isClosedIncident} />
           </div>
         )}
       </SheetContent>

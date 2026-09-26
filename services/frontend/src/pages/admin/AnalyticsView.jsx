@@ -11,6 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Search, Activity } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { DataTable } from '@/components/common/DataTable';
+import { StatusBadge } from '@/components/common/StatusBadge';
 
 const TIME_FILTERS = [
   { key: 'today', label: 'Today' },
@@ -330,7 +332,7 @@ function AnalyticsView({ incidents, reports, units, logs, loading, config, onRef
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-border overflow-hidden">
+          <DataTable>
             <Table>
               <TableHeader className="bg-secondary/30">
                 <TableRow>
@@ -356,7 +358,7 @@ function AnalyticsView({ incidents, reports, units, logs, loading, config, onRef
                     </TableCell>
                     <TableCell className="tabular-nums">{incident.report_count || 0}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{incident.status || 'Reported'}</Badge>
+                      <StatusBadge status={incident.status || 'Reported'} />
                     </TableCell>
                     <TableCell>
                       <span className="text-sm tabular-nums">Level {incident.escalation_level || 0}</span>
@@ -368,7 +370,7 @@ function AnalyticsView({ incidents, reports, units, logs, loading, config, onRef
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </DataTable>
           {monitoredIncidents.length === 0 && (
             <Empty className="py-8">
               <EmptyHeader>

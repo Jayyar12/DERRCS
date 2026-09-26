@@ -11,9 +11,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "@/components/ui/empty"
 import { toast } from "sonner"
-import { LifeBuoy } from "lucide-react"
+import { LifeBuoy, Navigation } from "lucide-react"
 
-import { AppHeader } from '@/components/layout/AppHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 import { ActiveDispatchCard } from '../features/responder/components/ActiveDispatchCard';
 import { ResponderActionButtons } from '../features/responder/components/ResponderActionButtons';
 import { FieldAssessmentDrawer } from '../features/responder/components/FieldAssessmentDrawer';
@@ -25,6 +26,7 @@ function ResponderPortal() {
   const [saving, setSaving] = useState(false);
   const [assessmentError, setAssessmentError] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [form, setForm] = useState({ patientName: '', approximateAge: '', gender: '', consciousnessLevel: '', injuriesObserved: [], interventionsRendered: [], disposition: '', destinationFacility: '', notes: '' });
   const savingRef = useRef(false);
   const loadControllerRef = useRef(null);
@@ -39,6 +41,7 @@ function ResponderPortal() {
       const current = await api.currentAssignment({ signal: controller.signal });
       if (controller.signal.aborted) return;
       setAssignment(current);
+      setLastUpdated(new Date());
       setError('');
     } catch (requestError) {
       if (!controller.signal.aborted) {
@@ -54,6 +57,7 @@ function ResponderPortal() {
     loadAssignment();
     return () => loadControllerRef.current?.abort();
   }, [loadAssignment]);
+
   useSocketEvent('unit:dispatch:alert', () => {
     toast('A dispatch update was received.');
     loadAssignment({ quiet: true });
@@ -105,19 +109,31 @@ function ResponderPortal() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground pb-20 sm:pb-0">
-      <AppHeader
+      <PageHeader
         title="Response Unit Field Portal"
         actions={(
           <>
-          <span className="text-sm font-medium hidden sm:inline">{session?.fullName || 'Response unit'}</span>
-          <Button variant="outline" size="sm" onClick={() => { disconnectSocket(); clearSession(); window.location.assign('/login'); }}>
-            Sign out
-          </Button>
+            <span className="hidden items-center gap-1.5 text-xs text-success font-medium sm:flex" role="status">
+              <span className="size-2 rounded-full bg-success animate-pulse" />
+              Live
+            </span>
+            <span className="text-sm font-medium hidden sm:inline">{session?.fullName || 'Response unit'}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                disconnectSocket();
+                clearSession();
+                window.location.assign('/login');
+              }}
+            >
+              Sign out
+            </Button>
           </>
         )}
       />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6" id="responder-main">
+      <PageContainer maxWidth="5xl">
         {error && (
           <Alert variant="destructive" className="mb-5">
             <AlertTitle>Error</AlertTitle>
@@ -163,6 +179,11 @@ function ResponderPortal() {
                   error={assessmentError}
                 />
               )}
+              {lastUpdated && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Last updated {lastUpdated.toLocaleTimeString()}
+                </p>
+              )}
             </ActiveDispatchCard>
 
             <Card className="shadow-sm">
@@ -170,9 +191,24 @@ function ResponderPortal() {
                 <CardTitle className="text-lg">Emergency location</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {location ? `${location[1].toFixed(5)}, ${location[0].toFixed(5)}` : 'Location unavailable'}
-                </p>
+                {location ? (
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-mono text-muted-foreground">
+                      {`${location[1].toFixed(5)}, ${location[0].toFixed(5)}`}
+                    </p>
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${location[1]},${location[0]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                    >
+                      <Navigation className="size-3.5" />
+                      Directions
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground mb-4">Location unavailable</p>
+                )}
                 {location && (
                   <div className="h-80 overflow-hidden rounded-xl border">
                     <ErrorBoundary>
@@ -184,7 +220,7 @@ function ResponderPortal() {
             </Card>
           </div>
         )}
-      </main>
+      </PageContainer>
     </div>
   );
 }

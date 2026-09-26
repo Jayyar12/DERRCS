@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
-import { AppHeader } from '@/components/layout/AppHeader';
-import { ArrowLeft } from 'lucide-react';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { OrganizationHero } from '@/components/branding/OrganizationBrand';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const destinations = { Dispatcher: '/dispatcher', ResponseUnit: '/responder', Admin: '/admin' };
 
@@ -18,6 +20,7 @@ function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,7 +43,8 @@ function Login() {
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
-      <AppHeader
+      <PageHeader
+        variant="public"
         title="Agency Login"
         actions={(
           <Link
@@ -59,6 +63,7 @@ function Login() {
         tabIndex="-1"
       >
         <div className="flex w-full max-w-md flex-col gap-6">
+          <OrganizationHero />
           <Card className="py-2">
             <CardHeader className="flex flex-col gap-1 text-center">
               <CardTitle className="text-lg font-bold">Secure Access Portal</CardTitle>
@@ -83,23 +88,42 @@ function Login() {
                       autoComplete="username"
                       placeholder="Enter your assigned badge ID"
                       value={username} 
-                      onChange={(event) => setUsername(event.target.value)} 
+                      onChange={(event) => {
+                        setError('');
+                        setUsername(event.target.value);
+                      }} 
                       className="h-14 text-base px-4"
                       required 
                     />
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      value={password} 
-                      onChange={(event) => setPassword(event.target.value)} 
-                      className="h-14 text-base px-4 tracking-[0.2em] placeholder:tracking-normal placeholder:text-base"
-                      required 
-                    />
+                    <div className="relative flex items-center">
+                      <Input 
+                        id="password" 
+                        type={showPassword ? 'text' : 'password'} 
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        value={password} 
+                        onChange={(event) => {
+                          setError('');
+                          setPassword(event.target.value);
+                        }} 
+                        className={cn(
+                          "h-14 text-base px-4 pr-12",
+                          !showPassword && "tracking-[0.2em] placeholder:tracking-normal placeholder:text-base"
+                        )}
+                        required 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                      </button>
+                    </div>
                   </Field>
                 </FieldGroup>
 

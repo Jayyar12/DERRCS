@@ -1,27 +1,17 @@
 import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-
-const statusBadgeVariants = {
-  Pending: "outline",
-  Reported: "outline",
-  Validated: "default",
-  Dispatched: "secondary",
-  Active: "destructive",
-  Resolved: "default",
-  Closed: "secondary",
-};
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString() : "—");
 
 export function ReviewHeader({ data, loading, effectiveStatus }) {
   return (
-    <SheetHeader className="mb-4">
+    <SheetHeader className="mb-4 sticky top-0 z-10 bg-card/95 backdrop-blur py-2 border-b border-border/40">
       <div className="flex justify-between items-start">
         <div>
           {effectiveStatus && (
-            <Badge variant={statusBadgeVariants[effectiveStatus] || "outline"} className="mb-2">
-              {effectiveStatus}
-            </Badge>
+            <div className="mb-2">
+              <StatusBadge status={effectiveStatus} />
+            </div>
           )}
           <SheetTitle className="text-2xl">
             {loading && !data
@@ -45,3 +35,5 @@ export function ReviewHeader({ data, loading, effectiveStatus }) {
     </SheetHeader>
   );
 }
+
+export default ReviewHeader;

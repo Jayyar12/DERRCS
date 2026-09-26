@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import AdminDashboard from './AdminDashboard';
 import { api } from '../api/client';
 
@@ -264,5 +264,17 @@ describe('AdminDashboard', () => {
 
     expect(await screen.findByText('Username is already in use')).toBeInTheDocument();
     expect(screen.getByLabelText('Username')).toHaveValue('mreyes');
+  });
+
+  it('renders staff view directly when navigated with ?view=staff', async () => {
+    mockBasicResponses();
+    render(
+      <MemoryRouter initialEntries={['/admin?view=staff']}>
+        <AdminDashboard />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Create Staff Account')).toBeInTheDocument();
+    expect(screen.getByText('Admin One')).toBeInTheDocument();
   });
 });

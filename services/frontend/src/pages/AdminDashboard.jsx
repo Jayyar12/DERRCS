@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api, clearSession } from '../api/client';
 import { disconnectSocket } from '../api/socket';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { PageContainer } from '@/components/layout/PageContainer';
 import {
   SidebarProvider,
   Sidebar,
@@ -55,7 +57,22 @@ function AdminDashboard() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [form, setForm] = useState({ username: '', fullName: '', phoneNumber: '', password: '', role: 'Dispatcher' });
-  const [view, setView] = useState('analytics');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentView = searchParams.get('view') || 'analytics';
+  const view = ['analytics', 'staff', 'audit'].includes(currentView) ? currentView : 'analytics';
+
+  function setView(nextView) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (nextView === 'analytics') {
+        next.delete('view');
+      } else {
+        next.set('view', nextView);
+      }
+      return next;
+    });
+  }
+
   const [creatingUser, setCreatingUser] = useState(false);
   const [updatingUserId, setUpdatingUserId] = useState(null);
   const createInFlightRef = useRef(false);
@@ -196,7 +213,7 @@ function AdminDashboard() {
           </div>
         </header>
 
-        <div className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col gap-6">
+        <PageContainer maxWidth="7xl" className="flex flex-col gap-6">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
@@ -247,7 +264,7 @@ function AdminDashboard() {
               )}
             </Suspense>
           </ErrorBoundary>
-        </div>
+        </PageContainer>
       </SidebarInset>
     </SidebarProvider>
   );

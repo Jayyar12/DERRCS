@@ -132,6 +132,22 @@ describe('CitizenReport', () => {
     expect(screen.getByText('REP-123')).toBeInTheDocument();
   });
 
+  it('returns from confirmation to a fresh report using Back to Home', async () => {
+    api.submitReport.mockResolvedValueOnce({ reportId: 'REP-HOME', receivedAt: new Date().toISOString() });
+    renderComponent();
+    advanceToLocation();
+    fireEvent.click(screen.getByTestId('mock-map'));
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+    fireEvent.click(screen.getByRole('button', { name: /submit emergency/i }));
+
+    expect(await screen.findByText('REP-HOME')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'Back to Home' }));
+
+    expect(screen.getByText('Step 1 of 4')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/describe hazards/i)).toHaveValue('');
+    expect(screen.queryByText('REP-HOME')).not.toBeInTheDocument();
+  });
+
   it('rejects an out-of-bounds map selection and keeps the location step open', () => {
     renderComponent();
     advanceToLocation();
@@ -215,5 +231,17 @@ describe('CitizenReport', () => {
     fireEvent.click(screen.getByRole('button', { name: /submit emergency/i }));
     await waitFor(() => expect(screen.getByText('REP-RETRY')).toBeInTheDocument());
     expect(api.submitReport).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects photos exceeding 10MB limit', () => {
+    renderComponent();
+    advanceToLocation();
+    const largeFile = new File(['x'.repeat(1024)], 'giant.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(largeFile, 'size', { value: 11 * 1024 * 1024 });
+
+    const photoInput = screen.getByLabelText(/attach photo/i);
+    fireEvent.change(photoInput, { target: { files: [largeFile] } });
+
+    expect(screen.getByText('Photo must be less than 10MB.')).toBeInTheDocument();
   });
 });
